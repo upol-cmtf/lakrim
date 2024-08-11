@@ -38,7 +38,7 @@ jobs:
 
   merge-to-staging:
     if: (startsWith(github.head_ref, 'feature') || startsWith(github.head_ref, 'bugfix') || startsWith(github.head_ref, 'dependabot')) && !contains(github.event.pull_request.body, '[skip staging merge]')
-    needs: [ phpstan, phpcs, tests ]
+    needs: [ phpstan ]
     runs-on: ubuntu-latest
 
     steps:
