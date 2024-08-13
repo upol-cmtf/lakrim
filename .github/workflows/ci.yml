@@ -116,3 +116,26 @@ jobs:
           DB_PASSWORD: ""
           DB_DATABASE: lakrim
         run: php artisan test
+
+  merge-to-staging:
+    if: (startsWith(github.head_ref, 'feature') || startsWith(github.head_ref, 'bugfix')) && !contains(github.event.pull_request.body, '[skip staging merge]')
+    needs: [ phpstan, phpcs, tests ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Git config
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Github Actions"
+
+      - name: Merge branch to staging
+        run: |
+          git fetch --unshallow
+          git checkout "$GITHUB_HEAD_REF"
+          git pull
+          git checkout staging
+          git pull
+          git merge --no-edit "$GITHUB_HEAD_REF"
+          git push
