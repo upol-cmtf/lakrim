@@ -11,18 +11,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * @var array<int, string>
-     */
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    /**
-     * @var array<int, string>
-     */
+    /** @var array<int, string> */
     protected $hidden = [
         'password',
         'remember_token',

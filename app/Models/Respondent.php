@@ -18,6 +18,6 @@ class Respondent extends Model
 
     public function answers(): HasMany
     {
-        return $this->hasMany(RespondentQuestionAnswer::class);
+        return $this->hasMany(RespondentAnswer::class);
     }
 }
