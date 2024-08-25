@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
 
+use Database\Factories\QuestionOptionFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -15,5 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class QuestionOption extends Model
 {
+    /** @use HasFactory<QuestionOptionFactory> */
+    use HasFactory;
+
     protected $table = 'questions_options';
 }

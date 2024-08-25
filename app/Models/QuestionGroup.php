@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
 
+use Database\Factories\QuestionGroupFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class QuestionGroup extends Model
 {
+    /** @use HasFactory<QuestionGroupFactory> */
+    use HasFactory;
+
     protected $table = 'questions_groups';
 
     public function questions(): HasMany

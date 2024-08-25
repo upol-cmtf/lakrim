@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
 
+use Database\Factories\RespondentFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -14,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Respondent extends Model
 {
+    /** @use HasFactory<RespondentFactory> */
+    use HasFactory;
+
     protected $table = 'respondents';
 
     public function answers(): HasMany
