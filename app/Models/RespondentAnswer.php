@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
 
+use Database\Factories\RespondentAnswerFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class RespondentAnswer extends Model
 {
+    /** @use HasFactory<RespondentAnswerFactory> */
+    use HasFactory;
+
     protected $table = 'respondents_answers';
 
     public function respondent(): BelongsTo

@@ -2,11 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('')->group(function () {
-    Route::get('', function () {
-        dump('Admin login');
-        exit;
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('', fn() => view('admin.login'))
+        ->name('login');
+
+    Route::middleware('admin')->group(function () {
+        Route::get('/dashboard', function () {
+            dump('Admin dashboard');
+            exit;
+        });
     });
 
-    // TODO admin middleware to authenticate
+    // TODO other routes
 });
