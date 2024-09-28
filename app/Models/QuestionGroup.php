@@ -20,6 +20,11 @@ class QuestionGroup extends Model
 
     protected $table = 'questions_groups';
 
+    /** @var array<int, string> */
+    protected $fillable = [
+        'name',
+    ];
+
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class);

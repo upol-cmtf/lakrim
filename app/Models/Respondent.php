@@ -21,6 +21,12 @@ class Respondent extends Model
 
     protected $table = 'respondents';
 
+    /** @var array<int, string> */
+    protected $fillable = [
+        'cookie',
+        'ip',
+    ];
+
     public function answers(): HasMany
     {
         return $this->hasMany(RespondentAnswer::class);

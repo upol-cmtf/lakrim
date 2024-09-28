@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property int $seconds
+ * @property float $weight
  * @property Respondent $respondent
- * @property Question $question
  * @property QuestionOption $option
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
@@ -22,14 +23,17 @@ class RespondentAnswer extends Model
 
     protected $table = 'respondents_answers';
 
+    /** @var array<int, string> */
+    protected $fillable = [
+        'seconds',
+        'weight',
+        'respondent_id',
+        'question_option_id',
+    ];
+
     public function respondent(): BelongsTo
     {
         return $this->belongsTo(Respondent::class);
-    }
-
-    public function question(): BelongsTo
-    {
-        return $this->belongsTo(Question::class);
     }
 
     public function option(): BelongsTo

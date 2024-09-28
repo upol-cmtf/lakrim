@@ -5,6 +5,7 @@ use Database\Factories\QuestionOptionFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -21,4 +22,17 @@ class QuestionOption extends Model
     use HasFactory;
 
     protected $table = 'questions_options';
+
+    /** @var array<int, string> */
+    protected $fillable = [
+        'name',
+        'description',
+        'weight',
+        'evaluation',
+    ];
+
+    public function question(): BelongsTo
+    {
+        return $this->belongsTo(Question::class);
+    }
 }

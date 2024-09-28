@@ -13,13 +13,21 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('difficulty', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('min_questions')->default(1);
+            $table->integer('max_questions')->default(10);
+            $table->integer('shuffle_questions')->default(true);
+        });
+
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('question_group_id')->constrained('questions_groups');
-            $table->integer('difficulty');
+            $table->foreignId('difficulty_id')->constrained('difficulty');
+            $table->text('perex');
+            $table->text('description');
             $table->timestamps();
-
-            $table->index('difficulty');
         });
 
         Schema::create('questions_options', function (Blueprint $table) {
@@ -28,7 +36,7 @@ return new class extends Migration {
             $table->string('name');
             $table->text('description');
             $table->float('weight');
-            $table->string('evaluation');
+            $table->text('evaluation');
             $table->timestamps();
         });
 
@@ -43,14 +51,19 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('respondent_id')->constrained('respondents');
             $table->foreignId('question_option_id')->constrained('questions_options');
+            $table->integer('seconds');
+            $table->float('weight');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('questions_options');
         Schema::dropIfExists('questions');
         Schema::dropIfExists('questions_groups');
-        Schema::dropIfExists('questions_answers');
+        Schema::dropIfExists('respondents_answers');
+        Schema::dropIfExists('respondents');
+        Schema::dropIfExists('difficulty');
     }
 };
