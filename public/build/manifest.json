@@ -1,13 +1,13 @@
 {
-  "resources/js/app.js": {
-    "file": "assets/app-DBdvkBoY.js",
+  "resources/js/admin/app.js": {
+    "file": "assets/app-BNvQO90Q.js",
     "name": "app",
-    "src": "resources/js/app.js",
+    "src": "resources/js/admin/app.js",
     "isEntry": true
   },
-  "resources/sass/app.scss": {
+  "resources/sass/admin/app.scss": {
     "file": "assets/app-D-sv12UV.css",
-    "src": "resources/sass/app.scss",
+    "src": "resources/sass/admin/app.scss",
     "isEntry": true
   }
 }
