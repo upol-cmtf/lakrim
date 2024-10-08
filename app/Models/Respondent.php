@@ -5,12 +5,15 @@ use Database\Factories\RespondentFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
- * @property string $cookie
+ * @property string $token
  * @property string|null $ip
+ * @property Age $age
+ * @property Difficulty $difficulty
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  */
@@ -23,12 +26,31 @@ class Respondent extends Model
 
     /** @var array<int, string> */
     protected $fillable = [
-        'cookie',
+        'age_id',
+        'difficulty_id',
         'ip',
+        'session_id',
+        'sex',
+        'token',
     ];
+
+    public function age(): BelongsTo
+    {
+        return $this->belongsTo(Age::class);
+    }
 
     public function answers(): HasMany
     {
         return $this->hasMany(RespondentAnswer::class);
+    }
+
+    public function difficulty(): BelongsTo
+    {
+        return $this->belongsTo(Difficulty::class);
+    }
+
+    public function getTotalWeight(): float
+    {
+        return (float) $this->answers()->sum('weight');
     }
 }

@@ -9,18 +9,17 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-
     <!-- Scripts -->
-    @vite(['resources/sass/web/app.scss', 'resources/js/web/app.js'])
+    @vite(['resources/sass/web/app.scss', 'resources/js/web/app.js'],'build/web')
 </head>
-<body>
-<div id="app">
-    <main class="py-4">
+<body class="flex flex-col min-h-screen">
+<div id="app-web">
+    @include('web.partials.header')
+
+    <main class="flex-auto">
         @yield('content')
     </main>
+
+    @include('web.partials.footer')
 </div>
-</body>
 </html>

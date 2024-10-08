@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Integration\Middleware;
+namespace Admin\Middleware;
 
 use App\Http\Middleware\Admin;
 use App\Models\User;

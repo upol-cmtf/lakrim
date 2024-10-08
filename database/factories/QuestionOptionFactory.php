@@ -1,6 +1,7 @@
 <?php
 namespace Database\Factories;
 
+use App\Models\Question;
 use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -14,6 +15,13 @@ class QuestionOptionFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        return [
+            'description' => $this->faker->text,
+            'evaluation' => $this->faker->text,
+            'name' => $this->faker->word,
+            'question_id' => Question::factory()->createOneQuietly()->id,
+            'right' => $this->faker->boolean,
+            'weight' => $this->faker->randomFloat(2, 0, 1),
+        ];
     }
 }
