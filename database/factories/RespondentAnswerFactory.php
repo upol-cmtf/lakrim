@@ -14,6 +14,9 @@ class RespondentAnswerFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        return [
+            'seconds' => $this->faker->numberBetween(0, 1000),
+            'weight' => $this->faker->numberBetween(0, 1000),
+        ];
     }
 }

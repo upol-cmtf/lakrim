@@ -1,7 +1,10 @@
 <?php
 namespace Database\Factories;
 
+use App\Enums\Difficulty;
 use App\Models\Question;
+use App\Models\QuestionGroup;
+use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,6 +17,11 @@ class QuestionFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        return [
+            'question_group_id' => QuestionGroup::factory()->createOneQuietly()->id,
+            'perex' => $this->faker->sentence,
+            'description' => $this->faker->text,
+            'difficulty_id' => Difficulty::Easy->value,
+        ];
     }
 }

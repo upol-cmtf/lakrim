@@ -3,7 +3,7 @@ namespace App\Enums;
 
 enum Difficulty: int
 {
-    case LOW = 1;
-    case MEDIUM = 2;
-    case HIGH = 3;
+    case Easy = 1;
+    case Medium = 2;
+    case Hard = 3;
 }

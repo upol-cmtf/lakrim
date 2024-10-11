@@ -12,7 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $name
  * @property string $description
  * @property float $weight
+ * @property boolean $right
  * @property string $evaluation
+ * @property int $question_id
+ * @property Question $question
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  */
@@ -33,6 +36,6 @@ class QuestionOption extends Model
 
     public function question(): BelongsTo
     {
-        return $this->belongsTo(Question::class);
+        return $this->belongsTo(Question::class, 'question_id');
     }
 }

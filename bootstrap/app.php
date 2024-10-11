@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Middleware\Admin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -18,9 +21,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->group('admin', [
-            \App\Http\Middleware\Admin::class,
+            Admin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->dontReport([
+            ValidationException::class,
+        ]);
+
+        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
+            return $e instanceof ValidationException;
+        });
+
         Integration::handles($exceptions);
     })->create();

@@ -23,6 +23,12 @@ class RespondentAnswer extends Model
 
     protected $table = 'respondents_answers';
 
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'seconds' => 0,
+        'weight' => 0,
+    ];
+
     /** @var array<int, string> */
     protected $fillable = [
         'seconds',
@@ -33,11 +39,16 @@ class RespondentAnswer extends Model
 
     public function respondent(): BelongsTo
     {
-        return $this->belongsTo(Respondent::class);
+        return $this->belongsTo(Respondent::class, 'respondent_id');
     }
 
     public function option(): BelongsTo
     {
-        return $this->belongsTo(QuestionOption::class);
+        return $this->belongsTo(QuestionOption::class, 'question_option_id');
+    }
+
+    public function isRightAnswer(): bool
+    {
+        return $this->option->right;
     }
 }
