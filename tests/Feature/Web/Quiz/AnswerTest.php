@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature\Web\Quiz;
 
+use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Respondent;
@@ -62,18 +63,74 @@ class AnswerTest extends TestCase
 
     public function testStoreAnswer(): void
     {
-        $respondent = Respondent::factory()->createOneQuietly();
-        $option = QuestionOption::factory()->createOneQuietly();
+        $difficulty = Difficulty::easy()->first();
+        assert($difficulty instanceof Difficulty);
+
+        $respondent = Respondent::factory()->createOneQuietly([
+            'difficulty_id' => $difficulty->id,
+        ]);
+        $question = Question::factory()
+            ->has(QuestionOption::factory()->count(4), 'options')
+            ->create([
+                'difficulty_id' => $difficulty->id,
+            ]);
+        $option = $question->options->first();
+        assert($option instanceof QuestionOption);
 
         $this->post(route(self::ROUTE_NAME), data: [
             'seconds' => 10,
             'respondent_token' => $respondent->token,
-            'question_id' => $option->question->id,
+            'question_id' => $question->id,
             'option_id' => $option->id,
         ])
             ->assertOk()
             ->assertExactJson([
-                'evaluation' => $option->evaluation,
+                'data' => [
+                    'end' => false,
+                    'evaluation' => $option->evaluation,
+                ],
+            ]);
+
+        $this->assertDatabaseHas(RespondentAnswer::class, [
+            'respondent_id' => $respondent->id,
+            'question_option_id' => $option->id,
+            'seconds' => 10,
+            'weight' => $option->weight,
+        ]);
+    }
+
+    public function testStoreLastAnswer(): void
+    {
+        $difficulty = Difficulty::easy()->first();
+        assert($difficulty instanceof Difficulty);
+
+        $difficulty->update([
+            'max_questions' => 1,
+        ]);
+
+        $respondent = Respondent::factory()->createOneQuietly([
+            'difficulty_id' => $difficulty->id,
+        ]);
+        $question = Question::factory()
+            ->has(QuestionOption::factory()->count(4), 'options')
+            ->create([
+                'difficulty_id' => $difficulty->id,
+            ]);
+        $option = $question->options->first();
+        assert($option instanceof QuestionOption);
+
+        $this->post(route(self::ROUTE_NAME), data: [
+            'seconds' => 10,
+            'respondent_token' => $respondent->token,
+            'question_id' => $question->id,
+            'option_id' => $option->id,
+        ])
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [
+                    'end' => true,
+                    'evaluation' => $option->evaluation,
+                ],
             ]);
 
         $this->assertDatabaseHas(RespondentAnswer::class, [

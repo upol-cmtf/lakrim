@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Database\Factories\RespondentFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ip
  * @property Age $age
  * @property Difficulty $difficulty
+ * @property Collection<RespondentAnswer> $answers
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  */
@@ -47,6 +49,21 @@ class Respondent extends Model
     public function difficulty(): BelongsTo
     {
         return $this->belongsTo(Difficulty::class);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function getAnsweredQuestionIds(): array
+    {
+        /** @var int[] $questionIds */
+        $questionIds = $this->answers->pluck('option.question_id')->toArray();
+        return $questionIds;
+    }
+
+    public function isAllQuizQuestionsAnswered(): bool
+    {
+        return $this->answers->count() >= $this->difficulty->max_questions;
     }
 
     public function getTotalWeight(): float

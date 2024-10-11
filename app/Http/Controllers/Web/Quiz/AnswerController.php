@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Web\Quiz;
 
 use App\Http\Controllers\Web\ApiController;
+use App\Http\Resources\Web\ArrayResource;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Respondent;
@@ -9,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class AnswerController extends ApiController
 {
-    public function store(): JsonResponse
+    public function store(): ArrayResource|JsonResponse
     {
         $questionId = $this->request->get('question_id');
 
@@ -36,7 +37,8 @@ class AnswerController extends ApiController
             'weight' => $option->weight,
         ]);
 
-        return response()->json([
+        return new ArrayResource([
+            'end' => $respondent->isAllQuizQuestionsAnswered(),
             'evaluation' => $option->evaluation,
         ]);
     }

@@ -17,7 +17,8 @@ class DifficultyFactory extends Factory
         return [
             'min_questions' => 1,
             'max_questions' => 10,
-            'shuffle_questions' => true,
+            'shuffle_questions' => false,
+            'shuffle_options' => false,
         ];
     }
 }

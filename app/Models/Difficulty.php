@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property int $id
  * @property int $min_questions
  * @property int $max_questions
  * @property string $name
  * @property bool $shuffle_questions
+ * @property bool $shuffle_options
  */
 class Difficulty extends Model
 {
@@ -27,7 +29,16 @@ class Difficulty extends Model
     protected $attributes = [
         'min_questions' => 1,
         'max_questions' => 10,
-        'shuffle_questions' => true,
+        'shuffle_questions' => false,
+        'shuffle_options' => false,
+    ];
+
+    /** @var array<int, string> */
+    protected $fillable = [
+        'min_questions',
+        'max_questions',
+        'shuffle_questions',
+        'shuffle_options',
     ];
 
     public function questions(): HasMany

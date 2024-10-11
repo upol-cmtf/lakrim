@@ -4,6 +4,7 @@ namespace Database\Factories;
 use App\Enums\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionGroup;
+use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class ApiController extends Controller
 {
     public function __construct(
-        protected readonly Request $request,
+        protected Request $request,
     ) {
     }
 }

@@ -39,11 +39,16 @@ class RespondentAnswer extends Model
 
     public function respondent(): BelongsTo
     {
-        return $this->belongsTo(Respondent::class);
+        return $this->belongsTo(Respondent::class, 'respondent_id');
     }
 
     public function option(): BelongsTo
     {
-        return $this->belongsTo(QuestionOption::class);
+        return $this->belongsTo(QuestionOption::class, 'question_option_id');
+    }
+
+    public function isRightAnswer(): bool
+    {
+        return $this->option->right;
     }
 }
