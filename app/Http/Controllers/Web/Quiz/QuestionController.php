@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Web\Quiz;
 
 use App\Exceptions\MaximumQuestionsExceededException;
+use App\Exceptions\QuestionNotFoundException;
 use App\Http\Controllers\Web\ApiController;
 use App\Http\Resources\Web\ArrayResource;
 use App\Http\Resources\Web\QuestionResource;
@@ -36,6 +37,13 @@ class QuestionController extends ApiController
             return (new ArrayResource([
                 'code' => 'maximum_questions_exceeded',
                 'error' => $this->translator->get($e->getMessage()),
+            ]))
+                ->response()
+                ->setStatusCode(400);
+        } catch (QuestionNotFoundException) {
+            return (new ArrayResource([
+                'code' => 'question_not_found',
+                'error' => $this->translator->get('quiz.question_not_found'),
             ]))
                 ->response()
                 ->setStatusCode(400);

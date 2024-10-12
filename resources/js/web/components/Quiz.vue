@@ -3,8 +3,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRespondentTokenStore } from '../stores/RespondentTokenStore.js';
+import {defineProps} from 'vue';
+import {onMounted} from 'vue';
+import {useRespondentTokenStore} from '../stores/RespondentTokenStore.js';
+import {loadQuestion} from '../services/QuizAPI.js';
 
 const respondentTokenStore = useRespondentTokenStore();
 
@@ -15,7 +17,9 @@ const props = defineProps({
     },
 });
 
-computed(() => {
+onMounted(async () => {
     respondentTokenStore.setToken(props.uuid);
+
+    await loadQuestion();
 });
 </script>
