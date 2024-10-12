@@ -7,7 +7,5 @@
         <a href="{{ route('web.quiz.run') }}" class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
             Spustit test <icon-arrow-right/>
         </a>
-
-        <quiz></quiz>
     </div>
 @endsection
