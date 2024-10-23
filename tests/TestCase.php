@@ -1,7 +1,6 @@
 <?php
 namespace Tests;
 
-use Database\Seeders\DifficultySeeder;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
