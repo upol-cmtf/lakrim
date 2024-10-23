@@ -5,8 +5,8 @@
                 <a href="https://www.cmtf.upol.cz/" class="flex items-center lg:justify-center" target="_blank">
                     <img src="{{ asset('images/cmtf-logo.png') }}" alt="cmtf-logo" class="object-center max-h-32"/>
                 </a>
-                <a href="#" class="flex items-center lg:justify-center">
-                    U3V
+                <a href="https://u3v.upol.cz/" class="flex items-center lg:justify-center" target="_blank">
+                    <img src="{{ asset('images/au3v-logo.jpg') }}" alt="au3v-logo" class="object-center max-h-32"/>
                 </a>
                 <a href="https://www.tacr.cz/" class="flex items-center lg:justify-center" target="_blank">
                     <img src="{{ asset('images/tacr-logo.png') }}" alt="tacr-logo" class="object-center max-h-32"/>
