@@ -27,18 +27,19 @@ class Difficulty extends Model
 
     /** @var array<string, int|bool> */
     protected $attributes = [
-        'min_questions' => 1,
         'max_questions' => 10,
-        'shuffle_questions' => false,
+        'min_questions' => 1,
         'shuffle_options' => false,
+        'shuffle_questions' => false,
     ];
 
     /** @var array<int, string> */
     protected $fillable = [
-        'min_questions',
         'max_questions',
-        'shuffle_questions',
+        'min_questions',
+        'name',
         'shuffle_options',
+        'shuffle_questions',
     ];
 
     public function questions(): HasMany

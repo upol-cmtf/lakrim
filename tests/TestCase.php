@@ -1,7 +1,6 @@
 <?php
 namespace Tests;
 
-use Database\Seeders\DifficultySeeder;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -15,8 +14,6 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->seed(DifficultySeeder::class);
 
         $this->translator = $this->app->make(Translator::class);
     }
