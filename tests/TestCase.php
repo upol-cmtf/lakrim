@@ -16,8 +16,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->seed(DifficultySeeder::class);
-
         $this->translator = $this->app->make(Translator::class);
     }
 }
