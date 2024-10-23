@@ -2,6 +2,7 @@
 namespace App\Services\Quiz;
 
 use App\Exceptions\MaximumQuestionsExceededException;
+use App\Exceptions\QuestionNotFoundException;
 use App\Models\Question;
 use App\Models\Respondent;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,6 +11,7 @@ class QuizQuestionService
 {
     /**
      * @throws MaximumQuestionsExceededException
+     * @throws QuestionNotFoundException
      */
     public function getQuestionForRespondent(Respondent $respondent): Question
     {
@@ -33,6 +35,10 @@ class QuizQuestionService
         $question = $difficulty->shuffle_questions
             ? $questions->random()
             : $questions->first();
+
+        if ($questions->isEmpty()) {
+            throw new QuestionNotFoundException();
+        }
 
         assert($question instanceof Question);
 
