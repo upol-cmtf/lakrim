@@ -1,5 +1,7 @@
 @extends('layouts.web')
 
 @section('content')
-    <quiz uuid="{{ $uuid }}"></quiz>
+    <div class="container mx-auto">
+        <quiz-form token="{{ $token }}"></quiz-form>
+    </div>
 @endsection

@@ -70,4 +70,12 @@ class Respondent extends Model
     {
         return (float) $this->answers()->sum('weight');
     }
+
+    /** @return string[] */
+    public function getFinalSummary(): array
+    {
+        /** @var string[] $summary */
+        $summary = $this->answers->pluck('option.summary')->toArray();
+        return $summary;
+    }
 }

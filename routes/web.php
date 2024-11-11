@@ -11,6 +11,9 @@ Route::prefix('quiz')->group(function () {
     Route::get('', [Web\Quiz\QuizRunController::class, 'run'])
         ->name('web.quiz.run');
 
+    Route::get('/age-list', [Web\Quiz\AgeListController::class, 'index'])
+        ->name('web.quiz.age-list');
+
     Route::post('/answer', [Web\Quiz\AnswerController::class, 'store'])
         ->name('web.quiz.answer');
 
@@ -19,4 +22,7 @@ Route::prefix('quiz')->group(function () {
 
     Route::post('/respondent/identification', [Web\Quiz\RespondentIdentificationController::class, 'store'])
         ->name('web.quiz.respondent.identification');
+
+    Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
+        ->name('web.quiz.respondent.summary');
 });

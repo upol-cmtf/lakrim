@@ -1,16 +1,21 @@
 import {createApp} from 'vue';
 import {createPinia} from 'pinia';
+import mitt from 'mitt';
 
+import ButtonBlue from './components/ButtonBlue.vue';
 import IconArrowRight from './components/Icons/IconArrowRight.vue';
-import Quiz from './components/Quiz.vue';
+import QuizForm from './components/Quiz/QuizForm.vue';
 
 const pinia = createPinia();
 const app = createApp({});
+const EventBus = mitt();
 
 app.use(pinia);
 
-app
+app.provide('EventBus', EventBus);
+
+app.component('ButtonBlue', ButtonBlue)
 	.component('IconArrowRight', IconArrowRight)
-	.component('Quiz', Quiz);
+	.component('QuizForm', QuizForm);
 
 app.mount('#app-web');

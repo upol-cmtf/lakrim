@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $weight
  * @property boolean $right
  * @property string $evaluation
+ * @property string $summary
  * @property int $question_id
  * @property Question $question
  * @property DateTimeInterface|null $created_at
@@ -32,6 +33,10 @@ class QuestionOption extends Model
         'description',
         'weight',
         'evaluation',
+    ];
+
+    protected $casts = [
+        'right' => 'boolean',
     ];
 
     public function question(): BelongsTo
