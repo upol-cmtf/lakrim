@@ -40,6 +40,7 @@ class AnswerController extends ApiController
         return new ArrayResource([
             'end' => $respondent->isAllQuizQuestionsAnswered(),
             'evaluation' => $option->evaluation,
+            'rightAnswer' => $option->right,
         ]);
     }
 }

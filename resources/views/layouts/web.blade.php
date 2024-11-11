@@ -12,14 +12,12 @@
     <!-- Scripts -->
     @vite(['resources/sass/web/app.scss', 'resources/js/web/app.js'],'build/web')
 </head>
-<body class="flex flex-col min-h-screen">
-<div id="app-web">
+<body id="app-web" class="flex flex-col min-h-screen h-screen justify-between">
     @include('web.partials.header')
 
-    <main class="flex-auto">
+    <main class="mb-auto flex-auto">
         @yield('content')
     </main>
 
     @include('web.partials.footer')
-</div>
 </html>

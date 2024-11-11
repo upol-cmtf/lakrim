@@ -19,7 +19,7 @@ class QuizRunController extends Controller
         ]);
 
         return view('web.quiz.run', [
-            'uuid' => $respondent->token,
+            'token' => $respondent->token,
         ]);
     }
 }

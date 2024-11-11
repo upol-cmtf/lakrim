@@ -17,6 +17,7 @@ class QuestionOptionFactory extends Factory
         return [
             'description' => $this->faker->text,
             'evaluation' => $this->faker->text,
+            'summary' => $this->faker->text,
             'name' => $this->faker->word,
             'right' => $this->faker->boolean,
             'weight' => $this->faker->randomFloat(2, 0, 1),
