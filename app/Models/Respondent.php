@@ -71,11 +71,26 @@ class Respondent extends Model
         return (float) $this->answers()->sum('weight');
     }
 
-    /** @return string[] */
+    /**
+     * @return array{
+     *     right: string[],
+     *     wrong: string[],
+     * }
+     */
     public function getFinalSummary(): array
     {
-        /** @var string[] $summary */
-        $summary = $this->answers->pluck('option.summary')->toArray();
-        return $summary;
+        $right = $wrong = [];
+        foreach ($this->answers as $answer) {
+            if ($answer->option->right) {
+                $right[] = $answer->option->summary;
+            } else {
+                $wrong[] = $answer->option->summary;
+            }
+        }
+
+        return [
+            'right' => $right,
+            'wrong' => $wrong,
+        ];
     }
 }

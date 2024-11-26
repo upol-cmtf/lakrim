@@ -10,15 +10,21 @@
         <h3 class="font-bold mb-3 text-3xl">1. Pohlaví</h3>
 
         <div class="p-8">
-            <div class="max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            <div class="max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
                 <div class="rounded-lg overflow-hidden shadow-md"
-                     :class="{'bg-gray-50': form.sex === null, 'bg-white': form.sex !== null}">
-                    <div class="px-6 py-8 text-center font-semibold relative">
+                     :class="{'bg-emerald-600 text-white': form.sex === null, 'bg-white': form.sex !== null}">
+                    <div class="px-4 py-6 text-center font-semibold relative">
                         <label for="sex-0" class="ml-2 cursor-pointer after:absolute after:inset-0">
                             <div class="hidden md:flex justify-center items-center mb-4">
-                                <img class="object-center object-contain h-20 w-20" src="/images/nezvole-ico@2x.png"/>
+                                <img class="object-center object-contain h-14 w-14"
+                                     src="/images/nezvole-ico@2x.png"
+                                     alt="Nezadáno"/>
                             </div>
-                            <input class="sr-only peer" type="radio" v-model="form.sex" :value="null" :checked="true"
+                            <input class="sr-only peer"
+                                   type="radio"
+                                   v-model="form.sex"
+                                   :value="null"
+                                   :checked="true"
                                    id="sex-0">
                             Nezadáno
                         </label>
@@ -27,13 +33,19 @@
 
                 <template v-for="sex in sexList">
                     <div class="rounded-lg overflow-hidden shadow-md"
-                         :class="{'bg-gray-50': form.sex === sex.id, 'bg-white': form.sex !== sex.id}">
+                         :class="{'bg-emerald-600 text-white': form.sex === sex.id, 'bg-white': form.sex !== sex.id}">
                         <div class="px-6 py-8 text-center font-semibold relative">
                             <label :for="`sex-${sex.id}`" class="ml-2 cursor-pointer after:absolute after:inset-0">
                                 <div class="hidden md:flex justify-center items-center mb-4">
-                                    <img class="object-center object-contain h-20 w-20" :src="sex.img"/>
+                                    <img class="object-center object-contain h-14 w-14"
+                                         :src="sex.img"
+                                         :alt="sex.name"
+                                    />
                                 </div>
-                                <input class="sr-only peer" type="radio" v-model="form.sex" :value="sex.id"
+                                <input class="sr-only peer"
+                                       type="radio"
+                                       v-model="form.sex"
+                                       :value="sex.id"
                                        :id="`sex-${sex.id}`">
                                 {{ sex.name }}
                             </label>
@@ -45,12 +57,21 @@
 
         <h3 class="font-bold mb-3 text-3xl">2. Věk</h3>
         <div class="p-8">
-            <div class="max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            <div class="max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
                 <div class="rounded-lg overflow-hidden shadow-md"
-                     :class="{'bg-gray-50': form.age_id === null, 'bg-white': form.age_id !== null}">
+                     :class="{'bg-emerald-600 text-white': form.age_id === null, 'bg-white': form.age_id !== null}">
                     <div class="px-6 py-8 text-center font-semibold relative">
+                        <div class="hidden md:flex justify-center items-center mb-4">
+                            <img class="object-center object-contain h-14 w-14"
+                                 src="/images/nezvole-ico@2x.png"
+                                 alt="Nezadáno"/>
+                        </div>
                         <label for="age-0" class="ml-2 cursor-pointer after:absolute after:inset-0">
-                            <input class="sr-only peer" type="radio" v-model="form.age_id" :value="null" :checked="true"
+                            <input class="sr-only peer"
+                                   type="radio"
+                                   v-model="form.age_id"
+                                   :value="null"
+                                   :checked="true"
                                    id="age-0">
                             Nezadáno
                         </label>
@@ -59,10 +80,18 @@
 
                 <template v-for="age in ageList">
                     <div class="rounded-lg overflow-hidden shadow-md"
-                         :class="{'bg-gray-50': form.age_id === age.id, 'bg-white': form.age_id !== age.id}">
+                         :class="{'bg-emerald-600 text-white': form.age_id === age.id, 'bg-white': form.age_id !== age.id}">
                         <div class="px-6 py-8 text-center font-semibold relative">
+                            <div class="hidden md:flex justify-center items-center mb-4">
+                                <img class="object-center object-contain h-14 w-14"
+                                     :src="`/images/`+age.name+`_years@2x.png`"
+                                     :alt="age.name"/>
+                            </div>
                             <label :for="`age-${age.id}`" class="ml-2 cursor-pointer after:absolute after:inset-0">
-                                <input class="sr-only peer" type="radio" v-model="form.age_id" :value="age.id"
+                                <input class="sr-only peer"
+                                       type="radio"
+                                       v-model="form.age_id"
+                                       :value="age.id"
                                        :id="`age-${age.id}`">
                                 {{ age.name }}
                             </label>
@@ -115,6 +144,6 @@ const submitRespondentIdentification = async () => {
 
 onMounted(async () => {
     await getAgeList();
-    window.scroll(0,0)
+    window.scroll(0, 0)
 });
 </script>

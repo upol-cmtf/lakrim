@@ -37,19 +37,31 @@ class RespondentSummaryTest extends TestCase
         $difficulty = Difficulty::easy()->first();
         assert($difficulty instanceof Difficulty);
 
-        $question = Question::factory()
-            ->has(QuestionOption::factory(), 'options')
+        $question1 = Question::factory()
+            ->has(QuestionOption::factory()->state(fn() => ['right' => false]), 'options')
             ->create([
                 'difficulty_id' => $difficulty->id,
             ]);
-        assert($question instanceof Question);
+        assert($question1 instanceof Question);
 
-        $option = $question->options->first();
-        assert($option instanceof QuestionOption);
+        $question2 = Question::factory()
+            ->has(QuestionOption::factory()->state(fn() => ['right' => true]), 'options')
+            ->create([
+                'difficulty_id' => $difficulty->id,
+            ]);
+        assert($question2 instanceof Question);
+
+        $option1 = $question1->options->first();
+        $option2 = $question2->options->first();
+        assert($option1 instanceof QuestionOption && $option2 instanceof QuestionOption);
 
         $respondent = Respondent::factory()
             ->has(
-                RespondentAnswer::factory()->state(fn() => ['question_option_id' => $option->id]),
+                RespondentAnswer::factory()->state(fn() => ['question_option_id' => $option1->id]),
+                'answers',
+            )
+            ->has(
+                RespondentAnswer::factory()->state(fn() => ['question_option_id' => $option2->id]),
                 'answers',
             )
             ->createOneQuietly([
@@ -62,7 +74,8 @@ class RespondentSummaryTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    $option->summary,
+                    'right' => [$option2->summary],
+                    'wrong' => [$option1->summary],
                 ],
             ]);
     }
