@@ -1,5 +1,5 @@
 <template>
-    <div class="relative flex flex-col md:my-10 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px] p-5">
+    <div class="relative flex flex-col md:my-10 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px] lg:p-5 p-2">
         <div class="p-4">
             <quiz v-if="showQuiz" :token="token"/>
 
