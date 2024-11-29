@@ -6,7 +6,7 @@
         <div class="grid grid-cols-6 gap-x-8">
             <div class="md:col-span-3 col-span-6 p-2 md:p-6">
                 <h1 v-if="question.perex">{{ question.perex }}</h1>
-                <div class="text-xl md:text-2xl md:font-semibold md:mb-10" v-html="question.description"></div>
+                <div class="text-xl md:text-2xl md:font-semibold md:mb-10 question-description" v-html="question.description"></div>
             </div>
 
             <div class="bg-gray-50 shadow-lg p-4 rounded-lg col-span-6 md:col-span-3 p-1 md:p-6">
