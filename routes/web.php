@@ -7,6 +7,10 @@ Route::get('/', function () {
     return view('web.homepage');
 });
 
+Route::get('/phishing-template', function () {
+    return view('web.phishing');
+});
+
 Route::prefix('quiz')->group(function () {
     Route::get('', [Web\Quiz\QuizRunController::class, 'run'])
         ->name('web.quiz.run');
