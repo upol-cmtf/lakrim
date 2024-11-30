@@ -88,6 +88,7 @@ class AnswerTest extends TestCase
                 'data' => [
                     'end' => false,
                     'evaluation' => $option->evaluation,
+                    'evaluationTitle' => $option->evaluation_title,
                     'rightAnswer' => $option->right,
                 ],
             ]);
@@ -131,6 +132,7 @@ class AnswerTest extends TestCase
                 'data' => [
                     'end' => true,
                     'evaluation' => $option->evaluation,
+                    'evaluationTitle' => $option->evaluation_title,
                     'rightAnswer' => $option->right,
                 ],
             ]);
