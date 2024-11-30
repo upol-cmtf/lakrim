@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $description
  * @property float $weight
  * @property boolean $right
+ * @property string $evaluation_title
  * @property string $evaluation
  * @property string $summary
  * @property int $question_id
@@ -33,6 +34,7 @@ class QuestionOption extends Model
         'description',
         'weight',
         'evaluation',
+        'evaluation_title',
     ];
 
     protected $casts = [
