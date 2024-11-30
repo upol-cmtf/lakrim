@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('questions_options', function (Blueprint $table) {
-            $table->text('evaluation_title')->after('right')->nullable()->default('');
+            $table->text('evaluation_title')->after('right')->nullable(false);
         });
     }
 
