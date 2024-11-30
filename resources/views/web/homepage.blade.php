@@ -8,18 +8,9 @@
                     {{ __('homepage.title') }}
                 </h1>
 
-                <p class="max-w-2xl mb-6 lg:mb-8">{!! __('homepage.description') !!}</p>
-
-                <p class="font-bold">{{ __('homepage.what_will_you_learn.title') }}</p>
-
-                <ul class="list-disc ml-8 mt-3">
-                    <li>{{ __('homepage.what_will_you_learn.list_1') }}</li>
-                    <li>{{ __('homepage.what_will_you_learn.list_2') }}</li>
-                    <li>{{ __('homepage.what_will_you_learn.list_3') }}</li>
-                    <li>{{ __('homepage.what_will_you_learn.list_4') }}</li>
-                </ul>
-
-                <p class="mt-5">{{ __('homepage.everything_is_done_anonymously') }}</p>
+                <p class="max-w-2xl mb-6 lg:mb-8">
+                    Naučíme vás, jak se bránit podvodníkům a bezpečně používat internet i telefon. Praktické tipy vycházejí z reálných situací. Kurz je anonymní a zaměřený na vaši ochranu.
+                </p>
 
                 <p class="text-center mt-8">
                     <a href="{{ route('web.quiz.run') }}"

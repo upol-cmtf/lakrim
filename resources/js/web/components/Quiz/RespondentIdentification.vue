@@ -1,9 +1,6 @@
 <template>
     <p class="lg:text-3xl text-center mb-3">
-        Děkujeme za vyplnění ankety.
-    </p>
-    <p class="lg:text-3xl text-center font-bold mb-3">
-        Před odesláním, prosím, vyplňte tyto údaje. Děkujeme.
+        Skvělá práce! Už jste skoro u konce. Ještě prosím zaklikněte své pohlaví a věk, a hned přejdeme k výsledkům.
     </p>
 
     <div class="md:text-lg lg:text-xl">
