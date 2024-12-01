@@ -9,7 +9,7 @@
                 <div class="text-xl md:text-2xl md:font-semibold md:mb-10 question-description" v-html="question.description"></div>
             </div>
 
-            <div class="bg-slate-200 shadow-lg p-4 rounded-r-lg col-span-6 md:col-span-3 p-1 md:p-6">
+            <div class="bg-gray-50 shadow-lg p-4 rounded-lg col-span-6 md:col-span-3 p-1 md:p-6">
                 <div class="text-xl md:text-2xl md:font-bold mb-4 underline underline-offset-4">Co uděláte?</div>
 
                 <div v-for="option in question.options"

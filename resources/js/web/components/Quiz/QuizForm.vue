@@ -1,13 +1,14 @@
 <template>
     <progress-bar v-if="showQuiz" class="sticky top-0"/>
 
-    <div
-        class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
-        <quiz v-if="showQuiz" :token="token" class="mt-5"/>
+    <div class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px] lg:p-5 p-2">
+        <div class="p-4">
+            <quiz v-if="showQuiz" :token="token" class="mt-5"/>
 
-        <respondent-identification v-if="showRespondentIdentification" class="p-4"/>
+            <respondent-identification v-if="showRespondentIdentification"/>
 
-        <quiz-end v-if="showQuizEnd" class="p-4"/>
+            <quiz-end v-if="showQuizEnd"/>
+        </div>
     </div>
 </template>
 
