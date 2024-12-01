@@ -1,7 +1,9 @@
 <template>
-    <div class="relative flex flex-col md:my-10 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px] lg:p-5 p-2">
+    <progress-bar v-if="showQuiz" class="sticky top-0"/>
+
+    <div class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px] lg:p-5 p-2">
         <div class="p-4">
-            <quiz v-if="showQuiz" :token="token"/>
+            <quiz v-if="showQuiz" :token="token" class="mt-5"/>
 
             <respondent-identification v-if="showRespondentIdentification"/>
 
@@ -15,15 +17,23 @@ import {defineProps, inject, onMounted, ref} from 'vue';
 import Quiz from './Quiz.vue';
 import QuizEnd from './QuizEnd.vue';
 import RespondentIdentification from './RespondentIdentification.vue';
+import {useQuizStatusBarStore} from '../../stores/QuizStatusBarStore.js';
+import ProgressBar from "./ProgressBar.vue";
 
 const EventBus = inject('EventBus');
 
-defineProps({
+const props = defineProps({
     token: {
         type: String,
         required: true,
     },
+    settings: {
+        type: Object,
+        required: true,
+    },
 });
+
+const quizStatusBarStore = useQuizStatusBarStore();
 
 const showQuiz = ref(true);
 const showQuizEnd = ref(false);
@@ -40,6 +50,8 @@ const onRespondentIdentificationFinished = () => {
 };
 
 onMounted(async () => {
+    quizStatusBarStore.setMaxQuestions(props.settings.maxQuestions);
+
     EventBus.on('quiz:finished', () => onQuizFinished());
     EventBus.on('respondentIdentification:finished', () => onRespondentIdentificationFinished());
 });

@@ -6,7 +6,7 @@
     <loading v-if="!summaryLoaded"/>
 
     <div v-if="summaryLoaded" class="lg:text-xl">
-        <div v-if="summary.right.length" class="shadow-green-700 lg:mb-8 border-green-700 border-2 p-3 rounded-lg">
+        <div v-if="summary.right.length" class="shadow-green-700 lg:mb-8 border-green-700 border-2 p-3 rounded-lg mb-5">
             <h1 class="max-w-2xl lg:mb-8 mb-2 text-2xl font-extrabold leading-none tracking-tight xl:text-3xl text-green-700">
                 <div class="flex">
                     <div class="mx-2 align-middle">
