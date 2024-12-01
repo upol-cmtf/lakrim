@@ -2,6 +2,8 @@
 
 @section('content')
     <div class="container mx-auto">
-        <quiz-form token="{{ $token }}"></quiz-form>
+        <quiz-form token="{{ $respondentToken }}"
+                   :settings="{{ json_encode($settings) }}">
+        </quiz-form>
     </div>
 @endsection

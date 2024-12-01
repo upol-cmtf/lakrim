@@ -6,8 +6,7 @@
         <div class="grid grid-cols-6 gap-x-8">
             <div class="md:col-span-3 col-span-6 p-2 md:p-6">
                 <h1 v-if="question.perex">{{ question.perex }}</h1>
-                <div class="text-xl md:text-2xl md:mb-10 question-description"
-                     v-html="question.description"></div>
+                <div class="text-xl md:text-2xl md:font-semibold md:mb-10 question-description" v-html="question.description"></div>
             </div>
 
             <div class="bg-gray-50 shadow-lg p-4 rounded-lg col-span-6 md:col-span-3 p-1 md:p-6">
@@ -26,7 +25,7 @@
 
                 <div v-if="!evaluationState.loading && !evaluationState.success"
                      class="flex justify-center items-center invisible md:visible mt-10">
-                    <img src="/images/thinking-grandparents.png" class="object-center"/>
+                    <img src="/images/thinking-grandparents.png" class="object-center" alt="Přemýšlející senioři"/>
                 </div>
 
                 <div v-if="evaluationState.loading">
@@ -63,6 +62,7 @@
 
 <script setup>
 import {defineProps, inject, onMounted, ref} from 'vue';
+import {useQuizStatusBarStore} from '../../stores/QuizStatusBarStore.js';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 import {loadQuestion, storeRespondentAnswer} from '../../services/QuizAPI.js';
 import ButtonBlue from '../ButtonBlue.vue';
@@ -107,6 +107,7 @@ const evaluationState = ref({
     success: false,
 });
 
+const quizStatusBarStore = useQuizStatusBarStore();
 const respondentTokenStore = useRespondentTokenStore();
 
 const endQuiz = () => {
@@ -137,6 +138,9 @@ const getQuestion = async () => {
         return;
     }
 
+    quizStatusBarStore.incrementLoadedQuestions();
+    quizStatusBarStore.addTopic(questionData.group.id, questionData.group.name);
+
     question.value.id = questionData.id;
     question.value.perex = questionData.perex;
     question.value.description = questionData.description;
@@ -160,6 +164,13 @@ const selectOption = async (optionId) => {
     evaluation.value.text = evaluationData.evaluation;
     evaluation.value.hasAnotherQuestion = !evaluationData.end;
     evaluation.value.rightAnswer = evaluationData.rightAnswer;
+
+    if (evaluationData.rightAnswer) {
+        quizStatusBarStore.incrementRightAnswers();
+        quizStatusBarStore.setLastTopicState(1);
+    } else {
+        quizStatusBarStore.incrementWrongAnswers();
+    }
 
     evaluationState.value.loading = false;
     evaluationState.value.success = true;
