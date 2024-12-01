@@ -82,6 +82,10 @@ class QuestionTest extends TestCase
                         'id' => $option->id,
                         'name' => $option->name,
                     ]),
+                    'group' => [
+                        'id' => $question->questionGroup->id,
+                        'name' => $question->questionGroup->name,
+                    ],
                 ],
             ]);
     }
@@ -126,6 +130,10 @@ class QuestionTest extends TestCase
                         'id' => $option->id,
                         'name' => $option->name,
                     ]),
+                    'group' => [
+                        'id' => $question2->questionGroup->id,
+                        'name' => $question2->questionGroup->name,
+                    ],
                 ],
             ]);
     }
