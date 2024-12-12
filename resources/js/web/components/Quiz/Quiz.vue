@@ -1,63 +1,66 @@
 <template>
-    <question-loader v-if="questionState.loading"/>
+    <div class="mt-5">
+        <question-loader v-if="questionState.loading"/>
 
-    <template v-if="questionState.success && !questionState.loading">
+        <template v-if="questionState.success && !questionState.loading">
 
-        <div class="grid grid-cols-6 gap-x-8">
-            <div class="md:col-span-3 col-span-6 p-2 md:p-6">
-                <h1 v-if="question.perex">{{ question.perex }}</h1>
-                <div class="text-xl md:text-2xl md:font-semibold md:mb-10 question-description" v-html="question.description"></div>
-            </div>
-
-            <div class="bg-slate-200 shadow-lg p-4 rounded-r-lg col-span-6 md:col-span-3 p-1 md:p-6">
-                <div class="text-xl md:text-2xl md:font-bold mb-4 underline underline-offset-4">Co uděláte?</div>
-
-                <div v-for="option in question.options"
-                     :key="option.id">
-                    <button-blue class="my-3 disabled:cursor-not-allowed"
-                                 :class="{'disabled:bg-gray-400': evaluation.loading || (option.id !== clickedButtonId), 'disabled:bg-emerald-600': (option.id === clickedButtonId && evaluation.rightAnswer === true), 'disabled:bg-rose-600': (option.id === clickedButtonId && evaluation.rightAnswer === false)}"
-                                 :disabled="evaluationState.loading || evaluationState.success"
-                                 @click="selectOption(option.id)">
-                        <!--                        {{ String.fromCharCode(65 + index) }}) {{ option.name }}-->
-                        {{ option.name }}
-                    </button-blue>
+            <div class="grid grid-cols-6 gap-x-8">
+                <div class="md:col-span-3 col-span-6 p-2 md:p-6">
+                    <h1 v-if="question.perex">{{ question.perex }}</h1>
+                    <div class="text-xl md:text-2xl md:font-semibold md:mb-10 question-description"
+                         v-html="question.description"></div>
                 </div>
 
-                <div v-if="!evaluationState.loading && !evaluationState.success"
-                     class="flex justify-center items-center invisible md:visible mt-10">
-                    <img src="/images/thinking-grandparents.png" class="object-center" alt="Přemýšlející senioři"/>
-                </div>
+                <div class="bg-slate-200 shadow-lg p-4 rounded-r-lg col-span-6 md:col-span-3 p-1 md:p-6">
+                    <div class="text-xl md:text-2xl md:font-bold mb-4 underline underline-offset-4">Co uděláte?</div>
 
-                <div v-if="evaluationState.loading">
-                    <p>Vaše odpověď se vyhodnocuje...</p>
-                </div>
+                    <div v-for="option in question.options"
+                         :key="option.id">
+                        <button-blue class="my-3 disabled:cursor-not-allowed"
+                                     :class="{'disabled:bg-gray-400': evaluation.loading || (option.id !== clickedButtonId), 'disabled:bg-emerald-600': (option.id === clickedButtonId && evaluation.rightAnswer === true), 'disabled:bg-rose-600': (option.id === clickedButtonId && evaluation.rightAnswer === false)}"
+                                     :disabled="evaluationState.loading || evaluationState.success"
+                                     @click="selectOption(option.id)">
+                            <!--                        {{ String.fromCharCode(65 + index) }}) {{ option.name }}-->
+                            {{ option.name }}
+                        </button-blue>
+                    </div>
 
-                <div v-if="!evaluationState.loading && evaluationState.success">
-                    <hr>
-                    <div class="flex my-3 lg:text-3xl border-solid border-2 p-3 rounded-lg text-center"
-                         :class="{'text-green-700 border-green-700': evaluation.rightAnswer, 'text-red-700 border-red-700':!evaluation.rightAnswer}">
-                        <div class="mx-2 align-middle">
-                            <icon-hand-thumb-up v-if="evaluation.rightAnswer" class="h-10 w-10"/>
-                            <icon-hand-raised v-else class="h-10 w-10"/>
+                    <div v-if="!evaluationState.loading && !evaluationState.success"
+                         class="flex justify-center items-center invisible md:visible mt-10">
+                        <img src="/images/thinking-grandparents.png" class="object-center" alt="Přemýšlející senioři"/>
+                    </div>
+
+                    <div v-if="evaluationState.loading">
+                        <p>Vaše odpověď se vyhodnocuje...</p>
+                    </div>
+
+                    <div v-if="!evaluationState.loading && evaluationState.success">
+                        <hr>
+                        <div class="flex my-3 lg:text-3xl border-solid border-2 p-3 rounded-lg text-center"
+                             :class="{'text-green-700 border-green-700': evaluation.rightAnswer, 'text-red-700 border-red-700':!evaluation.rightAnswer}">
+                            <div class="mx-2 align-middle">
+                                <icon-hand-thumb-up v-if="evaluation.rightAnswer" class="h-10 w-10"/>
+                                <icon-hand-raised v-else class="h-10 w-10"/>
+                            </div>
+                            <div class="font-bold underline">{{ evaluation.title }}</div>
                         </div>
-                        <div class="font-bold underline">{{ evaluation.title }}</div>
-                    </div>
 
-                    <div class="text-xl" v-html="evaluation.text"></div>
+                        <div class="text-xl" v-html="evaluation.text"></div>
 
-                    <div class="mt-10">
-                        <button-blue-with-arrow-right v-if="evaluation.hasAnotherQuestion" @click="getQuestion">
-                            Pokračovat na další otázku
-                        </button-blue-with-arrow-right>
+                        <div class="mt-10">
+                            <button-blue-with-arrow-right v-if="evaluation.hasAnotherQuestion" @click="getQuestion">
+                                Pokračovat na další otázku
+                            </button-blue-with-arrow-right>
 
-                        <button-blue-with-arrow-right v-else @click="endQuiz">
-                            Přejít na dokončení
-                        </button-blue-with-arrow-right>
+                            <button-blue-with-arrow-right v-else @click="endQuiz">
+                                Přejít na dokončení
+                            </button-blue-with-arrow-right>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </template>
+        </template>
+    </div>
 </template>
 
 <script setup>

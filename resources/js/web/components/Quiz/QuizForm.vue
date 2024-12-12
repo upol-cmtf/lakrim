@@ -3,11 +3,11 @@
 
     <div
         class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
-        <quiz v-if="showQuiz" :token="token" class="mt-5"/>
+        <quiz v-if="showQuiz" :token="token"/>
 
-        <respondent-identification v-if="showRespondentIdentification" class="p-4"/>
+        <respondent-identification v-if="showRespondentIdentification"/>
 
-        <quiz-end v-if="showQuizEnd" class="p-4"/>
+        <quiz-end v-if="showQuizEnd"/>
     </div>
 </template>
 
