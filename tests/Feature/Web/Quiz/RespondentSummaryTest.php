@@ -74,8 +74,19 @@ class RespondentSummaryTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'right' => [$option2->summary],
-                    'wrong' => [$option1->summary],
+                    'statistics' => [
+                        'totalQuestions' => 10,
+                        'totalAnsweredQuestions' => 2,
+                        'totalUnansweredQuestions' => 8,
+                        'correctAnswers' => 1,
+                        'incorrectAnswers' => 1,
+                        'percentageCorrectAnswers' => 50,
+                        'percentageIncorrectAnswers' => 50,
+                    ],
+                    'evaluation' => [
+                        'right' => [$option2->summary],
+                        'wrong' => [$option1->summary],
+                    ],
                 ],
             ]);
     }

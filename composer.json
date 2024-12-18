@@ -51,7 +51,11 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon app tests --memory-limit=-1",
-        "phpcs": "./vendor/bin/phpcs --standard=phpcs-standard.xml app/ tests/"
+        "phpcs": "./vendor/bin/phpcs --standard=phpcs-standard.xml app/ tests/",
+        "checks": [
+            "@phpcs",
+            "@phpstan"
+        ]
     },
     "extra": {
         "laravel": {

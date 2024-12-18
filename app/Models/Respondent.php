@@ -79,18 +79,16 @@ class Respondent extends Model
      */
     public function getFinalSummary(): array
     {
-        $right = $wrong = [];
+        $summary = [
+            'right' => [],
+            'wrong' => [],
+        ];
+
         foreach ($this->answers as $answer) {
-            if ($answer->option->right) {
-                $right[] = $answer->option->summary;
-            } else {
-                $wrong[] = $answer->option->summary;
-            }
+            $type = $answer->isRightAnswer() ? 'right' : 'wrong';
+            $summary[$type][] = $answer->option->summary;
         }
 
-        return [
-            'right' => $right,
-            'wrong' => $wrong,
-        ];
+        return $summary;
     }
 }

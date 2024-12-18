@@ -7,35 +7,32 @@
         <loading v-if="!summaryLoaded"/>
 
         <div v-if="summaryLoaded" class="lg:text-xl">
-            <div v-if="summary.right.length"
-                 class="shadow-green-700 lg:mb-8 border-green-700 border-2 p-3 rounded-lg mb-5">
-                <h1 class="max-w-2xl lg:mb-8 mb-2 text-2xl font-extrabold leading-none tracking-tight xl:text-3xl text-green-700">
-                    <div class="flex">
-                        <div class="mx-2 align-middle">
-                            <icon-hand-thumb-up class="h-10 w-10"/>
-                        </div>
-                        <div class="font-bold underline">Pozitiva</div>
+            <progress-bar class="mb-5"/>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-2">
+                <div v-if="summary.evaluation.right.length"
+                     class="shadow-green-700 lg:mb-8 border-green-700 border-4 p-3 rounded-lg mb-5">
+                    <div class="text-center font-semibold mb-8">
+                        Správných odpovědí: {{ summary.statistics.correctAnswers }}<br/>
+                        Úspěšnost: {{ summary.statistics.percentageCorrectAnswers }}%
                     </div>
-                </h1>
 
-                <ul class="list-disc lg:mx-10 ml-5">
-                    <li v-for="data in summary.right" class="mb-5" v-html="data"></li>
-                </ul>
-            </div>
+                    <ul class="list-disc lg:mx-10 ml-5">
+                        <li v-for="data in summary.evaluation.right" class="mb-5" v-html="data"></li>
+                    </ul>
+                </div>
 
-            <div v-if="summary.wrong.length" class="shadow-red-700 lg:mb-8 border-red-700 border-2 p-3 rounded-lg">
-                <h1 class="max-w-2xl lg:mb-8 mb-2 text-2xl font-extrabold leading-none tracking-tight xl:text-3xl text-red-700">
-                    <div class="flex">
-                        <div class="mx-2 align-middle">
-                            <icon-hand-raised class="h-10 w-10"/>
-                        </div>
-                        <div class="font-bold underline">Negativa</div>
+                <div v-if="summary.evaluation.wrong.length"
+                     class="shadow-red-700 lg:mb-8 border-red-700 border-4 p-3 rounded-lg">
+                    <div class="text-center font-semibold mb-8">
+                        Chybných odpovědí: {{ summary.statistics.incorrectAnswers }}<br/>
+                        Chybovost: {{ summary.statistics.percentageIncorrectAnswers }}%
                     </div>
-                </h1>
 
-                <ul class="list-disc lg:mx-10 ml-5">
-                    <li v-for="data in summary.wrong" class="mb-5" v-html="data"></li>
-                </ul>
+                    <ul class="list-disc lg:mx-10 ml-5">
+                        <li v-for="data in summary.evaluation.wrong" class="mb-5" v-html="data"></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -47,6 +44,7 @@ import {onMounted, ref} from 'vue';
 import Loading from '../Loading.vue';
 import IconHandThumbUp from '../Icons/IconHandThumbUp.vue';
 import IconHandRaised from '../Icons/IconHandRaised.vue';
+import ProgressBar from "./ProgressBar.vue";
 
 const summary = ref([]);
 const summaryLoaded = ref(false);
