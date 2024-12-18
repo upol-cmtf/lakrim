@@ -34,7 +34,7 @@
                         <p>Vaše odpověď se vyhodnocuje...</p>
                     </div>
 
-                    <div v-if="!evaluationState.loading && evaluationState.success">
+                    <div v-if="!evaluationState.loading && evaluationState.success" class="relative">
                         <hr>
                         <div class="flex my-3 lg:text-3xl border-solid border-2 p-3 rounded-lg text-center"
                              :class="{'text-green-700 border-green-700': evaluation.rightAnswer, 'text-red-700 border-red-700':!evaluation.rightAnswer}">
@@ -47,8 +47,8 @@
 
                         <div class="text-xl" v-html="evaluation.text"></div>
 
-                        <div class="mt-10">
-                            <button-blue-with-arrow-right v-if="evaluation.hasAnotherQuestion" @click="getQuestion">
+                        <div class="mt-10 sticky bottom-4 right-4 text-right">
+                            <button-blue-with-arrow-right v-if="evaluation.hasAnotherQuestion" @click="getQuestion" class="shadow-2xl">
                                 Pokračovat na další otázku
                             </button-blue-with-arrow-right>
 
