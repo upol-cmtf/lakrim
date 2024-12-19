@@ -85,7 +85,10 @@ class Respondent extends Model
 
         foreach ($this->answers as $answer) {
             $type = $answer->isRightAnswer() ? 'right' : 'wrong';
-            $summary[$type][] = $answer->option->summary;
+
+            if ($answer->option->summary) {
+                $summary[$type][] = $answer->option->summary;
+            }
         }
 
         return $summary;
