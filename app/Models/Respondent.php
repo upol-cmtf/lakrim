@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ip
  * @property Age $age
  * @property Difficulty $difficulty
+ * @property QuizEvent|null $event
  * @property Collection<RespondentAnswer> $answers
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
@@ -27,14 +28,7 @@ class Respondent extends Model
     protected $table = 'respondents';
 
     /** @var array<int, string> */
-    protected $fillable = [
-        'age_id',
-        'difficulty_id',
-        'ip',
-        'session_id',
-        'sex',
-        'token',
-    ];
+    protected $guarded = [];
 
     public function age(): BelongsTo
     {
@@ -49,6 +43,11 @@ class Respondent extends Model
     public function difficulty(): BelongsTo
     {
         return $this->belongsTo(Difficulty::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(QuizEvent::class, 'quiz_event_id');
     }
 
     /**

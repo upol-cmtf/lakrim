@@ -12,7 +12,7 @@ Route::get('/phishing-template', function () {
 });
 
 Route::prefix('quiz')->group(function () {
-    Route::get('', [Web\Quiz\QuizRunController::class, 'run'])
+    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
         ->name('web.quiz.run');
 
     Route::get('/age-list', [Web\Quiz\AgeListController::class, 'index'])
