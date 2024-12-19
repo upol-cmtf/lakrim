@@ -12,9 +12,6 @@ Route::get('/phishing-template', function () {
 });
 
 Route::prefix('quiz')->group(function () {
-    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
-        ->name('web.quiz.run');
-
     Route::get('/age-list', [Web\Quiz\AgeListController::class, 'index'])
         ->name('web.quiz.age-list');
 
@@ -29,4 +26,7 @@ Route::prefix('quiz')->group(function () {
 
     Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
         ->name('web.quiz.respondent.summary');
+
+    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
+        ->name('web.quiz.run');
 });
