@@ -4,8 +4,8 @@
 
         <div>
             <div class="w-10 text-end">
-                <span class="text-sm text-gray-800 dark:text-white font-semibold"
-                      v-html="quizStatusBarStore.getPercentComplete()">
+                <span class="text-sm text-gray-800 dark:text-white font-semibold">
+                    {{ quizStatusBarStore.loadedQuestions }}/{{ quizStatusBarStore.maxQuestions }}
                 </span>
             </div>
         </div>

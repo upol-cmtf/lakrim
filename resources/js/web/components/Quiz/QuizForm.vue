@@ -49,7 +49,7 @@ const onRespondentIdentificationFinished = () => {
 };
 
 onMounted(async () => {
-    quizStatusBarStore.setMaxQuestions(props.settings.maxQuestions);
+    quizStatusBarStore.maxQuestions = props.settings.maxQuestions;
 
     EventBus.on('quiz:finished', () => onQuizFinished());
     EventBus.on('respondentIdentification:finished', () => onRespondentIdentificationFinished());
