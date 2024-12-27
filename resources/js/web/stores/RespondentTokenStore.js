@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 
+const initialState = {
+	token: null,
+};
+
 export const useRespondentTokenStore = defineStore('respondentTokenStore', {
-	state: () => ({
-		token: null,
-	}),
+	state: () => ({...initialState}),
 	actions: {
 		getToken() {
 			return this.token;

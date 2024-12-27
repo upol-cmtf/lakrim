@@ -1,13 +1,15 @@
-import {defineStore} from 'pinia';
+import { defineStore } from 'pinia';
+
+const initialState = {
+	loadedQuestions: 0,
+	maxQuestions: 0,
+	rightAnswers: 0,
+	wrongAnswers: 0,
+	topics: [],
+};
 
 export const useQuizStatusBarStore = defineStore('quizStatusBarStore', {
-	state: () => ({
-		loadedQuestions: 0,
-		maxQuestions: 0,
-		rightAnswers: 0,
-		wrongAnswers: 0,
-		topics: [],
-	}),
+	state: () => ({...initialState}),
 	actions: {
 		incrementLoadedQuestions() {
 			this.loadedQuestions++;
@@ -17,15 +19,6 @@ export const useQuizStatusBarStore = defineStore('quizStatusBarStore', {
 		},
 		incrementWrongAnswers() {
 			this.wrongAnswers++;
-		},
-		setMaxQuestions(maxQuestions) {
-			this.maxQuestions = maxQuestions;
-		},
-		getMaxQuestions() {
-			return this.maxQuestions;
-		},
-		getLoadedQuestions() {
-			return this.loadedQuestions;
 		},
 		addTopic(id, name) {
 			this.topics.push({id: id, name: name, state: 0});
@@ -43,7 +36,7 @@ export const useQuizStatusBarStore = defineStore('quizStatusBarStore', {
 			return this.topics[index];
 		},
 		getPercentComplete() {
-			return Math.ceil((this.getAnsweredQuestionsCount() * 100) / this.getMaxQuestions()) + '%';
+			return Math.ceil((this.getAnsweredQuestionsCount() * 100) / this.maxQuestions) + '%';
 		}
 	},
 });
