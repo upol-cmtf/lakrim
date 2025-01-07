@@ -1,10 +1,10 @@
 @extends('layouts.web')
 
 @section('content')
-    <section class="bg-white dark:bg-gray-900">
+    <section class="bg-white">
         <div class="grid max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12 lg:pt-28">
             <div class="mr-auto place-self-center lg:col-span-7 md:text-lg lg:text-xl">
-                <h1 class="max-w-2xl mb-8 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-5xl dark:text-white">
+                <h1 class="max-w-2xl mb-8 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-5xl">
                     {{ __('homepage.title') }}
                 </h1>
 
@@ -14,7 +14,7 @@
 
                 <p class="text-center mt-8">
                     <a href="{{ route('web.quiz.run') }}"
-                       class="lg:text-lg inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                       class="lg:text-lg inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
                         {{ __('homepage.start_to_play') }}
                         <icon-arrow-right class="ml-3"></icon-arrow-right>
                     </a>
