@@ -39,9 +39,21 @@ class AnswerController extends ApiController
 
         return new ArrayResource([
             'end' => $respondent->isAllQuizQuestionsAnswered(),
-            'evaluation' => $option->evaluation,
-            'evaluationTitle' => $option->evaluation_title,
-            'rightAnswer' => $option->right,
+            'evaluations' => $question->getOptions()
+                ->filter(function (QuestionOption $option) {
+                    if ($option->question->difficulty->show_evaluations_for_other_options) {
+                        return true;
+                    }
+
+                    return $option->id === (int) $this->request->input('option_id');
+                })
+                ->map(fn(QuestionOption $option) => [
+                    'optionId' => $option->id,
+                    'evaluation' => $option->evaluation,
+                    'evaluationTitle' => $option->evaluation_title,
+                    'rightAnswer' => $option->right,
+                ])
+                ->toArray(),
         ]);
     }
 }

@@ -1,17 +1,10 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
-const initialState = {
+const storeName = 'respondentTokenStore';
+
+const defaultState = {
 	token: null,
 };
-
-export const useRespondentTokenStore = defineStore('respondentTokenStore', {
-	state: () => ({...initialState}),
-	actions: {
-		getToken() {
-			return this.token;
-		},
-		setToken(token) {
-			this.token = token;
-		}
-	},
+export const useRespondentTokenStore = defineStore(storeName, {
+	state: () => ({...defaultState}),
 });
