@@ -4,7 +4,7 @@
 
         <div>
             <div class="w-10 text-end">
-                <span class="text-sm text-gray-800 dark:text-white font-semibold">
+                <span class="text-sm text-gray-800 font-semibold">
                     {{ quizStatusBarStore.loadedQuestions }}/{{ quizStatusBarStore.maxQuestions }}
                 </span>
             </div>
