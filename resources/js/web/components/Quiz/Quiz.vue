@@ -30,8 +30,7 @@
                              alt="Přemýšlející senioři"/>
                     </div>
 
-<!--                    TODO samostatný blok pro vyhodnocení-->
-
+                    <!--                    TODO samostatný blok pro vyhodnocení-->
 
 
                     <div v-if="questionStore.isLoadingEvaluation">
@@ -41,8 +40,10 @@
                     <div v-if="!questionStore.isLoadingEvaluation && questionStore.isEvaluationLoaded"
                          class="relative">
                         <hr>
-                        <div class="flex my-3 lg:text-3xl border-solid border-2 p-3 rounded-lg text-center"
-                             :class="{
+                        <div
+                            v-if="questionStore.isAnswered && (questionStore.selectedOptionId === questionStore.answeredOptionId)"
+                            class="flex my-3 lg:text-3xl border-solid border-2 p-3 rounded-lg text-center"
+                            :class="{
                                 'text-green-700 border-green-700': optionEvaluationStore.rightAnswer,
                                 'text-red-700 border-red-700':!optionEvaluationStore.rightAnswer
                              }"
@@ -83,6 +84,7 @@ import {defineProps, inject, onMounted, ref} from 'vue';
 import {storeRespondentAnswer} from '../../services/QuizAPI.js';
 import {useOptionEvaluationStore} from '../../stores/OptionEvalutationStore.js';
 import {useQuestionStore} from '../../stores/QuestionStore.js';
+import {useQuizSettingsStore} from '../../stores/QuizSettingsStore.js';
 import {useQuizStatusBarStore} from '../../stores/QuizStatusBarStore.js';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 import ButtonBlueWithArrowRight from '../ButtonBlueWithArrowRight.vue';
@@ -119,6 +121,7 @@ const evaluation = ref({
 
 const optionEvaluationStore = useOptionEvaluationStore();
 const questionStore = useQuestionStore();
+const quizSettingsStore = useQuizSettingsStore();
 const quizStatusBarStore = useQuizStatusBarStore();
 const respondentTokenStore = useRespondentTokenStore();
 
@@ -131,32 +134,40 @@ const getQuestion = async () => {
     window.scrollTo(0, 0);
 };
 
-const handleOptionSelected = async (optionId) => {
-    const seconds = moment().diff(questionStore.loadedAt, 'seconds');
-
-    // TODO nejaka kontrola, ze bylo na otazku jiz odpovezeno a nejde znovu hlasovat nebo poslat neco jineho
-
-
-    questionStore.isLoadingEvaluation = true;
-
-    const data = await storeRespondentAnswer(questionStore.id, optionId, seconds);
-    if (!data) {
-        // TODO nejaka chyba
-        return;
-    }
-
-    questionStore.setEvaluations(data.evaluations);
-    isLastQuestion.value = data.end;
-
+const handleShowEvaluation = (optionId) => {
     optionEvaluationStore.setOptionEvaluation(questionStore.getEvaluationByOptionId(optionId));
-    if (optionEvaluationStore.rightAnswer) {
-        quizStatusBarStore.incrementRightAnswers();
-        quizStatusBarStore.setLastTopicState(1);
-    } else {
-        quizStatusBarStore.incrementWrongAnswers();
-    }
+};
 
-    questionStore.setIsEvaluationLoaded();
+const handleOptionSelected = async (optionId) => {
+    if (!questionStore.isAnswerStored) {
+        questionStore.selectedOptionId = optionId;
+        questionStore.answeredOptionId = optionId;
+        questionStore.isAnswerStored = true;
+        questionStore.isLoadingEvaluation = true;
+
+        const seconds = moment().diff(questionStore.loadedAt, 'seconds');
+        questionStore.isLoadingEvaluation = true;
+        const data = await storeRespondentAnswer(questionStore.id, optionId, seconds);
+        if (!data) {
+            return;
+        }
+
+        questionStore.setEvaluations(data.evaluations);
+        isLastQuestion.value = data.end;
+
+        optionEvaluationStore.setOptionEvaluation(questionStore.getEvaluationByOptionId(optionId));
+        if (optionEvaluationStore.rightAnswer) {
+            quizStatusBarStore.incrementRightAnswers();
+            quizStatusBarStore.setLastTopicState(1);
+        } else {
+            quizStatusBarStore.incrementWrongAnswers();
+        }
+
+        questionStore.setIsEvaluationLoaded();
+    } else if (quizSettingsStore.showEvaluationsForOtherOptions) {
+        questionStore.selectedOptionId = optionId;
+        return handleShowEvaluation(optionId);
+    }
 };
 
 onMounted(async () => {

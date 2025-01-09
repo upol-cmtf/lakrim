@@ -13,18 +13,20 @@ const defaultState = {
 	options: [],
 	group: null,
 	loadedAt: null,
+	answeredOptionId: null,
 	selectedOptionId: null,
 	isLoading: false,
 	isLoaded: false,
 	isLoadingEvaluation: false,
 	isEvaluationLoaded: false,
+	isAnswerStored: false,
 };
 
 export const useQuestionStore = defineStore(storeName, {
 	state: () => ({...defaultState}),
 	getters: {
 		isAnswered() {
-			return this.selectedOptionId !== null;
+			return this.answeredOptionId !== null;
 		}
 	},
 	actions: {

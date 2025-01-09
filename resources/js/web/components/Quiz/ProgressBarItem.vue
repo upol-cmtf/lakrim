@@ -1,6 +1,6 @@
 <template>
     <div
-        class="w-full h-2.5 flex flex-col justify-center overflow-hidden text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-neutral-600"
+        class="w-full h-2.5 flex flex-col justify-center overflow-hidden text-xs text-white text-center whitespace-nowrap transition duration-500"
         :class="{
             'bg-gray-300': showDefaultColor && !showActualColor,
             'bg-emerald-600': !showDefaultColor && isAnsweredRight,
