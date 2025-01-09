@@ -87,6 +87,7 @@ class AnswerTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'end' => false,
+                    // @phpstan-ignore-next-line
                     'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
                         'optionId' => $option->id,
                         'evaluation' => $option->evaluation,
@@ -134,6 +135,7 @@ class AnswerTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'end' => true,
+                    // @phpstan-ignore-next-line
                     'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
                         'optionId' => $option->id,
                         'evaluation' => $option->evaluation,
