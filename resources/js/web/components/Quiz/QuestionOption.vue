@@ -20,12 +20,12 @@
                      :class="{'text-white': isAnswered}"
                 >
                     <icon-hand-thumb-up
-                        v-if="isRight"
+                        v-if="isRight && questionStore.isEvaluationLoaded"
                         class="h-7 w-7 text-emerald-600 ml-2"
                         :class="{'text-white': isAnswered}"
                     />
                     <icon-hand-raised
-                        v-if="!isRight"
+                        v-if="!isRight && questionStore.isEvaluationLoaded"
                         class="h-7 w-7 text-rose-600 ml-2"
                         :class="{'text-white': isAnswered}"
                     />
