@@ -1,6 +1,6 @@
 <template>
     <div>
-        <progress-bar v-if="showQuiz" class="sticky top-0"/>
+        <progress-bar v-if="showQuiz" class="sticky top-0 z-50"/>
 
         <div
             class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
