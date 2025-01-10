@@ -29,6 +29,7 @@ class QuizRunController extends Controller
             'respondentToken' => $respondent->token,
             'settings' => [
                 'maxQuestions' => $difficulty->max_questions,
+                'showEvaluationsForOtherOptions' => $difficulty->show_evaluations_for_other_options,
             ],
         ]);
     }

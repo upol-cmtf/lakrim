@@ -87,9 +87,13 @@ class AnswerTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'end' => false,
-                    'evaluation' => $option->evaluation,
-                    'evaluationTitle' => $option->evaluation_title,
-                    'rightAnswer' => $option->right,
+                    // @phpstan-ignore-next-line
+                    'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
+                        'optionId' => $option->id,
+                        'evaluation' => $option->evaluation,
+                        'evaluationTitle' => $option->evaluation_title,
+                        'rightAnswer' => $option->right,
+                    ])->toArray(),
                 ],
             ]);
 
@@ -131,9 +135,13 @@ class AnswerTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'end' => true,
-                    'evaluation' => $option->evaluation,
-                    'evaluationTitle' => $option->evaluation_title,
-                    'rightAnswer' => $option->right,
+                    // @phpstan-ignore-next-line
+                    'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
+                        'optionId' => $option->id,
+                        'evaluation' => $option->evaluation,
+                        'evaluationTitle' => $option->evaluation_title,
+                        'rightAnswer' => $option->right,
+                    ])->toArray(),
                 ],
             ]);
 

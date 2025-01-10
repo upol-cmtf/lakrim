@@ -19,6 +19,7 @@ class DifficultyFactory extends Factory
             'max_questions' => 10,
             'shuffle_questions' => false,
             'shuffle_options' => false,
+            'show_evaluations_for_other_options' => false,
         ];
     }
 }

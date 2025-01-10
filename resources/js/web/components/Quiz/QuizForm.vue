@@ -1,23 +1,25 @@
 <template>
-    <progress-bar v-if="showQuiz" class="sticky top-0"/>
+    <div>
+        <progress-bar v-if="showQuiz" class="sticky top-0 z-50"/>
 
-    <div
-        class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
-        <quiz v-if="showQuiz" :token="token"/>
+        <div
+            class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
+            <quiz v-if="showQuiz" :token="token"/>
 
-        <respondent-identification v-if="showRespondentIdentification"/>
+            <respondent-identification v-if="showRespondentIdentification" class="p-4"/>
 
-        <quiz-end v-if="showQuizEnd"/>
+            <quiz-end v-if="showQuizEnd" class="p-4"/>
+        </div>
     </div>
 </template>
 
 <script setup>
 import {defineProps, inject, onMounted, ref} from 'vue';
+import {useQuizSettingsStore} from '../../stores/QuizSettingsStore.js';
+import ProgressBar from './ProgressBar.vue';
 import Quiz from './Quiz.vue';
 import QuizEnd from './QuizEnd.vue';
 import RespondentIdentification from './RespondentIdentification.vue';
-import {useQuizStatusBarStore} from '../../stores/QuizStatusBarStore.js';
-import ProgressBar from "./ProgressBar.vue";
 
 const EventBus = inject('EventBus');
 
@@ -32,7 +34,7 @@ const props = defineProps({
     },
 });
 
-const quizStatusBarStore = useQuizStatusBarStore();
+const quizSettingsStore = useQuizSettingsStore();
 
 const showQuiz = ref(true);
 const showQuizEnd = ref(false);
@@ -49,7 +51,8 @@ const onRespondentIdentificationFinished = () => {
 };
 
 onMounted(async () => {
-    quizStatusBarStore.maxQuestions = props.settings.maxQuestions;
+    quizSettingsStore.maxQuestions = props.settings.maxQuestions;
+    quizSettingsStore.showEvaluationsForOtherOptions = props.settings.showEvaluationsForOtherOptions;
 
     EventBus.on('quiz:finished', () => onQuizFinished());
     EventBus.on('respondentIdentification:finished', () => onRespondentIdentificationFinished());

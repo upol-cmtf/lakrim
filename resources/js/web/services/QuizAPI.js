@@ -26,7 +26,7 @@ function loadQuestion() {
 		axios.post(
 			buildEndpointUrl(endpoint, {}),
 			{
-				respondent_token: respondentTokenStore.getToken(),
+				respondent_token: respondentTokenStore.token,
 			},
 			requestConfig(),
 		)
@@ -49,7 +49,7 @@ function storeRespondentAnswer(questionId, optionId, seconds) {
 			{
 				question_id: questionId,
 				option_id: optionId,
-				respondent_token: respondentTokenStore.getToken(),
+				respondent_token: respondentTokenStore.token,
 				seconds: seconds,
 			},
 			requestConfig(),
@@ -73,7 +73,7 @@ function storeRespondentIdentification(sex, ageId) {
 			{
 				sex: sex,
 				age_id: ageId,
-				respondent_token: respondentTokenStore.getToken(),
+				respondent_token: respondentTokenStore.token,
 			},
 			requestConfig(),
 		)
@@ -94,7 +94,7 @@ function getRespondentSummary() {
 		axios.post(
 			buildEndpointUrl(endpoint, {}),
 			{
-				respondent_token: respondentTokenStore.getToken(),
+				respondent_token: respondentTokenStore.token,
 			},
 			requestConfig(),
 		)

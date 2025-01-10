@@ -1,15 +1,22 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
+import {useQuizSettingsStore} from './QuizSettingsStore.js';
 
-const initialState = {
+const storeName = 'quizStatusBarStore';
+
+const defaultState = {
 	loadedQuestions: 0,
-	maxQuestions: 0,
 	rightAnswers: 0,
 	wrongAnswers: 0,
 	topics: [],
 };
 
-export const useQuizStatusBarStore = defineStore('quizStatusBarStore', {
-	state: () => ({...initialState}),
+export const useQuizStatusBarStore = defineStore(storeName, {
+	state: () => ({...defaultState}),
+	getters: {
+		maxQuestions() {
+			return useQuizSettingsStore().maxQuestions;
+		},
+	},
 	actions: {
 		incrementLoadedQuestions() {
 			this.loadedQuestions++;

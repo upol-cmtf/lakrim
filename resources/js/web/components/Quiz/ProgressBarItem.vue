@@ -1,7 +1,12 @@
 <template>
     <div
         class="w-full h-2.5 flex flex-col justify-center overflow-hidden text-xs text-white text-center whitespace-nowrap transition duration-500"
-        :class="{'bg-gray-300': showDefaultColor, 'bg-emerald-600': !showDefaultColor && isAnsweredRight, 'bg-rose-600': !showDefaultColor && !isAnsweredRight}"
+        :class="{
+            'bg-gray-300': showDefaultColor && !showActualColor,
+            'bg-emerald-600': !showDefaultColor && isAnsweredRight,
+            'bg-rose-600': !showDefaultColor && !isAnsweredRight,
+            'bg-blue-700': showActualColor,
+        }"
         role="progressbar"
         aria-valuenow="25"
         aria-valuemin="0"
@@ -24,6 +29,10 @@ const quizStatusBarStore = useQuizStatusBarStore();
 
 const showDefaultColor = computed(() => {
     return props.step > quizStatusBarStore.getAnsweredQuestionsCount();
+});
+
+const showActualColor = computed(() => {
+    return props.step === quizStatusBarStore.loadedQuestions;
 });
 
 const isAnsweredRight = computed(() => {
