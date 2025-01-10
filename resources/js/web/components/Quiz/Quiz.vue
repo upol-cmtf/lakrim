@@ -1,6 +1,6 @@
 <template>
     <div>
-        <question-loader v-if="questionStore.isLoading"/>
+        <question-loader v-if="questionStore.isLoading" class="p-5"/>
 
         <template v-if="questionStore.isLoaded">
 
