@@ -1,5 +1,5 @@
 <template>
-    <div class="p-8">
+    <div class="p-6">
         <p class="lg:text-3xl text-2xl text-center mb-3 font-bold mb-8">
             Závěrečné vyhodnocení
         </p>
@@ -35,14 +35,30 @@
                 </div>
             </div>
         </div>
+
+        <p class="text-right mt-2">
+            <a :href="completionUrl"
+               class="lg:text-lg inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
+                Pokračovat na dokončení
+                <icon-arrow-right class="ml-3"></icon-arrow-right>
+            </a>
+        </p>
     </div>
 </template>
 
 <script setup>
 import {getRespondentSummary} from '../../services/QuizAPI.js';
-import {onMounted, ref} from 'vue';
+import {defineProps, onMounted, ref} from 'vue';
+import IconArrowRight from '../Icons/IconArrowRight.vue';
 import Loading from '../Loading.vue';
-import ProgressBar from "./ProgressBar.vue";
+import ProgressBar from './ProgressBar.vue';
+
+defineProps({
+    completionUrl: {
+        type: String,
+        required: true,
+    },
+});
 
 const summary = ref([]);
 const summaryLoaded = ref(false);

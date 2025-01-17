@@ -30,9 +30,6 @@
                              alt="Přemýšlející senioři"/>
                     </div>
 
-                    <!--                    TODO samostatný blok pro vyhodnocení-->
-
-
                     <div v-if="questionStore.isLoadingEvaluation">
                         <p>Vaše odpověď se vyhodnocuje...</p>
                     </div>
