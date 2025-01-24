@@ -4,11 +4,21 @@
 
         <div
             class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
-            <quiz v-if="showQuiz" :token="token"/>
+            <quiz
+                v-if="showQuiz"
+                :token="token"
+            />
 
-            <respondent-identification v-if="showRespondentIdentification" class="p-4"/>
+            <respondent-identification
+                v-if="showRespondentIdentification"
+                class="p-4"
+            />
 
-            <quiz-end v-if="showQuizEnd" class="p-4"/>
+            <quiz-end
+                v-if="showQuizEnd"
+                class="p-4"
+                :completion-url="completionUrl"
+            />
         </div>
     </div>
 </template>
@@ -30,6 +40,10 @@ const props = defineProps({
     },
     settings: {
         type: Object,
+        required: true,
+    },
+    completionUrl: {
+        type: String,
         required: true,
     },
 });

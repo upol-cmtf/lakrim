@@ -3,15 +3,15 @@
 use App\Http\Controllers\Web;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('web.homepage');
-});
+Route::get('/', fn() => view('web.homepage'));
 
-Route::get('/phishing-template', function () {
-    return view('web.phishing');
-});
+Route::prefix('kviz')->group(function () {
+    Route::get('/dokonceni', fn() => view('web.quiz.finish'))
+        ->name('web.quiz.finish');
 
-Route::prefix('quiz')->group(function () {
+    Route::get('/podekovani', fn() => view('web.quiz.thank-you'))
+        ->name('web.quiz.thank-you');
+
     Route::get('/age-list', [Web\Quiz\AgeListController::class, 'index'])
         ->name('web.quiz.age-list');
 
