@@ -1,8 +1,10 @@
 <?php
 namespace App\Models;
 
+use App\Observers\RespondentAnswerObserver;
 use Database\Factories\RespondentAnswerFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  */
+#[ObservedBy([RespondentAnswerObserver::class])]
 class RespondentAnswer extends Model
 {
     /** @use HasFactory<RespondentAnswerFactory> */

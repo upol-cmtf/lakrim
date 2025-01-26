@@ -21,6 +21,9 @@ Route::prefix('kviz')->group(function () {
     Route::post('/question', [Web\Quiz\QuestionController::class, 'index'])
         ->name('web.quiz.question');
 
+    Route::post('/respondent/student-id', [Web\Quiz\RespondentIdentificationController::class, 'storeStudentId'])
+        ->name('web.quiz.respondent.student-id');
+
     Route::post('/respondent/identification', [Web\Quiz\RespondentIdentificationController::class, 'store'])
         ->name('web.quiz.respondent.identification');
 

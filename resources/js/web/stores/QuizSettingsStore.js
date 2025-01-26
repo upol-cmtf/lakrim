@@ -4,6 +4,7 @@ const storeName = 'quizSettingsStore';
 
 const defaultState = {
 	maxQuestions: 0,
+	requireStudentId: false,
 	showEvaluationsForOtherOptions: 0,
 };
 

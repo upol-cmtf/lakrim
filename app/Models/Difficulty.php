@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $shuffle_questions
  * @property bool $shuffle_options
  * @property bool $show_evaluations_for_other_options
+ * @property mixed[] $settings
  */
 class Difficulty extends Model
 {
@@ -35,6 +36,7 @@ class Difficulty extends Model
     ];
 
     protected $casts = [
+        'settings' => 'array',
         'shuffle_options' => 'bool',
         'shuffle_questions' => 'bool',
         'show_evaluations_for_other_options' => 'bool',

@@ -77,13 +77,12 @@
 </template>
 
 <script setup>
-import {defineProps, inject, onMounted, ref} from 'vue';
+import {inject, onMounted, ref} from 'vue';
 import {storeRespondentAnswer} from '../../services/QuizAPI.js';
 import {useOptionEvaluationStore} from '../../stores/OptionEvalutationStore.js';
 import {useQuestionStore} from '../../stores/QuestionStore.js';
 import {useQuizSettingsStore} from '../../stores/QuizSettingsStore.js';
 import {useQuizStatusBarStore} from '../../stores/QuizStatusBarStore.js';
-import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 import ButtonBlueWithArrowRight from '../ButtonBlueWithArrowRight.vue';
 import IconHandRaised from '../Icons/IconHandRaised.vue';
 import IconHandThumbUp from '../Icons/IconHandThumbUp.vue';
@@ -92,13 +91,6 @@ import QuestionOption from './QuestionOption.vue';
 import moment from 'moment';
 
 const EventBus = inject('EventBus');
-
-const props = defineProps({
-    token: {
-        type: String,
-        required: true,
-    },
-});
 
 const question = ref({
     id: null,
@@ -120,7 +112,6 @@ const optionEvaluationStore = useOptionEvaluationStore();
 const questionStore = useQuestionStore();
 const quizSettingsStore = useQuizSettingsStore();
 const quizStatusBarStore = useQuizStatusBarStore();
-const respondentTokenStore = useRespondentTokenStore();
 
 const endQuiz = () => {
     EventBus.emit('quiz:finished');
@@ -168,8 +159,6 @@ const handleOptionSelected = async (optionId) => {
 };
 
 onMounted(async () => {
-    respondentTokenStore.token = props.token;
-
     EventBus.on('option:clicked', (optionId) => handleOptionSelected(optionId));
 
     await getQuestion();
