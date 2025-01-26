@@ -27,10 +27,10 @@ class QuizRunController extends Controller
 
         return view('web.quiz.run', [
             'respondentToken' => $respondent->token,
-            'settings' => [
+            'settings' => array_merge(($difficulty->settings ?? []), [
                 'maxQuestions' => $difficulty->max_questions,
                 'showEvaluationsForOtherOptions' => $difficulty->show_evaluations_for_other_options,
-            ],
+            ]),
         ]);
     }
 }

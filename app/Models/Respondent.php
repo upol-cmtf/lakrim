@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $token
  * @property string|null $ip
+ * @property string|null $student_id
+ * @property boolean $finished
  * @property Age $age
  * @property Difficulty $difficulty
  * @property QuizEvent|null $event
@@ -29,6 +31,10 @@ class Respondent extends Model
 
     /** @var array<int, string> */
     protected $guarded = [];
+
+    protected $casts = [
+        'finished' => 'boolean',
+    ];
 
     public function age(): BelongsTo
     {

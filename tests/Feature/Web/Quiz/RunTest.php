@@ -12,7 +12,8 @@ class RunTest extends TestCase
     public function testSuccessful(): void
     {
         $this->get(route(self::ROUTE_NAME))
-            ->assertOk();
+            ->assertOk()
+            ->assertSee('<quiz-form', false);
 
         $this->assertDatabaseHas(Respondent::class, [
             'session_id' => session()->get('_token'),
@@ -29,7 +30,8 @@ class RunTest extends TestCase
         $quizEvent = QuizEvent::factory()->create();
 
         $this->get(route(self::ROUTE_NAME, ['quizEvent' => $quizEvent->hash]))
-            ->assertOk();
+            ->assertOk()
+            ->assertSee('<quiz-form', false);
 
         $this->assertDatabaseHas(Respondent::class, [
             'session_id' => session()->get('_token'),

@@ -86,6 +86,28 @@ function storeRespondentIdentification(sex, ageId) {
 	});
 }
 
+function storeStudentId(studentId) {
+	const endpoint = '/respondent/student-id';
+	const respondentTokenStore = useRespondentTokenStore();
+
+	return new Promise(function (resolve, reject) {
+		axios.post(
+			buildEndpointUrl(endpoint, {}),
+			{
+                student_id: studentId,
+				respondent_token: respondentTokenStore.token,
+			},
+			requestConfig(),
+		)
+			.then(response => {
+				resolve(response);
+			})
+			.catch(error => {
+				reject(error);
+			});
+	});
+}
+
 function getRespondentSummary() {
 	const endpoint = '/respondent/summary';
 	const respondentTokenStore = useRespondentTokenStore();
@@ -126,4 +148,5 @@ export {
 	getRespondentSummary,
 	storeRespondentAnswer,
 	storeRespondentIdentification,
+    storeStudentId,
 };

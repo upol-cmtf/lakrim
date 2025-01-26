@@ -103,6 +103,11 @@ class AnswerTest extends TestCase
             'seconds' => 10,
             'weight' => $option->weight,
         ]);
+
+        $this->assertDatabaseHas(Respondent::class, [
+            'id' => $respondent->id,
+            'finished' => false,
+        ]);
     }
 
     public function testStoreLastAnswer(): void
@@ -150,6 +155,11 @@ class AnswerTest extends TestCase
             'question_option_id' => $option->id,
             'seconds' => 10,
             'weight' => $option->weight,
+        ]);
+
+        $this->assertDatabaseHas(Respondent::class, [
+            'id' => $respondent->id,
+            'finished' => true,
         ]);
     }
 }
