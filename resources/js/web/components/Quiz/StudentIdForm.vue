@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-    import {computed, defineModel, inject, ref} from 'vue';
+    import {defineModel, inject, ref} from 'vue';
     import {storeStudentId} from '../../services/QuizAPI.js';
 
     const EventBus = inject('EventBus');
@@ -40,12 +40,7 @@
     const handleClick = async () => {
         isInputError.value = false;
 
-        if (!studentId.value) {
-            isInputError.value = true;
-            return;
-        }
-
-        if(!/C[0-9]/.test(studentId.value)) {
+        if (!studentId.value || (studentId.value.length > 20) || !/C[0-9]/.test(studentId.value)) {
             isInputError.value = true;
             return;
         }
