@@ -6,8 +6,10 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/sass/web/app.scss',
+                'resources/sass/web/app.scss', // Web assets entry point
                 'resources/js/web/app.js',
+                'resources/sass/admin/app.scss', // Admin assets entry point
+                'resources/js/admin/app.js',
             ],
             refresh: true,
         }),
@@ -25,7 +27,4 @@ export default defineConfig({
             vue: 'vue/dist/vue.esm-bundler.js',
         },
     },
-    build: {
-        outDir: 'public/build/web'
-    }
 });
