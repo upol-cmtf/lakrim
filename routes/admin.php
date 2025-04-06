@@ -15,9 +15,17 @@ Route::prefix('admin')->middleware('web')->name('admin.')->group(function () {
     Route::post('', [Admin\LoginController::class, 'login']);
 
     Route::middleware('admin')->group(function () {
-        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [Admin\DashboardController::class, 'index'])
+            ->name('dashboard');
 
-        Route::post('/logout', [Admin\LoginController::class, 'logout'])->name('logout');
+        Route::get(
+            '/export-completed-questionnaires-by-student-id',
+            [Admin\ExportCompletedQuestionnairesByStudentIdController::class, 'index'],
+        )
+            ->name('export.completed-questionnaires-by-student-id');
+
+        Route::post('/logout', [Admin\LoginController::class, 'logout'])
+            ->name('logout');
     });
 
     // TODO other routes

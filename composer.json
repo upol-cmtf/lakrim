@@ -9,6 +9,7 @@
         "laravel/framework": "^11.39.1",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
+        "league/csv": "^9.23",
         "sentry/sentry-laravel": "^4.7"
     },
     "require-dev": {
@@ -52,7 +53,7 @@
         ],
         "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon app tests --memory-limit=-1",
         "phpcs": "./vendor/bin/phpcs --standard=phpcs-standard.xml app/ tests/",
-        "checks": [
+        "check-all": [
             "@phpcs",
             "@phpstan"
         ]
