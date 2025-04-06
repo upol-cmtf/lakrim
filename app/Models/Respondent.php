@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Database\Factories\RespondentFactory;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -74,6 +75,11 @@ class Respondent extends Model
     public function getTotalWeight(): float
     {
         return (float) $this->answers()->sum('weight');
+    }
+
+    public function scopeFinished(Builder $query): void
+    {
+        $query->where('finished', true);
     }
 
     /**
