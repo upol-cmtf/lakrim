@@ -15,8 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $token
  * @property string|null $ip
  * @property string|null $student_id
+ * @property string|null $sex
  * @property boolean $finished
- * @property Age $age
+ * @property Age|null $age
  * @property Difficulty $difficulty
  * @property QuizEvent|null $event
  * @property Collection<RespondentAnswer> $answers

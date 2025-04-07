@@ -24,6 +24,12 @@ Route::prefix('admin')->middleware('web')->name('admin.')->group(function () {
         )
             ->name('export.completed-questionnaires-by-student-id');
 
+        Route::get(
+            '/export-questions-results',
+            [Admin\ExportQuestionsResultsController::class, 'index'],
+        )
+            ->name('export.questions-results');
+
         Route::post('/logout', [Admin\LoginController::class, 'logout'])
             ->name('logout');
     });
