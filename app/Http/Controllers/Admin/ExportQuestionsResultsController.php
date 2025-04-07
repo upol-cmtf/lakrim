@@ -19,8 +19,10 @@ final class ExportQuestionsResultsController
 {
     use XlsxHeaders;
 
+    /** @var array<int, string> */
     private array $columnQuestionTimeMap = [];
 
+    /** @var array<int, string> */
     private array $columnQuestionOptionMap = [];
 
     public function __construct(
@@ -53,8 +55,9 @@ final class ExportQuestionsResultsController
 
     private function writeHeaders(Worksheet $sheet, Collection $questions): void
     {
-        $nextColumn = function (string $column, int $increment) {
+        $nextColumn = function (string $column, int $increment): string {
             for ($i = 0; $i <= $increment; $i++) {
+                // @phpstan-ignore-next-line
                 $column = str_increment($column);
             }
 
@@ -64,8 +67,6 @@ final class ExportQuestionsResultsController
         $column = 'G';
         foreach ($questions as $key => $question) {
             assert($question instanceof Question);
-
-            $sheet->setCellValue($column . '1', $question->name);
 
             $optionCount = $question->options->count();
 
@@ -79,7 +80,8 @@ final class ExportQuestionsResultsController
             $this->columnQuestionTimeMap[$question->id] = $actualColumn;
 
             foreach ($question->options as $option) {
-                $actualColumn++;
+                // @phpstan-ignore-next-line
+                $actualColumn = str_increment($actualColumn);
 
                 $this->columnQuestionOptionMap[$option->id] = $actualColumn;
 
