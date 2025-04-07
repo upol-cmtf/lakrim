@@ -14,6 +14,14 @@
                     Export vyplněných dotazníků dle ID studenta
                 </a>
             </li>
+
+            <li>
+                <a href="{{ route('admin.export.questions-results') }}"
+                   class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+                >
+                    Export výsledků dle otázek
+                </a>
+            </li>
         </ul>
     </div>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\CsvHeaders;
 use App\Models\Respondent;
 use App\Services\CsvWriterFactory;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use League\Csv\Writer;
@@ -29,7 +30,7 @@ final class ExportCompletedQuestionnairesByStudentIdController
 
         return response()->stream(
             fn() => $csv->download('export.csv'),
-            200,
+            Response::HTTP_OK,
             $this->getCsvHeaders('export.csv'),
         );
     }
