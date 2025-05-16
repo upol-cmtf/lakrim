@@ -3,3 +3,10 @@
 @tailwind utilities;
 
 @import 'quiz';
+
+#main-grid {
+    background-image: url("/images/quiz-grid/policie.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
