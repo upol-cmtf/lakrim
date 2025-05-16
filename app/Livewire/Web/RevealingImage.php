@@ -14,7 +14,7 @@ class RevealingImage extends Component
     public bool $completed = false;
 
     #[On('answered')]
-    public function refreshGrid()
+    public function refreshGrid(): void
     {
         $this->rightAnswered++;
         $this->completed = $this->rightAnswered === $this->maxTiles;
