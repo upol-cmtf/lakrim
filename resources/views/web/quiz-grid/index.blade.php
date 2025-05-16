@@ -8,6 +8,6 @@
             Vítejte! Jsme rádi, že jste tu.
         </h1>
 
-        <livewire:web.revealing-image/>
+        <livewire:web.revealing-image :$maxTiles/>
     </div>
 @endsection

@@ -1,7 +1,7 @@
 <div>
     @if(!$completed)
         <div id="main-grid" class="grid grid-cols-4 mt-5">
-            @for ($i = 1; $i <= 16; $i++)
+            @for ($i = 1; $i <= $maxTiles; $i++)
                 <livewire:web.revealing-image-item :position="$i" :key="'tile-' . $i"/>
             @endfor
         </div>

@@ -36,7 +36,7 @@ Route::prefix('kviz')->group(function () {
 
 ### Version 2
 Route::prefix('v2')->group(function () {
-    Route::get('', fn() => view('web.quiz-grid.index'))
+    Route::get('/{maxTiles?}', fn(int $maxTiles = 16) => view('web.quiz-grid.index', compact('maxTiles')))
         ->name('web.quiz-grid.index');
 });
 
