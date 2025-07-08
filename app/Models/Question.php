@@ -37,8 +37,12 @@ class Question extends Model
         'version',
     ];
 
+    /** @var array{
+     *     version: int
+     * }
+     */
     protected $attributes = [
-        'version' => Version::One,
+        'version' => Version::One->value,
     ];
 
     protected $casts = [

@@ -25,7 +25,6 @@ class QuizQuestionService
 
         $builder = Question::version($version)->where('difficulty_id', $difficulty->id);
 
-        $answeredQuestionIds = $respondent->getAnsweredQuestionIds();
         if ($answeredQuestionIds) {
             $builder->whereNotIn('id', $answeredQuestionIds);
         }
