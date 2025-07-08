@@ -57,7 +57,7 @@ final class ExportQuestionsResultsController
     {
         $nextColumn = function (string $column, int $increment): string {
             for ($i = 0; $i <= $increment; $i++) {
-                $column = str_increment($column); // @phpstan-ignore-line
+                $column = str_increment($column);
             }
 
             return $column;
@@ -79,7 +79,7 @@ final class ExportQuestionsResultsController
             $this->columnQuestionTimeMap[$question->id] = $actualColumn;
 
             foreach ($question->options as $option) {
-                $actualColumn = str_increment($actualColumn); // @phpstan-ignore-line
+                $actualColumn = str_increment($actualColumn);
 
                 $this->columnQuestionOptionMap[$option->id] = $actualColumn;
 
