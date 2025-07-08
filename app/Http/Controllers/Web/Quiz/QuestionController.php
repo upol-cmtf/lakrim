@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Web\Quiz;
 
+use App\Enums\Version;
 use App\Exceptions\MaximumQuestionsExceededException;
 use App\Exceptions\QuestionNotFoundException;
 use App\Http\Controllers\Web\ApiController;
@@ -32,7 +33,7 @@ class QuestionController extends ApiController
         assert($respondent instanceof Respondent);
 
         try {
-            $question = $this->questionService->getQuestionForRespondent($respondent);
+            $question = $this->questionService->getQuestionForRespondent($respondent, Version::One);
         } catch (MaximumQuestionsExceededException $e) {
             return (new ArrayResource([
                 'code' => 'maximum_questions_exceeded',
