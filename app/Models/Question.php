@@ -71,8 +71,10 @@ class Question extends Model
             : $this->options;
     }
 
-    public function scopeVersion(Builder $query, Version $version): void
+    public function scopeVersion(Builder $query, Version $version): Builder
     {
         $query->where('version', $version);
+
+        return $query;
     }
 }
