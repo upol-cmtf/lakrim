@@ -1,6 +1,7 @@
 <?php
 namespace App\Services\Quiz;
 
+use App\Enums\Version;
 use App\Exceptions\MaximumQuestionsExceededException;
 use App\Exceptions\QuestionNotFoundException;
 use App\Models\Question;
@@ -13,7 +14,7 @@ class QuizQuestionService
      * @throws MaximumQuestionsExceededException
      * @throws QuestionNotFoundException
      */
-    public function getQuestionForRespondent(Respondent $respondent): Question
+    public function getQuestionForRespondent(Respondent $respondent, Version $version): Question
     {
         $difficulty = $respondent->difficulty;
         $answeredQuestionIds = $respondent->getAnsweredQuestionIds();
@@ -22,9 +23,8 @@ class QuizQuestionService
             throw new MaximumQuestionsExceededException();
         }
 
-        $builder = Question::where('difficulty_id', $difficulty->id);
+        $builder = Question::version($version)->where('difficulty_id', $difficulty->id);
 
-        $answeredQuestionIds = $respondent->getAnsweredQuestionIds();
         if ($answeredQuestionIds) {
             $builder->whereNotIn('id', $answeredQuestionIds);
         }
