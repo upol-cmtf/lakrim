@@ -56,6 +56,7 @@ final class ExportQuestionsResultsController
     private function writeHeaders(Worksheet $sheet, Collection $questions): void
     {
         $nextColumn = function (string $column, int $increment): string {
+            /** @phpstan-var non-empty-string $column */
             for ($i = 0; $i <= $increment; $i++) {
                 $column = str_increment($column);
             }
@@ -69,6 +70,7 @@ final class ExportQuestionsResultsController
 
             $optionCount = $question->options->count();
 
+            /** @phpstan-var non-empty-string $actualColumn */
             $actualColumn = $column;
             $column = $nextColumn($column, $optionCount);
 

@@ -33,3 +33,10 @@ Route::prefix('kviz')->group(function () {
     Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
         ->name('web.quiz.run');
 });
+
+### Version 2
+Route::prefix('v2')->group(function () {
+    Route::get('/{maxTiles?}', fn(int $maxTiles = 16) => view('web.quiz-grid.index', compact('maxTiles')))
+        ->name('web.quiz-grid.index');
+});
+
