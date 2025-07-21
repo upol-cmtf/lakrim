@@ -16,7 +16,8 @@ class AnswerController extends ApiController
 
         $this->validate($this->request, [
             'question_id' => 'required|integer|exists:questions,id',
-            'option_id' => 'required|integer|exists:questions_options,id,question_id,' . $questionId,
+            'option_ids' => 'required|array',
+            'option_ids.*' => 'integer|exists:questions_options,id,question_id,' . $questionId,
             'respondent_token' => 'required|string|exists:respondents,token',
             'seconds' => 'required|integer',
         ]);
@@ -24,26 +25,31 @@ class AnswerController extends ApiController
         $question = Question::where('id', $this->request->input('question_id'))->first();
         assert($question instanceof Question);
 
-        $option = $question->options()->where('id', $this->request->input('option_id'))->first();
-        assert($option instanceof QuestionOption);
-
         $respondent = Respondent::where('token', $this->request->input('respondent_token'))->first();
         assert($respondent instanceof Respondent);
 
-        $respondent->answers()->create([
-            'respondent_id' => $respondent->id,
-            'question_option_id' => $option->id,
-            'seconds' => $this->request->input('seconds'),
-            'weight' => $option->weight,
-        ]);
+        $optionIds = $this->request->input('option_ids');
+        assert(is_array($optionIds));
+
+        foreach ($optionIds as $optionId) {
+            $option = $question->options()->where('id', $optionId)->first();
+            assert($option instanceof QuestionOption);
+
+            $respondent->answers()->create([
+                'respondent_id' => $respondent->id,
+                'question_option_id' => $option->id,
+                'seconds' => $this->request->input('seconds'),
+                'weight' => $option->weight,
+            ]);
+        }
 
         return new ArrayResource([
             'end' => $respondent->isAllQuizQuestionsAnswered(),
             'evaluations' => $question->getOptions()
                 // @phpstan-ignore-next-line
-                ->filter(function (QuestionOption $questionOption) use ($option) {
+                ->filter(function (QuestionOption $questionOption) use ($optionIds) {
                     return $questionOption->question->difficulty->show_evaluations_for_other_options
-                        || $questionOption->id === $option->id;
+                        || in_array($questionOption->id, $optionIds, true);
                 })
                 // @phpstan-ignore-next-line
                 ->map(fn(QuestionOption $questionOption) => [

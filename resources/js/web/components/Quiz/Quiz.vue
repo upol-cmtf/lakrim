@@ -135,7 +135,7 @@ const handleOptionSelected = async (optionId) => {
 
         const seconds = moment().diff(questionStore.loadedAt, 'seconds');
         questionStore.isLoadingEvaluation = true;
-        const data = await storeRespondentAnswer(questionStore.id, optionId, seconds);
+        const data = await storeRespondentAnswer(questionStore.id, [optionId], seconds);
         if (!data) {
             return;
         }

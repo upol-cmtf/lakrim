@@ -39,7 +39,7 @@ function loadQuestion() {
 	});
 }
 
-function storeRespondentAnswer(questionId, optionId, seconds) {
+function storeRespondentAnswer(questionId, optionIds, seconds) {
 	const endpoint = '/answer';
 	const respondentTokenStore = useRespondentTokenStore();
 
@@ -48,7 +48,7 @@ function storeRespondentAnswer(questionId, optionId, seconds) {
 			buildEndpointUrl(endpoint, {}),
 			{
 				question_id: questionId,
-				option_id: optionId,
+				option_ids: optionIds,
 				respondent_token: respondentTokenStore.token,
 				seconds: seconds,
 			},
