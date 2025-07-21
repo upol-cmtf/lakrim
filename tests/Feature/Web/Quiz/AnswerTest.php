@@ -20,7 +20,7 @@ class AnswerTest extends TestCase
                 'seconds' => ['seconds musí být vyplněno.'],
                 'respondent_token' => ['respondent token musí být vyplněno.'],
                 'question_id' => ['question id musí být vyplněno.'],
-                'option_id' => ['option id musí být vyplněno.'],
+                'option_ids' => ['option ids musí být vyplněno.'],
             ]);
     }
 
@@ -33,13 +33,13 @@ class AnswerTest extends TestCase
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => 9987,
-            'option_id' => 1212,
+            'option_ids' => [1212],
         ])
             ->assertUnprocessable()
             ->assertJsonMissingValidationErrors(['respondent_token', 'seconds'])
             ->assertJsonFragment([
                 'question_id' => ['Zvolená hodnota pro question id není platná.'],
-                'option_id' => ['Zvolená hodnota pro option id není platná.'],
+                'option_ids.0' => ['Zvolená hodnota pro option_ids.0 není platná.'],
             ]);
     }
 
@@ -52,12 +52,12 @@ class AnswerTest extends TestCase
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => $question->id,
-            'option_id' => 1212,
+            'option_ids' => [1212],
         ])
             ->assertUnprocessable()
             ->assertJsonMissingValidationErrors(['respondent_token', 'question_id', 'seconds'])
             ->assertJsonFragment([
-                'option_id' => ['Zvolená hodnota pro option id není platná.'],
+                'option_ids.0' => ['Zvolená hodnota pro option_ids.0 není platná.'],
             ]);
     }
 
@@ -81,7 +81,7 @@ class AnswerTest extends TestCase
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => $question->id,
-            'option_id' => $option->id,
+            'option_ids' => [$option->id],
         ])
             ->assertOk()
             ->assertExactJson([
@@ -134,7 +134,7 @@ class AnswerTest extends TestCase
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => $question->id,
-            'option_id' => $option->id,
+            'option_ids' => [$option->id],
         ])
             ->assertOk()
             ->assertExactJson([
