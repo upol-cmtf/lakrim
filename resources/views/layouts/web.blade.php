@@ -12,7 +12,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/web/app.scss', 'resources/js/web/app.js'])
 </head>
-<body id="app-web" class="flex flex-col justify-between">
+<body id="app-web" class="flex flex-col justify-between min-h-screen">
     @include('web.partials.header')
 
     <main class="mb-auto flex-auto">
