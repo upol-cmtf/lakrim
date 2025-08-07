@@ -18,7 +18,7 @@ function loadAgeList() {
 	});
 }
 
-function loadQuestion() {
+function loadQuestion(version = 1) {
 	const endpoint = '/question';
 	const respondentTokenStore = useRespondentTokenStore();
 
@@ -27,6 +27,7 @@ function loadQuestion() {
 			buildEndpointUrl(endpoint, {}),
 			{
 				respondent_token: respondentTokenStore.token,
+				version: version,
 			},
 			requestConfig(),
 		)
@@ -94,7 +95,7 @@ function storeStudentId(studentId) {
 		axios.post(
 			buildEndpointUrl(endpoint, {}),
 			{
-                student_id: studentId,
+				student_id: studentId,
 				respondent_token: respondentTokenStore.token,
 			},
 			requestConfig(),
@@ -148,5 +149,5 @@ export {
 	getRespondentSummary,
 	storeRespondentAnswer,
 	storeRespondentIdentification,
-    storeStudentId,
+	storeStudentId,
 };
