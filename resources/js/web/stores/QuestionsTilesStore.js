@@ -60,6 +60,7 @@ export const useQuestionsTilesStore = defineStore(storeName, {
 			this.evaluated = false;
 			this.evaluationLoading = false;
 			this.questionLoading = true;
+			this.questionLoaded = false;
 
 			return loadQuestion(version)
 				.then(question => {

@@ -80,9 +80,10 @@ const showQuizEnd = ref(false);
 const store = useQuestionsTilesStore();
 const respondentTokenStore = useRespondentTokenStore();
 const handleTileClicked = () => {
+    store.loadQuestion();
+
     showTiles.value = false;
     showQuestionDetailModal.value = true;
-    store.loadQuestion();
 };
 
 const hideQuestionDetailModal = () => {
