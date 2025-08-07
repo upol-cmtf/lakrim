@@ -1,4 +1,4 @@
-<footer>
+<footer class="pt-5">
     <section class="bg-white">
         <div class="max-w-screen-xl px-4 pb-8 mx-auto lg:pb-16">
             <div class="grid grid-cols-3 gap-8 text-gray-500 sm:gap-12 sm:grid-cols-3 lg:grid-cols-3">
