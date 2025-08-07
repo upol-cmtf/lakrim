@@ -86,6 +86,8 @@ class QuestionTest extends TestCase
                         'id' => $question->questionGroup->id,
                         'name' => $question->questionGroup->name,
                     ],
+                    'settings' => null,
+                    'type' => $question->type,
                 ],
             ]);
     }
@@ -134,6 +136,8 @@ class QuestionTest extends TestCase
                         'id' => $question2->questionGroup->id,
                         'name' => $question2->questionGroup->name,
                     ],
+                    'settings' => null,
+                    'type' => $question2->type,
                 ],
             ]);
     }

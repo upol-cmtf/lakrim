@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property QuestionGroup $questionGroup
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
- * @property array|null $settings
+ * @property mixed[]|null $settings
  */
 class Question extends Model
 {

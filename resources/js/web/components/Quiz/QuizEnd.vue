@@ -7,7 +7,7 @@
         <loading v-if="!summaryLoaded"/>
 
         <div v-if="summaryLoaded" class="lg:text-xl">
-            <progress-bar class="mb-5"/>
+            <progress-bar v-if="showProgressBar" class="mb-5"/>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-2">
                 <div v-if="summary.statistics.correctAnswers"
@@ -57,6 +57,10 @@ defineProps({
     completionUrl: {
         type: String,
         required: true,
+    },
+    showProgressBar: {
+        type: Boolean,
+        default: true,
     },
 });
 

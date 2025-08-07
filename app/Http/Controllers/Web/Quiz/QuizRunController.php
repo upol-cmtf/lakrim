@@ -13,24 +13,38 @@ class QuizRunController extends Controller
 {
     public function run(?QuizEvent $quizEvent = null): View
     {
-        $difficultyType = DifficultyEnum::Easy;
+        $respondent = $this->createRespondent(DifficultyEnum::Easy, $quizEvent);
+
+        return view('web.quiz.run', [
+            'respondentToken' => $respondent->token,
+            'settings' => array_merge(($respondent->difficulty->settings ?? []), [
+                'maxQuestions' => $respondent->difficulty->max_questions,
+                'showEvaluationsForOtherOptions' => $respondent->difficulty->show_evaluations_for_other_options,
+            ]),
+        ]);
+    }
+
+    public function runTiles(?int $maxTiles = 16): View
+    {
+        $respondent = $this->createRespondent(DifficultyEnum::Medium);
+
+        return view('web.quiz-grid.index', [
+            'respondentToken' => $respondent->token,
+            'maxTiles' => $maxTiles,
+        ]);
+    }
+
+    private function createRespondent(DifficultyEnum $difficultyType, ?QuizEvent $quizEvent = null): Respondent
+    {
         $difficulty = Difficulty::find($difficultyType->value);
         assert($difficulty instanceof Difficulty);
 
-        $respondent = Respondent::create([
+        return Respondent::create([
             'session_id' => session()->get('_token'),
             'quiz_event_id' => $quizEvent?->id,
             'token' => Uuid::uuid4()->toString(),
             'ip' => request()->ip(),
             'difficulty_id' => $difficulty->id,
-        ]);
-
-        return view('web.quiz.run', [
-            'respondentToken' => $respondent->token,
-            'settings' => array_merge(($difficulty->settings ?? []), [
-                'maxQuestions' => $difficulty->max_questions,
-                'showEvaluationsForOtherOptions' => $difficulty->show_evaluations_for_other_options,
-            ]),
         ]);
     }
 }
