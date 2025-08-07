@@ -24,7 +24,7 @@ class QuizRunController extends Controller
         ]);
     }
 
-    public function runTiles(?int $maxTiles = 16)
+    public function runTiles(?int $maxTiles = 16): View
     {
         $respondent = $this->createRespondent(DifficultyEnum::Medium);
 

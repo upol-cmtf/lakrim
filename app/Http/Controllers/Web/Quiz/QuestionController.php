@@ -7,7 +7,6 @@ use App\Exceptions\QuestionNotFoundException;
 use App\Http\Controllers\Web\ApiController;
 use App\Http\Resources\Web\ArrayResource;
 use App\Http\Resources\Web\QuestionResource;
-use App\Models\Question;
 use App\Models\Respondent;
 use App\Services\Quiz\QuizQuestionService;
 use Illuminate\Contracts\Translation\Translator;
@@ -32,7 +31,10 @@ class QuestionController extends ApiController
             'version' => 'integer',
         ]);
 
-        $version = Version::from((int) $this->request->input('version', 1));
+        $version = $this->request->input('version', '1');
+        assert(is_string($version));
+
+        $version = Version::from((int) $version);
 
         $respondent = Respondent::where('token', $this->request->input('respondent_token'))->first();
         assert($respondent instanceof Respondent);

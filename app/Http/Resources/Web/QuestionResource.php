@@ -6,6 +6,7 @@ use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -25,7 +26,7 @@ class QuestionResource extends JsonResource
      *     perex: string,
      *     description: string,
      *     type: string,
-     *     options: array,
+     *     options: AnonymousResourceCollection<QuestionOption>,
      *     settings: mixed[]|null,
      *     group: array{
      *         id: int,
