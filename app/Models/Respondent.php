@@ -64,7 +64,7 @@ class Respondent extends Model
     public function getAnsweredQuestionIds(): array
     {
         /** @var int[] $questionIds */
-        $questionIds = $this->answers->pluck('option.question_id')->toArray();
+        $questionIds = $this->answers->pluck('option.question_id')->unique()->toArray();
         return $questionIds;
     }
 

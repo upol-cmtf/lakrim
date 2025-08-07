@@ -10,9 +10,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
-    @livewireStyles
     @vite(['resources/sass/web/app.scss', 'resources/js/web/app.js'])
-    @livewireScripts
 </head>
 <body id="app-web" class="flex flex-col min-h-screen h-screen justify-between">
     @include('web.partials.header')
