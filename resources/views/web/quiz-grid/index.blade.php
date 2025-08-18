@@ -3,11 +3,12 @@
 @section('content')
     <div class="flex flex-col items-center p-2">
 
-        <h1 class="max-w-2xl mb-8 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-5xl text-center">
-            Vítejte! Jsme rádi, že jste tu.
+        <h1 class="max-w-4xl mb-3 text-2xl font-bold leading-8 tracking-tight text-center mt-5">
+            Za každým číslem se skrývá příběh a každý příběh odhalí dílek skládačky.<br/>Co se stane, až je odhalíte všechny?
         </h1>
 
         <questions-tiles
+                class="mb-5"
                 completion-url="{{ route('web.quiz.finish') }}"
                 respondent-token="{{ $respondentToken }}"
                 :max-tiles="{{ $maxTiles }}"

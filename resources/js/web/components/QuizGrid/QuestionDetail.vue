@@ -36,14 +36,16 @@
                         v-if="store.evaluationLoading"
                     >
                         <icon-loading class="h-5 w-5 mr-2"/>
-                        Kontroluji odpovědi...
+                        <template v-if="store.question.type === 'multiselect'">Kontroluji odpovědi...</template>
+                        <template v-else>Kontroluji odpověd...</template>
                     </button-blue>
                     <button-blue-with-arrow-right
                         v-else-if="!store.evaluationLoading && !store.evaluated"
                         :disabled="!store.hasSelectedOptions || store.evaluationLoading"
                         @click="handleEvaluate"
                     >
-                        Hotovo, zkontrolovat odpovědi
+                        <template v-if="store.question.type === 'multiselect'">Hotovo, zkontrolovat odpovědi</template>
+                        <template v-else>Hotovo, zkontrolovat odpověď</template>
                     </button-blue-with-arrow-right>
                     <button-blue-with-arrow-right
                         v-else-if="store.isLastAnsweredQuestion && store.allTilesAreUncovered"
