@@ -22,17 +22,6 @@ export default defineConfig({
             },
         }),
     ],
-    // server: {
-    //     host: '127.0.0.1',
-    //     port: 5173,
-    //     cors: {
-    //         origin: 'http://lakrim.upol',
-    //         credentials: true,
-    //     },
-    //     hmr: {
-    //         host: 'lakrim.upol',
-    //     },
-    // },
     resolve: {
         alias: {
             vue: 'vue/dist/vue.esm-bundler.js',
