@@ -1,7 +1,10 @@
 <template>
     <div class="p-8">
-        <p class="lg:text-3xl text-center mb-5">
-            Skvělá práce! Už jste skoro u konce. Ještě prosím zaklikněte své pohlaví a věk, a hned přejdeme k výsledkům.
+        <p class="lg:text-3xl text-xl text-center mb-5">
+            Už jste téměř v cíli – po zadání pohlaví a věku vám hned ukážeme výsledky.
+        </p>
+        <p class="text-xl text-center mb-5">
+            Vaše odpověď je anonymní a v budoucnu nám pomůže lépe zacílit prevenci a varování před podvody.
         </p>
 
         <div class="md:text-lg lg:text-xl">

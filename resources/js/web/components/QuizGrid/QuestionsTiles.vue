@@ -1,22 +1,36 @@
 <template>
-    <div>
-        <div v-if="showTiles" id="questions-grid" class="grid grid-cols-4 mt-5">
-            <question-tile
-                v-for="n in 16"
-                :tile-id="n"
-                :key="n"
-            />
-        </div>
+    <div class="flex flex-col items-center p-2">
+        <template v-if="showTiles">
+            <h1 class="max-w-4xl mb-3 text-2xl font-bold leading-8 tracking-tight text-center mt-5">
+                Za každým číslem se skrývá příběh a každý příběh odhalí dílek skládačky.<br/>Co se stane, až je odhalíte všechny?
+            </h1>
 
-        <div v-if="showQuestionDetailModal" class="fixed inset-0 bg-white flex items-center justify-center">
-            <icon-loading v-if="store.questionLoading"/>
-
-            <div v-if="store.questionLoaded" class="bg-white w-full h-full overflow-y-auto">
-                <question-detail/>
+            <div id="questions-grid" class="grid grid-cols-4 mt-5">
+                <question-tile
+                    v-for="n in 16"
+                    :tile-id="n"
+                    :key="n"
+                />
             </div>
-        </div>
+        </template>
 
-        <div v-if="showFinalVideo">
+        <template v-if="showQuestionDetailModal">
+            <div class="fixed inset-0 bg-white flex items-center justify-center">
+                <icon-loading v-if="store.questionLoading"/>
+
+                <div v-if="store.questionLoaded" class="bg-white w-full h-full overflow-y-auto">
+                    <question-detail/>
+                </div>
+            </div>
+        </template>
+
+        <template v-if="showFinalVideo">
+            <h1 class="max-w-4xl mb-8 text-2xl font-bold leading-8 tracking-tight text-center mt-5">
+                Jen ten, kdo na sobě pracuje, je připravený se bránit.<br/>
+                Jen díky lidem jako vy je naše práce snazší.<br/>
+                Buďte na sebe pyšní – právě jste udělali velký krok pro vaši bezpečnost.
+            </h1>
+
             <div class="flex items-center justify-center max-w-2xl">
                 <video controls autoplay>
                     <source src="/videos/policie.mp4" type="video/mp4">
@@ -31,7 +45,7 @@
                     Přejít na dokončení
                 </button-blue-with-arrow-right>
             </div>
-        </div>
+        </template>
 
         <respondent-identification
             v-if="showRespondentIdentification"
