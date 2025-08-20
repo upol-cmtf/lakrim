@@ -100,7 +100,7 @@ class Respondent extends Model
             $type = $answer->isRightAnswer() ? 'right' : 'wrong';
 
             if ($answer->option->summary) {
-                $summary[$type][] = $answer->option->summary;
+                $summary[$type][$answer->option->question->id] = $answer->option->summary;
             }
         }
 
