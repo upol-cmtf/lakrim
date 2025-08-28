@@ -15,12 +15,15 @@ class AnswerController extends ApiController
         $questionId = $this->request->get('question_id');
 
         $this->validate($this->request, [
+            'attempt' => 'required|integer',
             'question_id' => 'required|integer|exists:questions,id',
             'option_ids' => 'required|array',
             'option_ids.*' => 'integer|exists:questions_options,id,question_id,' . $questionId,
             'respondent_token' => 'required|string|exists:respondents,token',
             'seconds' => 'required|integer',
         ]);
+
+        $attempt = $this->request->input('attempt');
 
         $question = Question::where('id', $this->request->input('question_id'))->first();
         assert($question instanceof Question);
@@ -40,6 +43,7 @@ class AnswerController extends ApiController
                 'question_option_id' => $option->id,
                 'seconds' => $this->request->input('seconds'),
                 'weight' => $option->weight,
+                'attempt' => $attempt,
             ]);
         }
 
@@ -59,6 +63,11 @@ class AnswerController extends ApiController
                     'rightAnswer' => $questionOption->right,
                 ])
                 ->toArray(),
+            'correctAnswerEvaluation' => match ($attempt) {
+                1 => $question->first_wrong_answer_evaluation,
+                2 => $question->second_wrong_answer_evaluation,
+                default => null,
+            },
         ]);
     }
 }

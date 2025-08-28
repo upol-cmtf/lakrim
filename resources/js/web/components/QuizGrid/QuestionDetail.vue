@@ -48,11 +48,16 @@
                         <template v-else>Hotovo, zkontrolovat odpověď</template>
                     </button-blue-with-arrow-right>
                     <button-blue-with-arrow-right
-                        v-else-if="store.isLastAnsweredQuestion && store.allTilesAreUncovered"
+                        v-else-if="store.isLastAnsweredQuestion"
                         @click="showFinalVideo"
                     >
                         Pokračovat
                     </button-blue-with-arrow-right>
+                    <button-blue
+                        v-else-if="store.answerWrong && store.answerAttempt < 2"
+                        @click="handleCorrectAnswer">
+                        Zkusit znovu
+                    </button-blue>
                     <button-blue-with-arrow-right
                         v-else
                         @click="handleContinueToTiles"
@@ -83,6 +88,10 @@ const handleEvaluate = () => {
 
 const handleContinueToTiles = () => {
     EventBus.emit('close-question-detail');
+};
+
+const handleCorrectAnswer = () => {
+    store.resetAnswer();
 };
 
 const showFinalVideo = () => {

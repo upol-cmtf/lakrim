@@ -4,7 +4,6 @@ namespace Database\Factories;
 use App\Enums\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionGroup;
-use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +17,8 @@ class QuestionFactory extends Factory
     public function definition(): array
     {
         return [
+            'first_wrong_answer_evaluation' => $this->faker->text,
+            'second_wrong_answer_evaluation' => $this->faker->text,
             'question_group_id' => QuestionGroup::factory()->createOneQuietly()->id,
             'perex' => $this->faker->sentence,
             'description' => $this->faker->text,

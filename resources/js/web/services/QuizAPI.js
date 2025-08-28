@@ -40,7 +40,7 @@ function loadQuestion(version = 1) {
 	});
 }
 
-function storeRespondentAnswer(questionId, optionIds, seconds) {
+function storeRespondentAnswer(questionId, optionIds, seconds, attempt) {
 	const endpoint = '/answer';
 	const respondentTokenStore = useRespondentTokenStore();
 
@@ -48,6 +48,7 @@ function storeRespondentAnswer(questionId, optionIds, seconds) {
 		axios.post(
 			buildEndpointUrl(endpoint, {}),
 			{
+				attempt: attempt,
 				question_id: questionId,
 				option_ids: optionIds,
 				respondent_token: respondentTokenStore.token,
