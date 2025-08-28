@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $seconds
  * @property float $weight
+ * @property int $attempt
  * @property Respondent $respondent
  * @property QuestionOption $option
  * @property DateTimeInterface|null $created_at
@@ -28,12 +29,14 @@ class RespondentAnswer extends Model
 
     /** @var array<string, mixed> */
     protected $attributes = [
+        'attempt' => 1,
         'seconds' => 0,
         'weight' => 0,
     ];
 
     /** @var array<int, string> */
     protected $fillable = [
+        'attempt',
         'seconds',
         'weight',
         'respondent_id',

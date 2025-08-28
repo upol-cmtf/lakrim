@@ -78,6 +78,7 @@ class AnswerTest extends TestCase
         assert($option instanceof QuestionOption);
 
         $this->post(route(self::ROUTE_NAME), data: [
+            'attempt' => 1,
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => $question->id,
@@ -86,6 +87,7 @@ class AnswerTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
+                    'correctAnswerEvaluation' => $question->first_wrong_answer_evaluation,
                     'end' => false,
                     // @phpstan-ignore-next-line
                     'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
@@ -131,6 +133,7 @@ class AnswerTest extends TestCase
         assert($option instanceof QuestionOption);
 
         $this->post(route(self::ROUTE_NAME), data: [
+            'attempt' => 1,
             'seconds' => 10,
             'respondent_token' => $respondent->token,
             'question_id' => $question->id,
@@ -139,6 +142,7 @@ class AnswerTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
+                    'correctAnswerEvaluation'=>$question->first_wrong_answer_evaluation,
                     'end' => true,
                     // @phpstan-ignore-next-line
                     'evaluations' => $question->getOptions()->map(fn(QuestionOption $option) => [
