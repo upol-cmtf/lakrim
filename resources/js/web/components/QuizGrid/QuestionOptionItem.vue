@@ -1,14 +1,15 @@
 <template>
     <div>
         <button
-            class="my-2 disabled:cursor-not-allowed disabled:text-slate-800 lg:text-lg inline-flex items-center px-4 py-1.5 text-base font-medium text-left rounded-md"
+            class="my-2 disabled:cursor-not-allowed lg:text-lg inline-flex items-center px-4 py-1.5 text-base font-medium text-left rounded-md"
             :class="{
-                    'bg-slate-50 outline outline-1 outline-gray-300 hover:outline-gray-600 text-slate-800': (!question?.answered && !option?.selected && !store.evaluated) || store.evaluationLoading || (store.evaluated && !option?.selected && store.answerWrong && store.answerAttempt<=1),
-                    'bg-sky-800 text-white': option?.selected && !store.evaluated,
-                    'bg-emerald-600 text-white': store.evaluated && option?.selected && option?.evaluation?.rightAnswer,
-                    'bg-rose-600 text-white': store.evaluated && option?.selected && !option?.evaluation?.rightAnswer,
-                    'bg-red-100 outline outline-1 outline-gray-300 text-slate-600': (store.answerRight || store.answerAttempt === 2) && store.evaluated && !option?.selected && !option?.evaluation?.rightAnswer,
-                    'bg-green-100 outline outline-1 outline-gray-300 text-slate-600': (store.answerRight || store.answerAttempt === 2) && store.evaluated && !option?.selected && option?.evaluation?.rightAnswer,
+                    'bg-slate-50 outline outline-1 outline-gray-300 hover:outline-gray-600 text-slate-800': !store.evaluationLoading && (!question?.answered && !option?.selected && !store.evaluated) || (store.evaluated && !option?.selected && store.answerWrong && store.answerAttempt<=1),
+                    'bg-sky-800 text-white': !store.evaluationLoading && option?.selected && !store.evaluated,
+                    'bg-emerald-600 text-white': !store.evaluationLoading && store.evaluated && option?.selected && option?.evaluation?.rightAnswer,
+                    'bg-rose-600 text-white': !store.evaluationLoading && store.evaluated && option?.selected && !option?.evaluation?.rightAnswer,
+                    'bg-red-100 outline outline-1 outline-gray-300 text-slate-600': !store.evaluationLoading && (store.answerRight || store.answerAttempt === 2) && store.evaluated && !option?.selected && !option?.evaluation?.rightAnswer,
+                    'bg-green-100 outline outline-1 outline-gray-300 text-slate-600': !store.evaluationLoading && (store.answerRight || store.answerAttempt === 2) && store.evaluated && !option?.selected && option?.evaluation?.rightAnswer,
+                    'bg-gray-200 text-slate-600 outline outline-1 outline-gray-300': store.evaluationLoading,
 
             }"
             :disabled="store.beingEvaluated"
