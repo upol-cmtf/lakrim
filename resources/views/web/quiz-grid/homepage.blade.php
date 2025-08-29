@@ -4,8 +4,8 @@
     <section class="bg-white">
         <div class="grid max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12 lg:pt-28">
             <div class="mr-auto place-self-center lg:col-span-7 md:text-lg lg:text-xl">
-                <h1 class="max-w-2xl mb-8 text-4xl font-extrabold leading-3 tracking-tight md:text-5xl xl:text-5xl text-center">
-                    Zahrajte si hru s 16-ti krátkými příběhy ze života
+                <h1 class="max-w-2xl mb-8 text-4xl font-extrabold lg:leading-3 leading-7 tracking-tight md:text-5xl xl:text-5xl text-center">
+                    Zahrajte si hru s 16 krátkými příběhy ze života
                 </h1>
 
                 <div class="max-w-2xl mb-6 lg:mb-8">
