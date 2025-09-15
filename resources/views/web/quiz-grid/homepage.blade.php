@@ -9,9 +9,9 @@
                 </h1>
 
                 <div class="max-w-2xl mb-6 lg:mb-8">
-                    <p>Jejich luštěním se <span class="font-bold">naučíte poznat triky podvodníků</span> a zjistíte, <span class="font-bold">jak se před nimi bránit</span>.</p>
+                    <p>Jejich řešením se <span class="font-bold">naučíte poznat triky podvodníků</span> a zjistíte, <span class="font-bold">jak se před nimi bránit</span>.</p>
                     <p>Pořadí si zvolíte sami – kliknutím na číslo se otevře nový příběh.</p>
-                    <p>Každý vyřešený příběh vám přidá dílek do skládačky.</p>
+                    <p>Každý vyřešený příběh Vám přidá dílek do skládačky.</p>
                     <p class="font-bold mt-5">Co se stane, až složíte všechny?</p>
                 </div>
 

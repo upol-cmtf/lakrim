@@ -2,7 +2,7 @@
     <div class="flex flex-col items-center p-2">
         <template v-if="showTiles">
             <h1 class="max-w-4xl mb-3 text-2xl font-bold leading-8 tracking-tight text-center mt-5">
-                Za každým číslem se skrývá příběh a každý příběh odhalí dílek skládačky.<br/>Co se stane, až je odhalíte všechny?
+                Je tu pro Vás připraveno několik příběhů. Každý se ukrývá pod jedním číslem. Záleží jen na Vás, kterým začnete. <br/>Co se stane, až je odhalíte všechny?
             </h1>
 
             <div id="questions-grid" class="grid grid-cols-4 mt-5">
