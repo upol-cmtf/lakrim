@@ -52,6 +52,7 @@ function storeRespondentAnswer(questionId, optionIds, seconds) {
 				option_ids: optionIds,
 				respondent_token: respondentTokenStore.token,
 				seconds: seconds,
+				attempt: 1,
 			},
 			requestConfig(),
 		)
