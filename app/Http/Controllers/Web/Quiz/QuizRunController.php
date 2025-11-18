@@ -24,13 +24,13 @@ class QuizRunController extends Controller
         ]);
     }
 
-    public function runTiles(?int $maxTiles = 16): View
+    public function runTiles(?QuizEvent $quizEvent = null): View
     {
-        $respondent = $this->createRespondent(DifficultyEnum::Medium);
+        $respondent = $this->createRespondent(DifficultyEnum::Medium, $quizEvent);
 
         return view('web.quiz-grid.index', [
             'respondentToken' => $respondent->token,
-            'maxTiles' => $maxTiles,
+            'maxTiles' => 16,
         ]);
     }
 
