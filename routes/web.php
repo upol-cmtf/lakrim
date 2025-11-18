@@ -36,7 +36,9 @@ Route::prefix('kviz')->group(function () {
 
 ### Version 2
 Route::prefix('v2')->group(function () {
-    Route::get('/{maxTiles?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
+    Route::get('/', fn() => view('web.quiz-grid.homepage'));
+
+    Route::get('/kviz', [Web\Quiz\QuizRunController::class, 'runTiles'])
         ->name('web.quiz-grid.index');
 });
 

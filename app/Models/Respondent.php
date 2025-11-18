@@ -70,7 +70,7 @@ class Respondent extends Model
 
     public function isAllQuizQuestionsAnswered(): bool
     {
-        return $this->answers->count() >= $this->difficulty->max_questions;
+        return count($this->getAnsweredQuestionIds()) >= $this->difficulty->max_questions;
     }
 
     public function getTotalWeight(): float
@@ -97,10 +97,14 @@ class Respondent extends Model
         ];
 
         foreach ($this->answers as $answer) {
+            if ($answer->attempt > 1) {
+                continue;
+            }
+
             $type = $answer->isRightAnswer() ? 'right' : 'wrong';
 
             if ($answer->option->summary) {
-                $summary[$type][] = $answer->option->summary;
+                $summary[$type][$answer->option->question->id] = $answer->option->summary;
             }
         }
 

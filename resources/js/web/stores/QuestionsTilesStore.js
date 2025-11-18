@@ -8,7 +8,11 @@ const version = 2;
 
 export const useQuestionsTilesStore = defineStore(storeName, {
 	state: () => ({
+		answerAttempt: 1,
+		answerRight: false,
+		answerWrong: false,
 		beingEvaluated: false,
+		correctAnswerEvaluation: null,
 		evaluated: false,
 		evaluationLoading: false,
 		loadedAt: null,
@@ -55,8 +59,27 @@ export const useQuestionsTilesStore = defineStore(storeName, {
 			option.selected = selected;
 		},
 
+		resetAnswer() {
+			this.answerAttempt += 1;
+			this.answeredRight = false;
+			this.answeredWrong = false;
+			this.correctAnswerEvaluation = null;
+			this.evaluated = false;
+			this.question.answered = false;
+
+			const lastSelectedTile = this.tiles.find(tile => tile.id === this.lastSelectedTile);
+			lastSelectedTile.answered = false;
+			lastSelectedTile.answeredRight = false;
+			lastSelectedTile.answeredWrong = false;
+			this.question.options.forEach(option => {
+				option.selected = false;
+				option.evaluation = null;
+			});
+		},
+
 		async loadQuestion() {
 			this.beingEvaluated = false;
+			this.correctAnswerEvaluation = null;
 			this.evaluated = false;
 			this.evaluationLoading = false;
 			this.questionLoading = true;
@@ -64,6 +87,9 @@ export const useQuestionsTilesStore = defineStore(storeName, {
 
 			return loadQuestion(version)
 				.then(question => {
+					this.answerAttempt = 1;
+					this.answeredRight = false;
+					this.answerWrong = false;
 					this.question = question;
 					this.questionLoaded = true;
 					this.questionLoading = false;
@@ -81,10 +107,12 @@ export const useQuestionsTilesStore = defineStore(storeName, {
 				.map(option => option.id);
 			const seconds = moment().diff(this.loadedAt, 'seconds');
 
-			storeRespondentAnswer(this.question.id, optionIds, seconds)
+			storeRespondentAnswer(this.question.id, optionIds, seconds, this.answerAttempt)
 				.then(answer => {
+					this.correctAnswerEvaluation = answer.correctAnswerEvaluation;
 					this.evaluationLoading = false;
 					this.evaluated = true;
+
 
 					this.isLastAnsweredQuestion = answer.end;
 
@@ -100,8 +128,8 @@ export const useQuestionsTilesStore = defineStore(storeName, {
 
 					const lastSelectedTile = this.tiles.find(tile => tile.id === this.lastSelectedTile);
 					lastSelectedTile.answered = true;
-					lastSelectedTile.answeredRight = rightAnsweredOptionCount > 0;
-					lastSelectedTile.answeredWrong = rightAnsweredOptionCount === 0;
+					lastSelectedTile.answeredRight = this.answerRight = rightAnsweredOptionCount > 0;
+					lastSelectedTile.answeredWrong = this.answerWrong = rightAnsweredOptionCount === 0;
 				});
 		}
 	},

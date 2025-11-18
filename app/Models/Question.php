@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  * @property mixed[]|null $settings
+ * @property string $first_wrong_answer_evaluation
+ * @property string $second_wrong_answer_evaluation
  */
 class Question extends Model
 {
