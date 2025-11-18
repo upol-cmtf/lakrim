@@ -3,7 +3,7 @@
 use App\Http\Controllers\Web;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => view('web.homepage'));
+Route::get('/', fn() => view('web.quiz-grid.homepage'));
 
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
@@ -30,15 +30,6 @@ Route::prefix('kviz')->group(function () {
     Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
         ->name('web.quiz.respondent.summary');
 
-    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
-        ->name('web.quiz.run');
-});
-
-### Version 2
-Route::prefix('v2')->group(function () {
-    Route::get('/', fn() => view('web.quiz-grid.homepage'));
-
-    Route::get('/kviz', [Web\Quiz\QuizRunController::class, 'runTiles'])
+    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
         ->name('web.quiz-grid.index');
 });
-
