@@ -71,7 +71,7 @@ import {computed, inject, onMounted, ref} from 'vue';
 import {useQuestionsTilesStore} from '../../stores/QuestionsTilesStore.js';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 
- import StudentIdForm from '../Quiz/StudentIdForm.vue';
+import StudentIdForm from '../Quiz/StudentIdForm.vue';
 import ButtonBlueWithArrowRight from '../ButtonBlueWithArrowRight.vue';
 import IconLoading from '../Icons/IconLoading.vue';
 import QuestionDetail from './QuestionDetail.vue';
