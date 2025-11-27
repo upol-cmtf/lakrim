@@ -1,5 +1,9 @@
 <template>
     <div class="flex flex-col items-center p-2">
+        <template v-if="showStudentIdForm">
+            <student-id-form/>
+        </template>
+
         <template v-if="showTiles">
             <h1 class="max-w-4xl mb-3 text-2xl font-bold leading-8 tracking-tight text-center mt-5">
                 Je tu pro Vás připraveno několik příběhů. Každý se ukrývá pod jedním číslem. Záleží jen na Vás, kterým začnete. <br/>Co se stane, až je odhalíte všechny?
@@ -63,7 +67,7 @@
 </template>
 
 <script setup>
-import {inject, onMounted, ref} from 'vue';
+    import {computed, inject, onMounted, ref} from 'vue';
 import {useQuestionsTilesStore} from '../../stores/QuestionsTilesStore.js';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 import ButtonBlueWithArrowRight from '../ButtonBlueWithArrowRight.vue';
@@ -72,6 +76,7 @@ import QuestionDetail from './QuestionDetail.vue';
 import QuestionTile from './QuestionTile.vue';
 import QuizEnd from '../Quiz/QuizEnd.vue';
 import RespondentIdentification from '../Quiz/RespondentIdentification.vue';
+    import StudentIdForm from '../Quiz/StudentIdForm.vue';
 
 const props = defineProps({
     completionUrl: {
@@ -86,13 +91,16 @@ const props = defineProps({
 
 const EventBus = inject('EventBus');
 
-const showTiles = ref(true);
-const showQuestionDetailModal = ref(false);
+const isFilledStudentId = ref(false);
 const showFinalVideo = ref(false);
-const showRespondentIdentification = ref(false);
+const showQuestionDetailModal = ref(false);
 const showQuizEnd = ref(false);
+const showRespondentIdentification = ref(false);
+const showTiles = ref(false);
+
 const store = useQuestionsTilesStore();
 const respondentTokenStore = useRespondentTokenStore();
+
 const handleTileClicked = () => {
     store.loadQuestion();
 
@@ -110,6 +118,10 @@ const moveToCompletion = () => {
     showFinalVideo.value = false;
 };
 
+const showStudentIdForm = computed(() => {
+    return !isFilledStudentId.value;
+});
+
 onMounted(() => {
     respondentTokenStore.token = props.respondentToken;
 
@@ -122,6 +134,10 @@ onMounted(() => {
     EventBus.on('show-final-video', () => {
         showFinalVideo.value = true;
         showQuestionDetailModal.value = false;
+    });
+    EventBus.on('studentId:stored', () => {
+        isFilledStudentId.value = true;
+        showTiles.value = true;
     });
 });
 </script>
