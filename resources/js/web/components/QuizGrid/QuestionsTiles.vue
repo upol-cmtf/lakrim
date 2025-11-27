@@ -67,16 +67,17 @@
 </template>
 
 <script setup>
-    import {computed, inject, onMounted, ref} from 'vue';
+import {computed, inject, onMounted, ref} from 'vue';
 import {useQuestionsTilesStore} from '../../stores/QuestionsTilesStore.js';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
+
+ import StudentIdForm from '../Quiz/StudentIdForm.vue';
 import ButtonBlueWithArrowRight from '../ButtonBlueWithArrowRight.vue';
 import IconLoading from '../Icons/IconLoading.vue';
 import QuestionDetail from './QuestionDetail.vue';
 import QuestionTile from './QuestionTile.vue';
 import QuizEnd from '../Quiz/QuizEnd.vue';
 import RespondentIdentification from '../Quiz/RespondentIdentification.vue';
-    import StudentIdForm from '../Quiz/StudentIdForm.vue';
 
 const props = defineProps({
     completionUrl: {
