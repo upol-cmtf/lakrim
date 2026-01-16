@@ -33,3 +33,16 @@ Route::prefix('kviz')->group(function () {
     Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
         ->name('web.quiz-grid.index');
 });
+
+### Version 1
+Route::prefix('v1')->group(function () {
+    Route::prefix('kviz')->group(function () {
+        Route::get('/dokonceni', fn() => view('web.quiz.finish'));
+
+        Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
+            ->name('web.quiz.respondent.summary');
+
+        Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'run'])
+            ->name('web.quiz.run');
+    });
+});

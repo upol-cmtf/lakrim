@@ -12,7 +12,8 @@ class AnswerController extends ApiController
 {
     public function store(): ArrayResource|JsonResponse
     {
-        $questionId = $this->request->get('question_id');
+        $questionId = $this->request->get('question_id', -1);
+        assert(is_numeric($questionId));
 
         $this->validate($this->request, [
             'attempt' => 'required|integer',

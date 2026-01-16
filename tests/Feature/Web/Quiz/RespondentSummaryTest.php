@@ -42,14 +42,12 @@ class RespondentSummaryTest extends TestCase
             ->create([
                 'difficulty_id' => $difficulty->id,
             ]);
-        assert($question1 instanceof Question);
 
         $question2 = Question::factory()
             ->has(QuestionOption::factory()->state(fn() => ['right' => true]), 'options')
             ->create([
                 'difficulty_id' => $difficulty->id,
             ]);
-        assert($question2 instanceof Question);
 
         $option1 = $question1->options->first();
         $option2 = $question2->options->first();

@@ -6,7 +6,6 @@ use App\Exceptions\MaximumQuestionsExceededException;
 use App\Exceptions\QuestionNotFoundException;
 use App\Models\Question;
 use App\Models\Respondent;
-use Illuminate\Database\Eloquent\Collection;
 
 class QuizQuestionService
 {
@@ -30,7 +29,6 @@ class QuizQuestionService
         }
 
         $questions = $builder->get();
-        assert($questions instanceof Collection);
 
         $question = $difficulty->shuffle_questions
             ? $questions->random()

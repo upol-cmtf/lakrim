@@ -27,14 +27,12 @@ class RespondentAnswer extends Model
 
     protected $table = 'respondents_answers';
 
-    /** @var array<string, mixed> */
     protected $attributes = [
         'attempt' => 1,
         'seconds' => 0,
         'weight' => 0,
     ];
 
-    /** @var array<int, string> */
     protected $fillable = [
         'attempt',
         'seconds',

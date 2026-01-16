@@ -34,7 +34,6 @@ class Question extends Model
 
     protected $table = 'questions';
 
-    /** @var array<int, string> */
     protected $fillable = [
         'question',
         'difficulty_id',
