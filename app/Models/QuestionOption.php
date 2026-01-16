@@ -28,7 +28,6 @@ class QuestionOption extends Model
 
     protected $table = 'questions_options';
 
-    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'description',

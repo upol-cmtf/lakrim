@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Collection<RespondentAnswer> $answers
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
+ * @property int|null $cnt
  */
 class Respondent extends Model
 {
@@ -58,9 +59,7 @@ class Respondent extends Model
         return $this->belongsTo(QuizEvent::class, 'quiz_event_id');
     }
 
-    /**
-     * @return array<int, int>
-     */
+    /** @return int[] */
     public function getAnsweredQuestionIds(): array
     {
         /** @var int[] $questionIds */

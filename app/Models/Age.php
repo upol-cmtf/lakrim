@@ -16,7 +16,6 @@ class Age extends Model
 
     protected $table = 'ages';
 
-    /** @var array<int, string> */
     protected $fillable = [
         'name',
     ];
