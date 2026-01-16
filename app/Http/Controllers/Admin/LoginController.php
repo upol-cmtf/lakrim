@@ -2,11 +2,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Traits\AuthenticatesUsers;
 
 class LoginController extends Controller
 {
     use AuthenticatesUsers;
 
-    protected string $redirectTo = '/admin/dashboard';
+    protected function getRedirectPath(): string
+    {
+        return '/admin/dashboard';
+    }
 }

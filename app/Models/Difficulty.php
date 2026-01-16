@@ -42,7 +42,6 @@ class Difficulty extends Model
         'show_evaluations_for_other_options' => 'bool',
     ];
 
-    /** @var array<int, string> */
     protected $fillable = [
         'max_questions',
         'min_questions',

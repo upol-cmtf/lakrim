@@ -27,7 +27,6 @@ class AnswerTest extends TestCase
     public function testQuestionNotFound(): void
     {
         $respondent = Respondent::factory()->createOneQuietly();
-        assert($respondent instanceof Respondent);
 
         $this->post(route(self::ROUTE_NAME), data: [
             'seconds' => 10,

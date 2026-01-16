@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Sex;
 use App\Http\XlsxHeaders;
 use App\Models\Question;
-use App\Models\QuestionOption;
 use App\Models\Respondent;
-use App\Models\RespondentAnswer;
 use App\Services\SpreadSheetFactory;
 use App\Services\XlsxWriterFactory;
 use Illuminate\Http\Response;
@@ -85,7 +83,6 @@ final class ExportQuestionsResultsController
 
                 $this->columnQuestionOptionMap[$option->id] = $actualColumn;
 
-                assert($option instanceof QuestionOption);
                 $sheet->setCellValue(
                     $actualColumn . '2',
                     $option->name . ' (' . ($option->right ? 'správně' : 'chyba') . ')',
@@ -114,12 +111,11 @@ final class ExportQuestionsResultsController
             $sheet->setCellValue('B' . $line, $respondent->student_id);
             $sheet->setCellValue('C' . $line, $respondent->finished ? 'ano' : 'ne');
             $sheet->setCellValue('D' . $line, $this->getSex($respondent));
-            $sheet->setCellValue('E' . $line, $respondent->age?->name ?? 'nezadáno');
+            $sheet->setCellValue('E' . $line, $respondent->age->name ?? 'nezadáno');
 
             $finalSummary = function (Respondent $respondent) {
                 $right = $wrong = 0;
                 foreach ($respondent->answers as $answer) {
-                    assert($answer instanceof RespondentAnswer);
                     if ($answer->option->right) {
                         $right++;
                     } else {
@@ -133,7 +129,6 @@ final class ExportQuestionsResultsController
             $sheet->setCellValue('F' . $line, $finalSummary($respondent));
 
             foreach ($respondent->answers as $answer) {
-                assert($answer instanceof RespondentAnswer);
                 $questionId = $answer->option->question_id;
 
                 $sheet->setCellValue(
