@@ -2,30 +2,67 @@
 
 @section('content')
     <section class="bg-white">
-        <div class="grid max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12 lg:pt-28">
-            <div class="mr-auto place-self-center lg:col-span-7 md:text-lg lg:text-xl">
-                <h1 class="max-w-2xl mb-8 text-4xl font-extrabold lg:leading-3 leading-10 tracking-tight md:text-5xl xl:text-5xl text-center">
-                    Zahrajte si hru s 16 krátkými příběhy ze života
+        <div class="max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:py-16 lg:pt-28">
+            {{-- Hlavní nadpis a úvod --}}
+            <div class="text-center mb-12">
+                <h1 class="mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl xl:text-5xl">
+                    Vítejte v Labyrintech kritického myšlení
                 </h1>
 
-                <div class="max-w-2xl mb-6 lg:mb-8">
-                    <p>Jejich řešením se <span class="font-bold">naučíte poznat triky podvodníků</span> a zjistíte, <span class="font-bold">jak se před nimi bránit</span>.</p>
-                    <p>Pořadí si zvolíte sami – kliknutím na číslo se otevře nový příběh.</p>
-                    <p>Každý vyřešený příběh Vám přidá dílek do skládačky.</p>
-                    <p class="font-bold mt-5">Co se stane, až složíte všechny?</p>
-                </div>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-4">
+                    Dobrý den, jsme rádi, že jste se rozhodli vyzkoušet naši hru, která vás naučí, jak se nenechat v digitálním světě napálit. Je pro vás připraveno několik příběhů, se kterými se můžete v běžném životě setkat.
+                </p>
 
-                <p class="text-center mt-8">
-                    <a href="{{ route('web.quiz-grid.index') }}"
-                       class="lg:text-lg inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                        Začít hrát hru
-                        <icon-arrow-right class="ml-3"></icon-arrow-right>
-                    </a>
+                <p class="text-2xl font-semibold text-gray-800 mt-8">
+                    Kterou cestou se vydáte?
                 </p>
             </div>
 
-            <div class="hidden lg:mt-0 lg:col-span-5 lg:flex">
-                <img class="object-contain" src="{{ asset('images/homepage.png') }}" alt="homepage">
+            {{-- Dvě cesty --}}
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                {{-- Cesta 1: Pro začátečníky --}}
+                <div class="bg-blue-50 rounded-2xl p-8 border-2 border-blue-200 hover:border-blue-400 transition-colors">
+                    <div class="text-center">
+                        <span class="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mb-4">
+                            1. cesta
+                        </span>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            Pro začátečníky
+                        </h2>
+                        <p class="text-gray-600 mb-6 min-h-[80px]">
+                            Chcete se nejprve seznámit s tím, jak podvody fungují? Tato verze vás provede úkoly pěkně popořadě.
+                        </p>
+                        <a href="{{ route('web.quiz.run') }}"
+                           class="inline-flex items-center justify-center w-full px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 transition-colors">
+                            Chci začít od začátku
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Cesta 2: Pro odvážné --}}
+                <div class="bg-purple-50 rounded-2xl p-8 border-2 border-purple-200 hover:border-purple-400 transition-colors">
+                    <div class="text-center">
+                        <span class="inline-block bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full mb-4">
+                            2. cesta
+                        </span>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            Pro odvážné
+                        </h2>
+                        <p class="text-gray-600 mb-6 min-h-[80px]">
+                            Máte už s internetem zkušenosti a chcete si rovnou vyzkoušet složitější situace? Tady si sami vybíráte, který příběh odhalíte dříve.
+                        </p>
+                        <a href="{{ route('web.quiz-grid.index') }}"
+                           class="inline-flex items-center justify-center w-full px-6 py-3 text-base font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 focus:ring-4 focus:outline-none focus:ring-purple-300 transition-colors">
+                            Zkusím rovnou složitější
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
