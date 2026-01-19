@@ -2,7 +2,7 @@
 
 @section('content')
     <section class="bg-white">
-        <div class="max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:py-16 lg:pt-28">
+        <div class="max-w-screen-xl px-4 pt-12 pb-8 mx-auto lg:py-10 lg:pt-16">
             {{-- Hlavní nadpis a úvod --}}
             <div class="text-center mb-12">
                 <h1 class="mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl xl:text-5xl">
