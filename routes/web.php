@@ -46,3 +46,8 @@ Route::prefix('v1')->group(function () {
             ->name('web.quiz.run');
     });
 });
+
+### Version 3
+Route::prefix('v3')->group(function () {
+    Route::get('/', fn() => view('web.v3.homepage'));
+});
