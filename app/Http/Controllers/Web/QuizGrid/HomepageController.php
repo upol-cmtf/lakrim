@@ -13,7 +13,7 @@ final class HomepageController extends Controller
 {
     public function index(?QuizEvent $quizEvent = null): View
     {
-        $difficulty = Difficulty::find(DifficultyEnum::Easy->value);
+        $difficulty = Difficulty::find(DifficultyEnum::Medium->value);
         assert($difficulty instanceof Difficulty);
 
         $respondent = Respondent::create([

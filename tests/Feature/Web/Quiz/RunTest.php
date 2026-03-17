@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class RunTest extends TestCase
 {
-    private const ROUTE_NAME = 'web.quiz-grid.index';
+    private const ROUTE_NAME = 'web.quiz-grid.homepage';
 
     public function testSuccessful(): void
     {

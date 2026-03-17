@@ -5,16 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('web.homepage'));
 
-Route::get('/kviz/{quizEvent:hash?}', [Web\Quiz\HomepageController::class, 'index'])
-    ->name('web.quiz.homepage');
-
-Route::get('/pexeso/{quizEvent:hash?}', [Web\QuizGrid\HomepageController::class, 'index'])
-    ->name('web.quiz-grid.homepage');
-
-Route::get('/ostrov/{quizEvent:hash?}', [Web\IslandGame\HomepageController::class, 'index'])
-    ->name('web.island-game.homepage');
-
-
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
         ->name('web.quiz.finish');
@@ -53,3 +43,12 @@ Route::prefix('v1')->group(function () {
             ->name('web.quiz.run');
     });
 });
+
+Route::get('/kviz/{quizEvent:hash?}', [Web\Quiz\HomepageController::class, 'index'])
+    ->name('web.quiz.homepage');
+
+Route::get('/pexeso/{quizEvent:hash?}', [Web\QuizGrid\HomepageController::class, 'index'])
+    ->name('web.quiz-grid.homepage');
+
+Route::get('/ostrov/{quizEvent:hash?}', [Web\IslandGame\HomepageController::class, 'index'])
+    ->name('web.island-game.homepage');
