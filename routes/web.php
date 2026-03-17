@@ -3,7 +3,7 @@
 use App\Http\Controllers\Web;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => view('web.quiz-grid.homepage'));
+Route::get('/', fn() => view('web.homepage'));
 
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
@@ -29,9 +29,6 @@ Route::prefix('kviz')->group(function () {
 
     Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
         ->name('web.quiz.respondent.summary');
-
-    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
-        ->name('web.quiz-grid.index');
 });
 
 ### Version 1
@@ -47,7 +44,11 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-### Version 3
-Route::prefix('v3')->group(function () {
-    Route::get('/', fn() => view('web.v3.homepage'));
-});
+Route::get('/kviz/{quizEvent:hash?}', [Web\Quiz\HomepageController::class, 'index'])
+    ->name('web.quiz.homepage');
+
+Route::get('/pexeso/{quizEvent:hash?}', [Web\QuizGrid\HomepageController::class, 'index'])
+    ->name('web.quiz-grid.homepage');
+
+Route::get('/ostrov/{quizEvent:hash?}', [Web\IslandGame\HomepageController::class, 'index'])
+    ->name('web.island-game.homepage');
