@@ -15,7 +15,7 @@ class QuizRunController extends Controller
     {
         $respondent = $this->createRespondent(DifficultyEnum::Easy, $quizEvent);
 
-        return view('web.quiz.run', [
+        return view('web.quiz.index', [
             'respondentToken' => $respondent->token,
             'settings' => array_merge(($respondent->difficulty->settings ?? []), [
                 'maxQuestions' => $respondent->difficulty->max_questions,
