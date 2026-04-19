@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->group('admin', [
             Admin::class,
         ]);
+
+        $middleware->encryptCookies(except: [
+            'lakrim-saved-game',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->dontReport([

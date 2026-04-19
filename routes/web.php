@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('web.homepage'));
 
+Route::get('/saved-game', [Web\SavedGameController::class, 'index'])
+    ->name('web.saved-game');
+
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
         ->name('web.quiz.finish');
