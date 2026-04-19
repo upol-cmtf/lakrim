@@ -68,7 +68,6 @@ final class ExportQuestionsResultsController
 
             $optionCount = $question->options->count();
 
-            /** @phpstan-var non-empty-string $actualColumn */
             $actualColumn = $column;
             $column = $nextColumn($column, $optionCount);
 
@@ -89,7 +88,7 @@ final class ExportQuestionsResultsController
                 );
             }
 
-            $column++;
+            $column = str_increment($column);
         }
 
         $sheet->setCellValue('A2', 'ID');
