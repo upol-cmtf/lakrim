@@ -1,21 +1,22 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Console\Commands;
 
 use App\Enums\Sex;
-use App\Http\XlsxHeaders;
+use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\Respondent;
 use App\Services\SpreadSheetFactory;
 use App\Services\XlsxWriterFactory;
-use Illuminate\Http\Response;
+use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
-final class ExportQuestionsResultsController
+class ExportQuestionsResultsCommand extends Command
 {
-    use XlsxHeaders;
+    protected $signature = 'export:questions-results {difficulty_id : ID of the difficulty to export}';
+
+    protected $description = 'Export questions results for the given difficulty to an XLSX file in the temp directory';
 
     /** @var array<int, string> */
     private array $columnQuestionTimeMap = [];
@@ -27,28 +28,41 @@ final class ExportQuestionsResultsController
         private readonly SpreadSheetFactory $spreadSheetFactory,
         private readonly XlsxWriterFactory $xlsxWriterFactory,
     ) {
+        parent::__construct();
     }
 
-    public function index(): StreamedResponse
+    public function handle(): int
     {
-        $questions = Question::get();
+        $difficultyId = (int) $this->argument('difficulty_id');
+
+        if (!Difficulty::whereKey($difficultyId)->exists()) {
+            $this->error("Difficulty with id {$difficultyId} not found.");
+
+            return self::FAILURE;
+        }
+
+        $questions = Question::where('difficulty_id', $difficultyId)->get();
+        $respondents = Respondent::where('difficulty_id', $difficultyId)->get();
 
         $spreadSheet = $this->spreadSheetFactory->create();
-
         $sheet = $spreadSheet->getActiveSheet();
 
         $this->writeHeaders($sheet, $questions);
         $sheet->freezePane('A3');
 
-        $this->writeData(Respondent::get(), $sheet);
+        $this->writeData($respondents, $sheet);
 
         $writer = $this->xlsxWriterFactory->create($spreadSheet);
 
-        return response()->stream(
-            fn() => $writer->save('php://output'),
-            Response::HTTP_OK,
-            $this->getXlsxHeaders('export.xlsx'),
-        );
+        $path = sys_get_temp_dir()
+            . DIRECTORY_SEPARATOR
+            . sprintf('export-questions-results-%d-%s.xlsx', $difficultyId, uniqid());
+
+        $writer->save($path);
+
+        $this->line($path);
+
+        return self::SUCCESS;
     }
 
     private function writeHeaders(Worksheet $sheet, Collection $questions): void
@@ -129,6 +143,10 @@ final class ExportQuestionsResultsController
 
             foreach ($respondent->answers as $answer) {
                 $questionId = $answer->option->question_id;
+
+                if (!isset($this->columnQuestionTimeMap[$questionId])) {
+                    continue;
+                }
 
                 $sheet->setCellValue(
                     $this->columnQuestionTimeMap[$questionId] . $line,
