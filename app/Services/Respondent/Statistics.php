@@ -1,6 +1,7 @@
 <?php
 namespace App\Services\Respondent;
 
+use App\Models\Difficulty;
 use App\Models\Respondent;
 use Exception;
 
@@ -33,7 +34,9 @@ class Statistics
         }
 
         $percentageCorrectAnswers = $percentageIncorrectAnswers = 0;
-        $totalQuestions = $this->respondent->difficulty->max_questions;
+        $difficulty = Difficulty::find($this->respondent->version->value);
+        assert($difficulty instanceof Difficulty);
+        $totalQuestions = $difficulty->max_questions;
         $totalAnsweredQuestions = $this->respondent->answers->count();
         $rightAnswers = $this->getTotalRightAnswers();
 

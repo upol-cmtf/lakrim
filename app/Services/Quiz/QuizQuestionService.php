@@ -4,6 +4,7 @@ namespace App\Services\Quiz;
 use App\Enums\Version;
 use App\Exceptions\MaximumQuestionsExceededException;
 use App\Exceptions\QuestionNotFoundException;
+use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\Respondent;
 
@@ -15,7 +16,8 @@ class QuizQuestionService
      */
     public function getQuestionForRespondent(Respondent $respondent, Version $version): Question
     {
-        $difficulty = $respondent->difficulty;
+        $difficulty = Difficulty::find($respondent->version->value);
+        assert($difficulty instanceof Difficulty);
         $answeredQuestionIds = $respondent->getAnsweredQuestionIds();
 
         if (count($answeredQuestionIds) >= $difficulty->max_questions) {

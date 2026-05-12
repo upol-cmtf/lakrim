@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Enums\Version;
 use Database\Factories\RespondentFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $student_id
  * @property string|null $sex
  * @property boolean $finished
+ * @property Version $version
  * @property Age|null $age
- * @property Difficulty $difficulty
  * @property QuizEvent|null $event
  * @property Collection<RespondentAnswer> $answers
  * @property DateTimeInterface|null $created_at
@@ -35,8 +36,17 @@ class Respondent extends Model
     /** @var array<int, string> */
     protected $guarded = [];
 
+    /** @var array{
+     *     version: int
+     * }
+     */
+    protected $attributes = [
+        'version' => Version::One->value,
+    ];
+
     protected $casts = [
         'finished' => 'boolean',
+        'version' => Version::class,
     ];
 
     public function age(): BelongsTo
@@ -47,11 +57,6 @@ class Respondent extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(RespondentAnswer::class);
-    }
-
-    public function difficulty(): BelongsTo
-    {
-        return $this->belongsTo(Difficulty::class);
     }
 
     public function event(): BelongsTo
@@ -69,7 +74,10 @@ class Respondent extends Model
 
     public function isAllQuizQuestionsAnswered(): bool
     {
-        return count($this->getAnsweredQuestionIds()) >= $this->difficulty->max_questions;
+        $difficulty = Difficulty::find($this->version->value);
+        assert($difficulty instanceof Difficulty);
+
+        return count($this->getAnsweredQuestionIds()) >= $difficulty->max_questions;
     }
 
     public function getTotalWeight(): float

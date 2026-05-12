@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature\Web\Quiz;
 
+use App\Enums\Version;
 use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -35,7 +36,7 @@ class QuestionTest extends TestCase
                 'answers',
             )
             ->createOneQuietly([
-                'difficulty_id' => $difficulty->id,
+                'version' => Version::One->value,
             ]);
 
         $this->postJson(route(self::ROUTE_NAME), [
@@ -64,7 +65,7 @@ class QuestionTest extends TestCase
         assert($question instanceof Question);
 
         $respondent = Respondent::factory()->createOneQuietly([
-            'difficulty_id' => $difficulty->id,
+            'version' => Version::One->value,
         ]);
 
         $this->postJson(route(self::ROUTE_NAME), [
@@ -114,7 +115,7 @@ class QuestionTest extends TestCase
                 'answers',
             )
             ->createOneQuietly([
-                'difficulty_id' => $difficulty->id,
+                'version' => Version::One->value,
             ]);
 
         $this->postJson(route(self::ROUTE_NAME), [
