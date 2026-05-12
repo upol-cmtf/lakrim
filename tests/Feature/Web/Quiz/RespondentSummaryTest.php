@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature\Web\Quiz;
 
+use App\Enums\Version;
 use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -63,7 +64,7 @@ class RespondentSummaryTest extends TestCase
                 'answers',
             )
             ->createOneQuietly([
-                'difficulty_id' => $difficulty->id,
+                'version' => Version::One->value,
             ]);
 
         $this->post(route(self::ROUTE_NAME), data: [
