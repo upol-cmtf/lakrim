@@ -19,7 +19,7 @@ class RunTest extends TestCase
             'session_id' => session()->get('_token'),
             'quiz_event_id' => null,
             'ip' => request()->ip(),
-            'difficulty_id' => 2,
+            'version' => 2,
             'age_id' => null,
             'sex' => null,
         ]);
@@ -37,7 +37,7 @@ class RunTest extends TestCase
             'session_id' => session()->get('_token'),
             'quiz_event_id' => $quizEvent->id,
             'ip' => request()->ip(),
-            'difficulty_id' => 2,
+            'version' => 2,
             'age_id' => null,
             'sex' => null,
         ]);

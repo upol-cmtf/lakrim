@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Web\Quiz;
 
-use App\Enums\Difficulty as DifficultyEnum;
+use App\Enums\Version;
 use App\Http\Controllers\Controller;
 use App\Models\Difficulty;
 use App\Models\QuizEvent;
@@ -13,20 +13,23 @@ class QuizRunController extends Controller
 {
     public function run(?QuizEvent $quizEvent = null): View
     {
-        $respondent = $this->createRespondent(DifficultyEnum::Easy, $quizEvent);
+        $respondent = $this->createRespondent(Version::One, $quizEvent);
+
+        $difficulty = Difficulty::find($respondent->version->value);
+        assert($difficulty instanceof Difficulty);
 
         return view('web.quiz.index', [
             'respondentToken' => $respondent->token,
-            'settings' => array_merge(($respondent->difficulty->settings ?? []), [
-                'maxQuestions' => $respondent->difficulty->max_questions,
-                'showEvaluationsForOtherOptions' => $respondent->difficulty->show_evaluations_for_other_options,
+            'settings' => array_merge(($difficulty->settings ?? []), [
+                'maxQuestions' => $difficulty->max_questions,
+                'showEvaluationsForOtherOptions' => $difficulty->show_evaluations_for_other_options,
             ]),
         ]);
     }
 
     public function runTiles(?QuizEvent $quizEvent = null): View
     {
-        $respondent = $this->createRespondent(DifficultyEnum::Medium, $quizEvent);
+        $respondent = $this->createRespondent(Version::Two, $quizEvent);
 
         return view('web.quiz-grid.index', [
             'respondentToken' => $respondent->token,
@@ -34,17 +37,14 @@ class QuizRunController extends Controller
         ]);
     }
 
-    private function createRespondent(DifficultyEnum $difficultyType, ?QuizEvent $quizEvent = null): Respondent
+    private function createRespondent(Version $version, ?QuizEvent $quizEvent = null): Respondent
     {
-        $difficulty = Difficulty::find($difficultyType->value);
-        assert($difficulty instanceof Difficulty);
-
         return Respondent::create([
             'session_id' => session()->get('_token'),
             'quiz_event_id' => $quizEvent?->id,
             'token' => Uuid::uuid4()->toString(),
             'ip' => request()->ip(),
-            'difficulty_id' => $difficulty->id,
+            'version' => $version->value,
         ]);
     }
 }

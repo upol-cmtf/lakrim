@@ -68,6 +68,7 @@ final class ExportQuestionsResultsController
 
             $optionCount = $question->options->count();
 
+            /** @phpstan-var non-falsy-string $actualColumn */
             $actualColumn = $column;
             $column = $nextColumn($column, $optionCount);
 

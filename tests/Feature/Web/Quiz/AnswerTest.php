@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature\Web\Quiz;
 
+use App\Enums\Version;
 use App\Models\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionOption;
@@ -66,7 +67,7 @@ class AnswerTest extends TestCase
         assert($difficulty instanceof Difficulty);
 
         $respondent = Respondent::factory()->createOneQuietly([
-            'difficulty_id' => $difficulty->id,
+            'version' => Version::One->value,
         ]);
         $question = Question::factory()
             ->has(QuestionOption::factory()->count(4), 'options')
@@ -121,7 +122,7 @@ class AnswerTest extends TestCase
         ]);
 
         $respondent = Respondent::factory()->createOneQuietly([
-            'difficulty_id' => $difficulty->id,
+            'version' => Version::One->value,
         ]);
         $question = Question::factory()
             ->has(QuestionOption::factory()->count(4), 'options')

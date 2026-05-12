@@ -1,7 +1,7 @@
 <?php
 namespace Database\Factories;
 
-use App\Enums\Difficulty;
+use App\Enums\Version;
 use App\Models\Respondent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +19,7 @@ class RespondentFactory extends Factory
             'session_id' => $this->faker->uuid,
             'token' => $this->faker->uuid,
             'ip' => $this->faker->ipv4,
-            'difficulty_id' => Difficulty::Easy->value,
+            'version' => Version::One->value,
         ];
     }
 }
