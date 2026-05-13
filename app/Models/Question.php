@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -21,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property QuestionType $type
  * @property Collection<QuestionOption> $options
  * @property QuestionGroup $questionGroup
+ * @property Collection<Island> $islands
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  * @property mixed[]|null $settings
@@ -64,6 +66,11 @@ class Question extends Model
     public function questionGroup(): BelongsTo
     {
         return $this->belongsTo(QuestionGroup::class, 'question_group_id');
+    }
+
+    public function islands(): BelongsToMany
+    {
+        return $this->belongsToMany(Island::class);
     }
 
     public function options(): HasMany
