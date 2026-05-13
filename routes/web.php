@@ -30,6 +30,9 @@ Route::prefix('kviz')->group(function () {
     Route::post('/respondent/summary', [Web\Quiz\RespondentSummaryController::class, 'index'])
         ->name('web.quiz.respondent.summary');
 
+    Route::post('/respondent/situations', [Web\Quiz\RespondentSituationsController::class, 'index'])
+        ->name('web.quiz.respondent.situations');
+
     Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
         ->name('web.quiz-grid.index');
 });
