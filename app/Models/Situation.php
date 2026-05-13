@@ -1,0 +1,44 @@
+<?php
+namespace App\Models;
+
+use Database\Factories\SituationFactory;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * @property int $id
+ * @property int $island_id
+ * @property int $position
+ * @property string|null $title
+ * @property Island $island
+ * @property Collection<RespondentSituation> $respondentSituations
+ * @property DateTimeInterface|null $created_at
+ * @property DateTimeInterface|null $updated_at
+ */
+class Situation extends Model
+{
+    /** @use HasFactory<SituationFactory> */
+    use HasFactory;
+
+    protected $table = 'situations';
+
+    protected $fillable = [
+        'island_id',
+        'position',
+        'title',
+    ];
+
+    public function island(): BelongsTo
+    {
+        return $this->belongsTo(Island::class);
+    }
+
+    public function respondentSituations(): HasMany
+    {
+        return $this->hasMany(RespondentSituation::class);
+    }
+}
