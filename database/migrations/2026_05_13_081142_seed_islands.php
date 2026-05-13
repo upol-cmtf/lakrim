@@ -7,10 +7,10 @@ return new class extends Migration {
     public function up(): void
     {
         $islands = [
-            ['name' => 'Ostrov digitálních pastí', 'image' => 'digital_traps.png'],
-            ['name' => 'Ostrov klamavých zpráv', 'image' => 'deceptive_news.png'],
-            ['name' => 'Ostrov zneužitých citů', 'image' => 'exploited_emotions.png'],
-            ['name' => 'Ostrov falešného bohatství', 'image' => 'fake_wealth.png'],
+            ['name' => 'Ostrov digitálních pastí', 'image' => 'digital_traps.webp'],
+            ['name' => 'Ostrov klamavých zpráv', 'image' => 'deceptive_news.webp'],
+            ['name' => 'Ostrov zneužitých citů', 'image' => 'exploited_emotions.webp'],
+            ['name' => 'Ostrov falešného bohatství', 'image' => 'fake_wealth.webp'],
         ];
 
         foreach ($islands as $island) {
