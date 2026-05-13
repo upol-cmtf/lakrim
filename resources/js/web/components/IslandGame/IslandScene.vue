@@ -23,6 +23,10 @@
                 <defs>
                     <path id="wave-outer" :d="waveOuterPath"/>
                     <path id="wave-inner" :d="waveInnerPath"/>
+                    <linearGradient id="lock-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fbbf24"/>
+                        <stop offset="100%" stop-color="#f59e0b"/>
+                    </linearGradient>
                 </defs>
             </svg>
 
@@ -108,14 +112,32 @@
                                 class="island-lamp absolute"
                                 alt=""
                             >
-                            <img
+                            <button
                                 v-for="(pos, i) in selectedIsland.pathButtonPositions"
                                 :key="`btn-${i}`"
-                                :src="buttonImgs[i]"
+                                type="button"
                                 :style="pos"
                                 class="path-button absolute"
-                                :alt="`Úkol ${i + 1}`"
+                                :class="{ 'path-button--locked': i > 0 }"
+                                :disabled="i > 0"
+                                :aria-label="`Úkol ${i + 1}`"
+                                @click="openQuestion(i)"
                             >
+                                <img
+                                    :src="buttonImgs[i]"
+                                    :alt="`Úkol ${i + 1}`"
+                                    class="block w-full"
+                                >
+                                <svg
+                                    v-if="i > 0"
+                                    class="path-button-lock"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M7 10V7a5 5 0 0110 0v3h-2V7a3 3 0 00-6 0v3z" fill="#fff"/>
+                                    <path fill-rule="evenodd" d="M5 11a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V11zm7 3a2 2 0 00-1 3.732V19a1 1 0 102 0v-1.268A2 2 0 0012 14z" fill="url(#lock-gradient)"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
@@ -123,6 +145,53 @@
                 </div>
             </transition>
         </div>
+
+        <transition name="modal-fade">
+            <div
+                v-if="activeQuestion"
+                class="question-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                :aria-label="activeQuestion.title"
+                @click.self="closeQuestion"
+            >
+                <div class="question-modal relative w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
+                    <button
+                        type="button"
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Zavřít"
+                        @click="closeQuestion"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <h3 class="mb-4 pr-8 text-xl font-bold leading-tight text-blue-900">
+                        {{ activeQuestion.title }}
+                    </h3>
+
+                    <p class="mb-5 text-sm leading-relaxed text-slate-700">
+                        {{ activeQuestion.description }}
+                    </p>
+
+                    <ul class="space-y-2">
+                        <li
+                            v-for="(option, idx) in activeQuestion.options"
+                            :key="`opt-${idx}`"
+                        >
+                            <button
+                                type="button"
+                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                @click="closeQuestion"
+                            >
+                                {{ option }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -262,6 +331,7 @@ const islands = reactive([
 ]);
 
 const selectedIsland = ref(null);
+const activeQuestion = ref(null);
 
 const open = (island) => {
     selectedIsland.value = island;
@@ -269,6 +339,29 @@ const open = (island) => {
 
 const close = () => {
     selectedIsland.value = null;
+};
+
+const fakeQuestion = (buttonIndex) => ({
+    title: `Úkol ${buttonIndex + 1}: Rozpoznáš podvod?`,
+    description:
+        'Dostali jste e-mail z banky s odkazem na "ověření účtu". ' +
+        'Zpráva obsahuje překlepy a adresa odesílatele vypadá podezřele. ' +
+        'Co uděláte jako první?',
+    options: [
+        'Kliknu na odkaz a zadám přihlašovací údaje.',
+        'Zavolám na číslo uvedené v e-mailu.',
+        'Ignoruji e-mail a kontaktuji banku přes oficiální web/aplikaci.',
+        'Přepošlu e-mail kamarádovi pro radu.',
+    ],
+});
+
+const openQuestion = (buttonIndex) => {
+    if (buttonIndex > 0) return;
+    activeQuestion.value = fakeQuestion(buttonIndex);
+};
+
+const closeQuestion = () => {
+    activeQuestion.value = null;
 };
 </script>
 
@@ -361,6 +454,9 @@ const close = () => {
 
 .path-button {
     width: 9%;
+    padding: 0;
+    border: 0;
+    background: transparent;
     transform: translate(-50%, -50%);
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
     transition: transform 0.18s ease, filter 0.18s ease;
@@ -368,10 +464,32 @@ const close = () => {
     user-select: none;
 }
 
-.path-button:hover,
-.path-button:focus {
+.path-button:not(.path-button--locked):hover,
+.path-button:not(.path-button--locked):focus {
     transform: translate(-50%, -50%) scale(1.12);
     filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.55));
+}
+
+.path-button--locked {
+    cursor: not-allowed;
+}
+
+.path-button--locked > img {
+    opacity: 0.55;
+    filter: grayscale(0.85);
+}
+
+.path-button-lock {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    width: 55%;
+    height: 55%;
+    transform: translate(-50%, -50%);
+    filter:
+        drop-shadow(0 2px 2px rgba(0, 0, 0, 0.55))
+        drop-shadow(0 5px 6px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
 }
 
 .island-label {
@@ -492,6 +610,32 @@ const close = () => {
 .scene-fade-enter-from,
 .scene-fade-leave-to {
     opacity: 0;
+}
+
+.question-modal-backdrop {
+    background: rgba(8, 38, 70, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.modal-fade-enter-active .question-modal,
+.modal-fade-leave-active .question-modal {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+.modal-fade-enter-from .question-modal,
+.modal-fade-leave-to .question-modal {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
 }
 
 @media (prefers-reduced-motion: reduce) {
