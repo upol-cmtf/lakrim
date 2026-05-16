@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Difficulty $difficulty
  * @property QuestionType $type
  * @property Collection<QuestionOption> $options
+ * @property Collection<QuestionImage> $images
  * @property QuestionGroup $questionGroup
  * @property Collection<Island> $islands
  * @property DateTimeInterface|null $created_at
@@ -76,6 +77,33 @@ class Question extends Model
     public function options(): HasMany
     {
         return $this->hasMany(QuestionOption::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(QuestionImage::class)->orderBy('position');
+    }
+
+    /**
+     * Returns the description with every [[image:key]] placeholder replaced by the
+     * matching image's HTML, so the frontend can render it as-is.
+     */
+    public function renderedDescription(): string
+    {
+        $this->loadMissing('images');
+        $images = $this->images->keyBy('key');
+
+        $rendered = preg_replace_callback(
+            '/\[\[image:([\w.-]+)\]\]/',
+            static function (array $matches) use ($images): string {
+                $image = $images->get($matches[1]);
+
+                return $image instanceof QuestionImage ? $image->toHtml() : '';
+            },
+            $this->description,
+        );
+
+        return $rendered ?? $this->description;
     }
 
     public function getOptions(): Collection

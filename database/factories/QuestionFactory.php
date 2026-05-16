@@ -4,6 +4,7 @@ namespace Database\Factories;
 use App\Enums\Difficulty;
 use App\Models\Question;
 use App\Models\QuestionGroup;
+use App\Models\QuestionImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,5 +25,13 @@ class QuestionFactory extends Factory
             'description' => $this->faker->text,
             'difficulty_id' => Difficulty::Easy->value,
         ];
+    }
+
+    /**
+     * @return Factory<Question>
+     */
+    public function withImages(int $count = 1): Factory
+    {
+        return $this->has(QuestionImage::factory()->count($count), 'images');
     }
 }
