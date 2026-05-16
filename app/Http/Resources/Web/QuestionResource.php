@@ -17,6 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property QuestionType $type
  * @property QuestionGroup $questionGroup
  * @method Collection<QuestionOption> getOptions()
+ * @method string renderedDescription()
  */
 class QuestionResource extends JsonResource
 {
@@ -40,7 +41,7 @@ class QuestionResource extends JsonResource
         return [
             'id' => $this->id,
             'perex' => $this->perex,
-            'description' => $this->description,
+            'description' => $this->renderedDescription(),
             'type' => $this->type->value,
             'options' => QuestionOptionsResource::collection($this->getOptions()),
             'settings' => $this->settings,
