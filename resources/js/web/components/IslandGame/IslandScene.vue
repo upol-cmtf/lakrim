@@ -90,32 +90,27 @@
                                 :alt="selectedIsland.name"
                                 class="island-shadow-soft block h-full w-full"
                             >
-                            <img
-                                v-for="(pos, i) in selectedIsland.lampPositions"
-                                :key="`lamp-${i}`"
-                                :src="lampImg"
-                                :style="pos"
-                                class="island-lamp absolute"
-                                alt=""
-                            >
                             <button
                                 v-for="(pos, i) in selectedIsland.pathButtonPositions"
                                 :key="`btn-${i}`"
                                 type="button"
                                 :style="pos"
                                 class="path-button absolute"
-                                :class="{ 'path-button--locked': i > 0 }"
-                                :disabled="i > 0"
+                                :class="{
+                                    'path-button--locked': selectedIsland.buttonStates[i] === 'locked',
+                                    'path-button--done': selectedIsland.buttonStates[i] === 'green',
+                                }"
+                                :disabled="selectedIsland.buttonStates[i] === 'locked' || selectedIsland.buttonStates[i] === 'green'"
                                 :aria-label="`Úkol ${i + 1}`"
                                 @click="openQuestion(i)"
                             >
                                 <img
-                                    :src="buttonImgs[i]"
+                                    :src="buttonSrc(i, selectedIsland.buttonStates[i])"
                                     :alt="`Úkol ${i + 1}`"
                                     class="block w-full"
                                 >
                                 <svg
-                                    v-if="i > 0"
+                                    v-if="selectedIsland.buttonStates[i] === 'locked'"
                                     class="path-button-lock"
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
@@ -169,7 +164,7 @@
                             <button
                                 type="button"
                                 class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                                @click="closeQuestion"
+                                @click="answerQuestion(idx)"
                             >
                                 {{ option }}
                             </button>
@@ -179,21 +174,48 @@
             </div>
         </transition>
         </div>
+
+        <div
+            v-if="selectedIsland"
+            class="island-guide absolute bottom-0 right-0"
+        >
+            <transition name="guide-fade">
+                <div v-if="guideMessage" ref="bubbleEl" class="island-guide-bubble" role="status">
+                    <button
+                        type="button"
+                        class="island-guide-close"
+                        aria-label="Zavřít"
+                        @click="guideMessage = null"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <div class="island-guide-text" v-html="guideMessage"></div>
+                </div>
+            </transition>
+            <img :src="selectedIsland.guideImage" alt="Průvodce" class="island-guide-img">
+        </div>
     </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch, onBeforeUnmount } from 'vue';
 
 const asset = (filename) => new URL(`../../../../images/islands/${filename}`, import.meta.url).href;
-const lampImg = new URL('../../../../images/turned_off_lamp.png', import.meta.url).href;
-const buttonImgs = [
-    new URL('../../../../images/button1.png', import.meta.url).href,
-    new URL('../../../../images/button2.png', import.meta.url).href,
-    new URL('../../../../images/button3.png', import.meta.url).href,
-    new URL('../../../../images/button4.png', import.meta.url).href,
-    new URL('../../../../images/button5.png', import.meta.url).href,
-];
+const buttonVariants = [1, 2, 3, 4, 5].map((n) => ({
+    default: new URL(`../../../../images/button${n}_default.svg`, import.meta.url).href,
+    green: new URL(`../../../../images/button${n}_green.svg`, import.meta.url).href,
+    orange: new URL(`../../../../images/button${n}_orange.svg`, import.meta.url).href,
+}));
+
+// button state: 'locked' | 'default' | 'green' (správně) | 'orange' (špatně)
+const buttonSrc = (index, state) => {
+    const variant = buttonVariants[index];
+    if (state === 'green') return variant.green;
+    if (state === 'orange') return variant.orange;
+    return variant.default;
+};
 
 const defaultPathButtonPositions = [
     { top: '63%', left: '38%' },
@@ -203,13 +225,8 @@ const defaultPathButtonPositions = [
     { top: '35%', left: '69%' },
 ];
 
-const defaultLampPositions = [
-    // { top: '62%', left: '47%' },
-    // { top: '56%', left: '52%' },
-    // { top: '50%', left: '57%' },
-    // { top: '44%', left: '62%' },
-    { top: '38%', left: '58%' },
-];
+// první tlačítko je odemčené, zbytek se odemyká postupně
+const initialButtonStates = () => ['default', 'locked', 'locked', 'locked', 'locked'];
 
 const seaWaveletPath = 'M2,4 Q7,1 12,4 T22,4 T32,4 T38,4';
 
@@ -252,62 +269,109 @@ const waveInnerPath = 'M188.0,38.0L188.9,38.9L189.3,40.1L188.8,41.0L187.7,41.5L1
 
 const lighthouseImg = asset('lighthouse.webp');
 
+// úvodní promluva průvodce při otevření detailu ostrova
+const exploitedEmotionsIntro =
+    '<p>Vítejte na Ostrově zneužitých citů, kapitáne. Tohle místo vypadá na první pohled vlídně, ale nenechte se zmást. Podvodníci zde neútočí jen na vaše zařízení, ale především na vaše srdce, vaši lásku k rodině a vaši ochotu pomáhat.</p>'
+    + '<p>Aby vás podvodníci dostali tam, kam chtějí, používají tyto nekalé postupy:</p>'
+    + '<ul>'
+    + '<li><strong>Zneužití strachu a emocí:</strong> Budou vám tvrdit, že váš vnuk měl nehodu nebo že je váš telefon v ohrožení virem. Chtějí vás vyděsit, abyste je v panice poslechli.</li>'
+    + '<li><strong>Hra na city a osamělost:</strong> Budou se vydávat za sympatické lidi v nouzi nebo osamělé hrdiny, kteří potřebují právě vaši pomoc. Budují si u vás důvěru jen proto, aby ji později zpeněžili.</li>'
+    + '<li><strong>Falešná autorita a nátlak:</strong> Někdy vystupují jako policisté nebo bankéři. Budou na vás spěchat a nutit vás k tajnostem před rodinou, abyste se nemohli s nikým poradit.</li>'
+    + '</ul>'
+    + '<p>Pamatujte si jedno zlaté pravidlo: Skutečná policie, banka nebo váš blízký po vás nikdy nebudou chtít, abyste své peníze narychlo někam posílali nebo si do telefonu instalovali neznámé programy. Jakmile na vás někdo v telefonu tlačí, zakazuje vám o tom mluvit s rodinou nebo vás straší virem, je to téměř jistě podvodník.</p>'
+    + '<p>Na cestě k majáku Ostrova zneužitých citů vás čeká pět zkoušek. Vaším úkolem je nenechat se ovládnout emocemi. Pokud ucítíte tlak, zastavte se. Ověřte si vše u svých blízkých nebo přímo v bance.</p>'
+    + '<p>Jste připraveni prokouknout jejich pasti a rozsvítit tento ostrov naplno? Pojďme na to.</p>';
+
 const islands = reactive([
     {
         key: 'digitalni-pasti',
         name: 'Ostrov digitálních pastí',
         image: asset('digital_traps.webp'),
         detailImage: asset('detail/digital_traps.webp'),
+        guideImage: asset('digital_traps_guide.webp'),
         position: { top: '18%', left: '14%' },
         bobClass: 'island-1',
         tasks: { completed: 0, total: 5 },
-        lampPositions: defaultLampPositions,
         pathButtonPositions: defaultPathButtonPositions,
+        buttonStates: initialButtonStates(),
     },
     {
         key: 'klamave-zpravy',
         name: 'Ostrov klamavých zpráv',
         image: asset('deceptive_news.webp'),
         detailImage: asset('detail/deceptive_news.webp'),
+        guideImage: asset('deceptive_news_guide.webp'),
         position: { top: '18%', right: '14%' },
         bobClass: 'island-2',
         tasks: { completed: 0, total: 5 },
-        lampPositions: defaultLampPositions,
         pathButtonPositions: defaultPathButtonPositions,
+        buttonStates: initialButtonStates(),
     },
     {
         key: 'lasky',
         name: 'Ostrov zneužitých citů',
         image: asset('exploited_emotions.webp'),
         detailImage: asset('detail/exploited_emotions.webp'),
+        guideImage: asset('exploited_emotions_guide.webp'),
+        introMessage: exploitedEmotionsIntro,
         position: { bottom: '14%', left: '14%' },
         bobClass: 'island-3',
         tasks: { completed: 0, total: 5 },
-        lampPositions: defaultLampPositions,
         pathButtonPositions: defaultPathButtonPositions,
+        buttonStates: initialButtonStates(),
     },
     {
         key: 'penize',
         name: 'Ostrov falešného bohatství',
         image: asset('fake_wealth.webp'),
         detailImage: asset('detail/fake_wealth.webp'),
+        guideImage: asset('fake_wealth_guide.webp'),
         position: { right: '14%', bottom: '14%' },
         bobClass: 'island-4',
         tasks: { completed: 0, total: 5 },
-        lampPositions: defaultLampPositions,
         pathButtonPositions: defaultPathButtonPositions,
+        buttonStates: initialButtonStates(),
     },
 ]);
 
 const selectedIsland = ref(null);
 const activeQuestion = ref(null);
+const guideMessage = ref(null);
+const bubbleEl = ref(null);
+
+// kliknutí kamkoliv mimo bublinu ji zavře
+let outsideClickTimer = null;
+
+const handleOutsideClick = (event) => {
+    if (bubbleEl.value && !bubbleEl.value.contains(event.target)) {
+        guideMessage.value = null;
+    }
+};
+
+watch(guideMessage, (value) => {
+    clearTimeout(outsideClickTimer);
+    document.removeEventListener('click', handleOutsideClick);
+    if (value) {
+        // listener přidáme až po dokončení kliknutí, které bublinu otevřelo
+        outsideClickTimer = setTimeout(() => {
+            document.addEventListener('click', handleOutsideClick);
+        }, 0);
+    }
+});
+
+onBeforeUnmount(() => {
+    clearTimeout(outsideClickTimer);
+    document.removeEventListener('click', handleOutsideClick);
+});
 
 const open = (island) => {
     selectedIsland.value = island;
+    guideMessage.value = island.introMessage ?? null;
 };
 
 const close = () => {
     selectedIsland.value = null;
+    guideMessage.value = null;
 };
 
 const fakeQuestion = (buttonIndex) => ({
@@ -322,14 +386,43 @@ const fakeQuestion = (buttonIndex) => ({
         'Ignoruji e-mail a kontaktuji banku přes oficiální web/aplikaci.',
         'Přepošlu e-mail kamarádovi pro radu.',
     ],
+    correct: 2,
 });
 
 const openQuestion = (buttonIndex) => {
-    if (buttonIndex > 0) return;
-    activeQuestion.value = fakeQuestion(buttonIndex);
+    const state = selectedIsland.value?.buttonStates[buttonIndex];
+    if (state === 'locked' || state === 'green') return;
+    guideMessage.value = null;
+    activeQuestion.value = { ...fakeQuestion(buttonIndex), buttonIndex };
 };
 
 const closeQuestion = () => {
+    activeQuestion.value = null;
+};
+
+const answerQuestion = (optionIndex) => {
+    const question = activeQuestion.value;
+    const island = selectedIsland.value;
+    if (!question || !island) return;
+
+    const i = question.buttonIndex;
+
+    if (optionIndex === question.correct) {
+        // správná odpověď – tlačítko zazelená a odemkne se další v pořadí
+        if (island.buttonStates[i] !== 'green') {
+            island.tasks.completed = Math.min(island.tasks.total, island.tasks.completed + 1);
+        }
+        island.buttonStates[i] = 'green';
+        if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
+            island.buttonStates[i + 1] = 'default';
+        }
+        guideMessage.value = '<p>Skvělá práce! Takhle se podvodům úspěšně bráníš.</p>';
+    } else {
+        // špatná odpověď – tlačítko zoranžoví, jde zkusit znovu
+        island.buttonStates[i] = 'orange';
+        guideMessage.value = '<p>Tentokrát to nevyšlo. Zkus si situaci znovu promyslet.</p>';
+    }
+
     activeQuestion.value = null;
 };
 </script>
@@ -418,14 +511,6 @@ const closeQuestion = () => {
     max-width: 100%;
 }
 
-.island-lamp {
-    width: 5%;
-    transform: translate(-50%, -100%);
-    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45));
-    pointer-events: none;
-    user-select: none;
-}
-
 .path-button {
     width: 9%;
     padding: 0;
@@ -438,14 +523,18 @@ const closeQuestion = () => {
     user-select: none;
 }
 
-.path-button:not(.path-button--locked):hover,
-.path-button:not(.path-button--locked):focus {
+.path-button:not(.path-button--locked):not(.path-button--done):hover,
+.path-button:not(.path-button--locked):not(.path-button--done):focus {
     transform: translate(-50%, -50%) scale(1.12);
     filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.55));
 }
 
 .path-button--locked {
     cursor: not-allowed;
+}
+
+.path-button--done {
+    cursor: default;
 }
 
 .path-button--locked > img {
@@ -584,6 +673,141 @@ const closeQuestion = () => {
 .scene-fade-enter-from,
 .scene-fade-leave-to {
     opacity: 0;
+}
+
+.island-guide {
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    max-width: min(94vw, 54rem);
+    padding: 0.75rem;
+}
+
+.island-guide-img {
+    height: 14rem;
+    width: auto;
+    flex-shrink: 0;
+    filter: drop-shadow(0 6px 8px rgba(8, 38, 70, 0.45));
+    user-select: none;
+    pointer-events: none;
+}
+
+.island-guide-bubble {
+    position: relative;
+    margin-bottom: 6rem;
+    padding: 1.1rem 1.4rem;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.98);
+    color: #11365e;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow:
+        0 6px 18px rgba(0, 20, 50, 0.4),
+        inset 0 0 0 1px rgba(20, 74, 120, 0.15);
+}
+
+.island-guide-close {
+    position: absolute;
+    top: -0.65rem;
+    right: -0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 0;
+    border-radius: 9999px;
+    background: #11365e;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 20, 50, 0.45);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.island-guide-close:hover,
+.island-guide-close:focus-visible {
+    background: #1d4f86;
+    transform: scale(1.08);
+    outline: none;
+}
+
+.island-guide-close svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.island-guide-text :deep(p) {
+    margin: 0 0 0.85rem;
+}
+
+.island-guide-text :deep(p:last-child) {
+    margin-bottom: 0;
+}
+
+.island-guide-text :deep(strong) {
+    font-weight: 800;
+}
+
+.island-guide-text :deep(ul) {
+    list-style: none;
+    margin: 0.2rem 0 0.95rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.island-guide-text :deep(li) {
+    position: relative;
+    padding-left: 1.15rem;
+}
+
+.island-guide-text :deep(li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: #f59e0b;
+}
+
+.island-guide-bubble::after {
+    content: '';
+    position: absolute;
+    right: -7px;
+    bottom: 14px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 9px solid rgba(255, 255, 255, 0.98);
+}
+
+@media (max-width: 639px) {
+    .island-guide-img {
+        height: 9rem;
+        width: auto;
+    }
+    .island-guide-bubble {
+        font-size: 0.9rem;
+        padding: 0.85rem 1rem;
+        margin-bottom: 3.5rem;
+    }
+}
+
+.guide-fade-enter-active,
+.guide-fade-leave-active {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.guide-fade-enter-from,
+.guide-fade-leave-to {
+    opacity: 0;
+    transform: translateY(12px);
 }
 
 .question-modal-backdrop {
