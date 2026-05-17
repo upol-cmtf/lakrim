@@ -4,6 +4,7 @@ namespace Tests\Feature\Web\Quiz;
 use App\Enums\Version;
 use App\Models\Difficulty;
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use App\Models\Respondent;
 use App\Models\RespondentAnswer;
@@ -63,6 +64,7 @@ class QuestionTest extends TestCase
                 'difficulty_id' => $difficulty->id,
             ]);
         assert($question instanceof Question);
+        assert($question->questionGroup instanceof QuestionGroup);
 
         $respondent = Respondent::factory()->createOneQuietly([
             'version' => Version::One->value,
@@ -105,6 +107,7 @@ class QuestionTest extends TestCase
                 'difficulty_id' => $difficulty->id,
             ]);
         assert($question1 instanceof Question && $question2 instanceof Question);
+        assert($question2->questionGroup instanceof QuestionGroup);
 
         $option = $question1->options->first();
         assert($option instanceof QuestionOption);
