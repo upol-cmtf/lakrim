@@ -34,9 +34,9 @@
             <span class="island-progress island-progress--lg">{{ selectedIsland.tasks.completed }}/{{ selectedIsland.tasks.total }}</span>
         </h2>
 
-        <div class="container mx-auto px-4 py-6 relative">
+        <div class="container mx-auto flex min-h-screen items-center justify-center px-4 py-6 relative">
 
-            <div class="island-scene relative mx-auto aspect-[3/2] w-full max-w-5xl overflow-hidden">
+            <div class="island-scene relative mx-auto w-full overflow-hidden">
             <div class="sea-caustics" aria-hidden="true"></div>
 
             <svg width="0" height="0" class="absolute" aria-hidden="true" focusable="false">
@@ -47,17 +47,68 @@
                         <stop offset="0%" stop-color="#fbbf24"/>
                         <stop offset="100%" stop-color="#f59e0b"/>
                     </linearGradient>
+                    <g id="cloud-shape">
+                        <ellipse cx="112" cy="92" rx="98" ry="30" fill="#e9f0f6"/>
+                        <ellipse cx="64"  cy="72" rx="48" ry="38"/>
+                        <ellipse cx="168" cy="70" rx="46" ry="36"/>
+                        <ellipse cx="116" cy="54" rx="58" ry="48"/>
+                        <ellipse cx="92"  cy="40" rx="34" ry="30"/>
+                    </g>
                 </defs>
             </svg>
 
             <transition name="scene-fade">
                 <div v-if="!selectedIsland" key="scene" class="absolute inset-0">
-                    <div class="island-wrap absolute top-1/2 left-1/2 w-[22%] -translate-x-1/2 -translate-y-1/2">
+                    <div class="island-wrap lighthouse-wrap absolute top-1/2 left-1/2 w-[22%] -translate-x-1/2 -translate-y-1/2">
                         <svg class="ripple" viewBox="0 0 220 70" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                             <use class="ring ring-outer" href="#wave-outer"/>
                             <use class="ring ring-inner" href="#wave-inner"/>
                         </svg>
                         <img :src="lighthouseImg" alt="Maják" class="island-shadow lighthouse-bob relative block w-full">
+
+                        <!-- mraky halící maják, rozestupují se s počtem získaných karet bezpečí -->
+                        <div
+                            v-for="(cloud, i) in clouds"
+                            :key="`cloud-${i}`"
+                            class="lighthouse-cloud"
+                            :style="cloudStyle(cloud)"
+                            aria-hidden="true"
+                        >
+                            <svg
+                                :class="['lighthouse-cloud-img', cloud.floatClass]"
+                                :style="{ animationDelay: cloud.delay }"
+                                viewBox="0 0 220 124"
+                            >
+                                <use href="#cloud-shape"/>
+                            </svg>
+                        </div>
+
+                        <!-- paprsky majáku – rozsvítí se k dokončenému ostrovu -->
+                        <div
+                            v-for="(island, i) in islands"
+                            :key="`beam-${i}`"
+                            class="lighthouse-beam"
+                            :style="{
+                                transform: `translateX(-50%) rotate(${island.beamAngle}deg)`,
+                                opacity: island.tasks.completed >= island.tasks.total ? 0.85 : 0,
+                            }"
+                            aria-hidden="true"
+                        ></div>
+
+                        <!-- záře lampy sílí s postupem hráče -->
+                        <div
+                            class="lighthouse-glow"
+                            :style="{ opacity: 0.1 + progress * 0.9 }"
+                            aria-hidden="true"
+                        ></div>
+
+                        <!-- počítadlo získaných karet bezpečí -->
+                        <span class="lighthouse-counter" aria-label="Získané karty bezpečí">
+                            <svg viewBox="0 0 24 24" class="lighthouse-counter-icon" aria-hidden="true">
+                                <path d="M12 2l7 3v6c0 4.4-3 8.6-7 11-4-2.4-7-6.6-7-11V5l7-3z"/>
+                            </svg>
+                            <span>{{ collectedCards }}/{{ totalCards }}</span>
+                        </span>
                     </div>
 
                     <button
@@ -81,7 +132,7 @@
                     </button>
                 </div>
 
-                <div v-else key="detail" class="absolute inset-0 flex flex-col p-3 sm:p-6">
+                <div v-else key="detail" class="fixed inset-0 z-10 flex flex-col p-3 sm:p-6">
 
                     <div class="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                         <div class="island-stage relative">
@@ -200,7 +251,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, reactive, ref, watch, onBeforeUnmount } from 'vue';
 
 const asset = (filename) => new URL(`../../../../images/islands/${filename}`, import.meta.url).href;
 const buttonVariants = [1, 2, 3, 4, 5].map((n) => ({
@@ -269,6 +320,16 @@ const waveInnerPath = 'M188.0,38.0L188.9,38.9L189.3,40.1L188.8,41.0L187.7,41.5L1
 
 const lighthouseImg = asset('lighthouse.webp');
 
+// mraky kolem majáku – základní pozice (překrývají maják) a směr odplutí
+const clouds = [
+    { top: '-20%', left: '5%',   width: '92%', dx: '-12%',  dy: '-150%', floatClass: 'cloud-float-a', delay: '0s'  },
+    { top: '8%',   left: '-32%', width: '84%', dx: '-150%', dy: '-25%',  floatClass: 'cloud-float-b', delay: '-4s' },
+    { top: '2%',   left: '50%',  width: '88%', dx: '150%',  dy: '-35%',  floatClass: 'cloud-float-c', delay: '-7s' },
+    { top: '20%',  left: '8%',   width: '88%', dx: '5%',    dy: '-165%', floatClass: 'cloud-float-b', delay: '-2s' },
+    { top: '42%',  left: '-24%', width: '72%', dx: '-150%', dy: '75%',   floatClass: 'cloud-float-a', delay: '-9s' },
+    { top: '42%',  left: '52%',  width: '76%', dx: '150%',  dy: '85%',   floatClass: 'cloud-float-c', delay: '-5s' },
+];
+
 // úvodní promluva průvodce při otevření detailu ostrova
 const exploitedEmotionsIntro =
     '<p>Vítejte na Ostrově zneužitých citů, kapitáne. Tohle místo vypadá na první pohled vlídně, ale nenechte se zmást. Podvodníci zde neútočí jen na vaše zařízení, ale především na vaše srdce, vaši lásku k rodině a vaši ochotu pomáhat.</p>'
@@ -282,57 +343,62 @@ const exploitedEmotionsIntro =
     + '<p>Na cestě k majáku Ostrova zneužitých citů vás čeká pět zkoušek. Vaším úkolem je nenechat se ovládnout emocemi. Pokud ucítíte tlak, zastavte se. Ověřte si vše u svých blízkých nebo přímo v bance.</p>'
     + '<p>Jste připraveni prokouknout jejich pasti a rozsvítit tento ostrov naplno? Pojďme na to.</p>';
 
-const islands = reactive([
-    {
-        key: 'digitalni-pasti',
-        name: 'Ostrov digitálních pastí',
-        image: asset('digital_traps.webp'),
-        detailImage: asset('detail/digital_traps.webp'),
-        guideImage: asset('digital_traps_guide.webp'),
-        position: { top: '18%', left: '14%' },
-        bobClass: 'island-1',
-        tasks: { completed: 0, total: 5 },
-        pathButtonPositions: defaultPathButtonPositions,
-        buttonStates: initialButtonStates(),
+const props = defineProps({
+    // ostrovy z DB (modul islands) – očekává pole { id, name, image, guide }
+    islandsData: {
+        type: Array,
+        default: () => [],
     },
-    {
-        key: 'klamave-zpravy',
-        name: 'Ostrov klamavých zpráv',
-        image: asset('deceptive_news.webp'),
-        detailImage: asset('detail/deceptive_news.webp'),
-        guideImage: asset('deceptive_news_guide.webp'),
-        position: { top: '18%', right: '14%' },
-        bobClass: 'island-2',
-        tasks: { completed: 0, total: 5 },
-        pathButtonPositions: defaultPathButtonPositions,
-        buttonStates: initialButtonStates(),
-    },
-    {
-        key: 'lasky',
-        name: 'Ostrov zneužitých citů',
-        image: asset('exploited_emotions.webp'),
-        detailImage: asset('detail/exploited_emotions.webp'),
-        guideImage: asset('exploited_emotions_guide.webp'),
-        introMessage: exploitedEmotionsIntro,
-        position: { bottom: '14%', left: '14%' },
-        bobClass: 'island-3',
-        tasks: { completed: 0, total: 5 },
-        pathButtonPositions: defaultPathButtonPositions,
-        buttonStates: initialButtonStates(),
-    },
-    {
-        key: 'penize',
-        name: 'Ostrov falešného bohatství',
-        image: asset('fake_wealth.webp'),
-        detailImage: asset('detail/fake_wealth.webp'),
-        guideImage: asset('fake_wealth_guide.webp'),
-        position: { right: '14%', bottom: '14%' },
-        bobClass: 'island-4',
-        tasks: { completed: 0, total: 5 },
-        pathButtonPositions: defaultPathButtonPositions,
-        buttonStates: initialButtonStates(),
-    },
-]);
+});
+
+// rozmístění ostrovů ve scéně – přiřazuje se podle pořadí, není v DB
+// beamAngle = natočení paprsku majáku k danému ostrovu
+// (0° = dolů, kladné = po směru hodin / doleva, záporné = doprava)
+const islandLayouts = [
+    { position: { top: '11%', left: '6%' }, bobClass: 'island-1', beamAngle: 106 },
+    { position: { top: '11%', right: '6%' }, bobClass: 'island-2', beamAngle: -106 },
+    { position: { bottom: '9%', left: '6%' }, bobClass: 'island-3', beamAngle: 56 },
+    { position: { right: '6%', bottom: '9%' }, bobClass: 'island-4', beamAngle: -56 },
+];
+
+// úvodní promluvy průvodce podle názvu obrázku ostrova – nejsou v DB
+const introMessages = {
+    'exploited_emotions.webp': exploitedEmotionsIntro,
+};
+
+const islands = reactive(
+    props.islandsData.map((island, index) => {
+        const layout = islandLayouts[index % islandLayouts.length];
+
+        return {
+            key: island.id,
+            name: island.name,
+            image: asset(island.image),
+            detailImage: asset(`detail/${island.image}`),
+            guideImage: island.guide ? asset(island.guide) : null,
+            introMessage: introMessages[island.image] ?? null,
+            position: layout.position,
+            bobClass: layout.bobClass,
+            beamAngle: layout.beamAngle,
+            tasks: { completed: 0, total: 5 },
+            pathButtonPositions: defaultPathButtonPositions,
+            buttonStates: initialButtonStates(),
+        };
+    }),
+);
+
+// celkový postup hráče – z něj se odvozuje mlha i záře majáku
+const totalCards = computed(() => islands.reduce((sum, island) => sum + island.tasks.total, 0));
+const collectedCards = computed(() => islands.reduce((sum, island) => sum + island.tasks.completed, 0));
+const progress = computed(() => (totalCards.value > 0 ? collectedCards.value / totalCards.value : 0));
+// mraky halí maják na začátku, s postupem se rozestoupí a odplují
+const cloudStyle = (cloud) => ({
+    top: cloud.top,
+    left: cloud.left,
+    width: cloud.width,
+    opacity: Math.max(0, 1 - progress.value),
+    transform: `translate(calc(${cloud.dx} * ${progress.value}), calc(${cloud.dy} * ${progress.value}))`,
+});
 
 const selectedIsland = ref(null);
 const activeQuestion = ref(null);
@@ -435,6 +501,10 @@ const answerQuestion = (optionIndex) => {
 
 .island-scene {
     background: transparent;
+    aspect-ratio: 3 / 2;
+    /* co největší scéna, která se vejde do výšky i šířky obrazovky */
+    max-width: min(96rem, calc((100vh - 3rem) * 3 / 2));
+    max-height: calc(100vh - 3rem);
 }
 
 .sea-wavelet {
@@ -665,6 +735,130 @@ const answerQuestion = (optionIndex) => {
 .island-3 { animation-duration: 5.8s; animation-delay: -2.0s; }
 .island-4 { animation-duration: 6.4s; animation-delay: -0.8s; }
 
+/* --- maják: mlha, paprsky, záře, počítadlo karet bezpečí --- */
+.lighthouse-wrap {
+    z-index: 3;
+}
+
+.lighthouse-cloud {
+    position: absolute;
+    pointer-events: none;
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    z-index: 2;
+}
+
+.lighthouse-cloud-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    fill: #fff;
+    filter: drop-shadow(0 6px 7px rgba(70, 95, 120, 0.28));
+    will-change: transform;
+}
+
+.cloud-float-a { animation: cloud-float-a 13s ease-in-out infinite; }
+.cloud-float-b { animation: cloud-float-b 16s ease-in-out infinite; }
+.cloud-float-c { animation: cloud-float-c 14s ease-in-out infinite; }
+
+@keyframes cloud-float-a {
+    0%, 100% { transform: translate(0, 0);      }
+    50%      { transform: translate(3.5%, -4%); }
+}
+
+@keyframes cloud-float-b {
+    0%, 100% { transform: translate(0, 0);      }
+    50%      { transform: translate(-4%, 3.5%); }
+}
+
+@keyframes cloud-float-c {
+    0%, 100% { transform: translate(0, 0);     }
+    50%      { transform: translate(4%, 2.5%); }
+}
+
+.lighthouse-beam {
+    position: absolute;
+    top: 23%;
+    left: 46%;
+    width: 82%;
+    height: 205%;
+    transform-origin: 50% 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 242, 195, 0.62) 0%,
+        rgba(255, 236, 170, 0.4) 48%,
+        rgba(255, 232, 150, 0.18) 82%,
+        rgba(255, 232, 150, 0) 100%
+    );
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    z-index: 3;
+}
+
+.lighthouse-glow {
+    position: absolute;
+    top: 23%;
+    left: 46%;
+    width: 125%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 243, 200, 0.95) 0%,
+        rgba(255, 224, 140, 0.5) 26%,
+        rgba(255, 224, 140, 0) 66%
+    );
+    mix-blend-mode: screen;
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+    animation: lamp-pulse 3.6s ease-in-out infinite;
+    z-index: 4;
+}
+
+@keyframes lamp-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    }
+    50%      { transform: translate(-50%, -50%) scale(1.09); }
+}
+
+.lighthouse-counter {
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.7rem 0.28rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.96);
+    color: #11365e;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow:
+        0 2px 8px rgba(0, 20, 50, 0.35),
+        inset 0 0 0 1px rgba(20, 74, 120, 0.15);
+    font-variant-numeric: tabular-nums;
+    z-index: 5;
+}
+
+.lighthouse-counter-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: #f59e0b;
+}
+
+@media (max-width: 639px) {
+    .lighthouse-counter {
+        font-size: 0.78rem;
+        padding: 0.2rem 0.5rem 0.2rem 0.35rem;
+        bottom: -1.1rem;
+    }
+}
+
 .scene-fade-enter-active,
 .scene-fade-leave-active {
     transition: opacity 0.25s ease;
@@ -838,6 +1032,8 @@ const answerQuestion = (optionIndex) => {
 
 @media (prefers-reduced-motion: reduce) {
     .island-bob,
-    .lighthouse-bob { animation: none; }
+    .lighthouse-bob,
+    .lighthouse-cloud-img,
+    .lighthouse-glow { animation: none; }
 }
 </style>

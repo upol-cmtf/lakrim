@@ -1,5 +1,5 @@
 @extends('layouts.web')
 
 @section('content')
-    <island-scene></island-scene>
+    <island-scene :islands-data='@json($islands)'></island-scene>
 @endsection
