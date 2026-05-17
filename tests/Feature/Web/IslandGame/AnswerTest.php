@@ -122,6 +122,30 @@ class AnswerTest extends TestCase
         ]);
     }
 
+    public function testAnswerWithOneOfMultipleRightOptionsIsCorrect(): void
+    {
+        $respondent = $this->respondent();
+        $scenario = $this->scenario(button: 1);
+
+        // situace má víc přijatelných odpovědí – stačí vybrat některou z nich
+        QuestionOption::factory()->create([
+            'question_id' => $scenario['question']->id,
+            'right' => true,
+        ]);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'question_id' => $scenario['question']->id,
+            'option_ids' => [$scenario['right']->id],
+            'seconds' => 5,
+            'attempt' => 1,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.correct', true);
+    }
+
     private function respondent(): Respondent
     {
         return Respondent::factory()->createOneQuietly([

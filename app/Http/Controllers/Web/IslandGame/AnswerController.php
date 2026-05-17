@@ -86,18 +86,21 @@ final class AnswerController extends ApiController
     }
 
     /**
-     * Odpověď je správná, když hráč zvolil právě všechny správné možnosti otázky.
+     * Odpověď je správná, když hráč zvolil pouze správné možnosti. Situace může
+     * mít víc přijatelných odpovědí – stačí vybrat některou z nich.
      *
      * @param int[] $optionIds
      */
     private function isCorrect(Question $question, array $optionIds): bool
     {
+        if ($optionIds === []) {
+            return false;
+        }
+
         /** @var int[] $rightOptionIds */
         $rightOptionIds = $question->options()->where('right', true)->pluck('id')->all();
 
-        return $optionIds !== []
-            && array_diff($optionIds, $rightOptionIds) === []
-            && array_diff($rightOptionIds, $optionIds) === [];
+        return array_diff($optionIds, $rightOptionIds) === [];
     }
 
     /**

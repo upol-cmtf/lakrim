@@ -187,10 +187,10 @@
                 :aria-label="activeQuestion.title"
                 @click.self="closeQuestion"
             >
-                <div class="question-modal relative w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
+                <div class="question-modal relative flex h-full w-full max-w-[1600px] flex-col rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
                     <button
                         type="button"
-                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        class="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Zavřít"
                         @click="closeQuestion"
                     >
@@ -199,38 +199,47 @@
                         </svg>
                     </button>
 
-                    <h3 class="mb-4 pr-8 text-xl font-bold leading-tight text-blue-900">
-                        {{ activeQuestion.title }}
-                    </h3>
+                    <div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto sm:flex-row sm:gap-8">
+                        <!-- levá část: popis situace -->
+                        <div class="sm:w-3/5">
+                            <h3 class="mb-4 pr-8 text-xl font-bold leading-tight text-blue-900 sm:pr-0">
+                                {{ activeQuestion.title }}
+                            </h3>
 
-                    <p
-                        v-if="activeQuestion.perex"
-                        class="mb-3 text-sm font-semibold leading-relaxed text-slate-800"
-                    >
-                        {{ activeQuestion.perex }}
-                    </p>
-
-                    <div
-                        v-if="activeQuestion.description"
-                        class="question-modal-text mb-5 text-sm leading-relaxed text-slate-700"
-                        v-html="activeQuestion.description"
-                    ></div>
-
-                    <ul class="space-y-2">
-                        <li
-                            v-for="option in activeQuestion.options"
-                            :key="option.id"
-                        >
-                            <button
-                                type="button"
-                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-                                :disabled="answerSubmitting"
-                                @click="answerQuestion(option)"
+                            <p
+                                v-if="activeQuestion.perex"
+                                class="mb-3 text-sm font-semibold leading-relaxed text-slate-800"
                             >
-                                {{ option.name }}
-                            </button>
-                        </li>
-                    </ul>
+                                {{ activeQuestion.perex }}
+                            </p>
+
+                            <div
+                                v-if="activeQuestion.description"
+                                :class="[
+                                    'question-modal-text text-sm leading-relaxed text-slate-700',
+                                    { 'question-modal-text--cover': descriptionImageOnly },
+                                ]"
+                                v-html="activeQuestion.description"
+                            ></div>
+                        </div>
+
+                        <!-- pravá část: možnosti na výběr -->
+                        <ul class="space-y-2 sm:w-2/5 sm:border-l sm:border-slate-200 sm:pl-8">
+                            <li
+                                v-for="option in activeQuestion.options"
+                                :key="option.id"
+                            >
+                                <button
+                                    type="button"
+                                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                                    :disabled="answerSubmitting"
+                                    @click="answerQuestion(option)"
+                                >
+                                    {{ option.name }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -431,10 +440,18 @@ const activeQuestion = ref(null);
 const loadingQuestion = ref(false);
 const answerSubmitting = ref(false);
 const guideMessage = ref(null);
+
+// popis otázky tvořený jen obrázkem (žádný text) – obrázek pak vyplní modal
+const descriptionImageOnly = computed(() => {
+    const description = activeQuestion.value?.description ?? '';
+    return /^\s*<img\b[^>]*>\s*$/i.test(description);
+});
 const bubbleEl = ref(null);
 
 // kliknutí kamkoliv mimo bublinu ji zavře
 let outsideClickTimer = null;
+// prodleva, než se po otevření detailu ostrova ukáže úvodní zpráva průvodce
+let introTimer = null;
 
 const handleOutsideClick = (event) => {
     if (bubbleEl.value && !bubbleEl.value.contains(event.target)) {
@@ -455,15 +472,28 @@ watch(guideMessage, (value) => {
 
 onBeforeUnmount(() => {
     clearTimeout(outsideClickTimer);
+    clearTimeout(introTimer);
     document.removeEventListener('click', handleOutsideClick);
 });
 
 const open = (island) => {
+    clearTimeout(introTimer);
     selectedIsland.value = island;
-    guideMessage.value = island.introMessage ?? null;
+    guideMessage.value = null;
+
+    // detail se otevře hned, úvodní zpráva průvodce naběhne až po krátké prodlevě
+    if (island.introMessage) {
+        introTimer = setTimeout(() => {
+            // pojistka: hráč mezitím nemusel detail zavřít / přepnout
+            if (selectedIsland.value === island) {
+                guideMessage.value = island.introMessage;
+            }
+        }, 700);
+    }
 };
 
 const close = () => {
+    clearTimeout(introTimer);
     selectedIsland.value = null;
     guideMessage.value = null;
 };
@@ -564,7 +594,7 @@ const answerQuestion = async (option) => {
             island.buttonStates[i] = 'orange';
             const hint = wrongAnswerHint(result, option.id);
             guideMessage.value = hint
-                ? `<p>Tentokrát to nevyšlo.</p><p>${hint}</p>`
+                ? `<p>${hint}</p>`
                 : '<p>Tentokrát to nevyšlo. Zkus si situaci znovu promyslet.</p>';
         }
     } catch (error) {
@@ -952,7 +982,8 @@ const answerQuestion = async (option) => {
 }
 
 .island-guide {
-    z-index: 50;
+    /* nižší než modal (z-50), aby průvodce zůstal za detailem situace */
+    z-index: 40;
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
@@ -1092,9 +1123,19 @@ const answerQuestion = async (option) => {
 }
 
 .question-modal-text :deep(img) {
+    display: block;
     max-width: 100%;
+    max-height: 30rem;
+    width: auto;
     height: auto;
+    margin: 0 auto 0.75rem;
     border-radius: 0.5rem;
+}
+
+/* popis je jen obrázek – nech ho vyplnit výšku modalu */
+.question-modal-text--cover :deep(img) {
+    max-height: 82vh;
+    margin-bottom: 0;
 }
 
 .question-modal-text :deep(p) {
