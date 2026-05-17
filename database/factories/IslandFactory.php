@@ -14,9 +14,13 @@ class IslandFactory extends Factory
      */
     public function definition(): array
     {
+        $slug = $this->faker->unique()->word;
+
         return [
             'name' => $this->faker->word,
-            'image' => $this->faker->word . '.png',
+            'image' => $slug . '.webp',
+            'guide' => $slug . '_guide.webp',
+            'settings' => null,
         ];
     }
 }

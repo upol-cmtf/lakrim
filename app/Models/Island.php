@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $name
  * @property string $image
+ * @property string|null $guide
+ * @property array<string, mixed>|null $settings
  * @property Collection<Question> $questions
  * @property Collection<Situation> $situations
  * @property DateTimeInterface|null $created_at
@@ -28,7 +30,19 @@ class Island extends Model
     protected $fillable = [
         'name',
         'image',
+        'guide',
+        'settings',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+        ];
+    }
 
     public function questions(): BelongsToMany
     {
