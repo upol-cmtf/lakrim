@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $island_id
  * @property int $position
  * @property string|null $title
+ * @property string|null $safety_card
  * @property Island $island
  * @property Collection<RespondentSituation> $respondentSituations
  * @property DateTimeInterface|null $created_at
@@ -30,6 +31,7 @@ class Situation extends Model
         'island_id',
         'position',
         'title',
+        'safety_card',
     ];
 
     public function island(): BelongsTo
