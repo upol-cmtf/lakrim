@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property QuestionType $type
  * @property Collection<QuestionOption> $options
  * @property Collection<QuestionImage> $images
- * @property QuestionGroup $questionGroup
+ * @property QuestionGroup|null $questionGroup
  * @property Collection<Island> $islands
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at

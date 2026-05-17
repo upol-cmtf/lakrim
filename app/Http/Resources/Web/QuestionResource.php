@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property string $description
  * @property mixed[]|null $settings
  * @property QuestionType $type
- * @property QuestionGroup $questionGroup
+ * @property QuestionGroup|null $questionGroup
  * @method Collection<QuestionOption> getOptions()
  * @method string renderedDescription()
  */
@@ -32,7 +32,7 @@ class QuestionResource extends JsonResource
      *     group: array{
      *         id: int,
      *         name: string,
-     *     }
+     *     }|null
      * }
      * phpcs:disable SlevomatCodingStandard.Functions.UnusedParameter
      */
@@ -45,7 +45,7 @@ class QuestionResource extends JsonResource
             'type' => $this->type->value,
             'options' => QuestionOptionsResource::collection($this->getOptions()),
             'settings' => $this->settings,
-            'group' => [
+            'group' => $this->questionGroup === null ? null : [
                 'id' => $this->questionGroup->id,
                 'name' => $this->questionGroup->name,
             ],
