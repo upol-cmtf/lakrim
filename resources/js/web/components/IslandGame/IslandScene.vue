@@ -203,21 +203,31 @@
                         {{ activeQuestion.title }}
                     </h3>
 
-                    <p class="mb-5 text-sm leading-relaxed text-slate-700">
-                        {{ activeQuestion.description }}
+                    <p
+                        v-if="activeQuestion.perex"
+                        class="mb-3 text-sm font-semibold leading-relaxed text-slate-800"
+                    >
+                        {{ activeQuestion.perex }}
                     </p>
+
+                    <div
+                        v-if="activeQuestion.description"
+                        class="question-modal-text mb-5 text-sm leading-relaxed text-slate-700"
+                        v-html="activeQuestion.description"
+                    ></div>
 
                     <ul class="space-y-2">
                         <li
-                            v-for="(option, idx) in activeQuestion.options"
-                            :key="`opt-${idx}`"
+                            v-for="option in activeQuestion.options"
+                            :key="option.id"
                         >
                             <button
                                 type="button"
-                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                                @click="answerQuestion(idx)"
+                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                                :disabled="answerSubmitting"
+                                @click="answerQuestion(option)"
                             >
-                                {{ option }}
+                                {{ option.name }}
                             </button>
                         </li>
                     </ul>
@@ -252,6 +262,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch, onBeforeUnmount } from 'vue';
+import axios from 'axios';
 
 const asset = (filename) => new URL(`../../../../images/islands/${filename}`, import.meta.url).href;
 const buttonVariants = [1, 2, 3, 4, 5].map((n) => ({
@@ -354,6 +365,16 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    // URL endpointu pro získání situace pro dané tlačítko
+    situationUrl: {
+        type: String,
+        default: '',
+    },
+    // URL endpointu pro uložení odpovědi na situaci
+    answerUrl: {
+        type: String,
+        default: '',
+    },
 });
 
 // rozmístění ostrovů ve scéně – přiřazuje se podle pořadí, není v DB
@@ -407,6 +428,8 @@ const cloudStyle = (cloud) => ({
 
 const selectedIsland = ref(null);
 const activeQuestion = ref(null);
+const loadingQuestion = ref(false);
+const answerSubmitting = ref(false);
 const guideMessage = ref(null);
 const bubbleEl = ref(null);
 
@@ -445,56 +468,110 @@ const close = () => {
     guideMessage.value = null;
 };
 
-const fakeQuestion = (buttonIndex) => ({
-    title: `Úkol ${buttonIndex + 1}: Rozpoznáš podvod?`,
-    description:
-        'Dostali jste e-mail z banky s odkazem na "ověření účtu". ' +
-        'Zpráva obsahuje překlepy a adresa odesílatele vypadá podezřele. ' +
-        'Co uděláte jako první?',
-    options: [
-        'Kliknu na odkaz a zadám přihlašovací údaje.',
-        'Zavolám na číslo uvedené v e-mailu.',
-        'Ignoruji e-mail a kontaktuji banku přes oficiální web/aplikaci.',
-        'Přepošlu e-mail kamarádovi pro radu.',
-    ],
-    correct: 2,
-});
+// načte situaci pro dané tlačítko z DB (endpoint vybere otázku adaptivní obtížnosti)
+const openQuestion = async (buttonIndex) => {
+    const island = selectedIsland.value;
+    const state = island?.buttonStates[buttonIndex];
+    if (!island || state === 'locked' || state === 'green') return;
+    if (loadingQuestion.value) return;
 
-const openQuestion = (buttonIndex) => {
-    const state = selectedIsland.value?.buttonStates[buttonIndex];
-    if (state === 'locked' || state === 'green') return;
     guideMessage.value = null;
-    activeQuestion.value = { ...fakeQuestion(buttonIndex), buttonIndex };
+    loadingQuestion.value = true;
+
+    try {
+        const { data } = await axios.post(
+            props.situationUrl,
+            {
+                respondent_token: props.respondentToken,
+                island_id: island.key,
+                button: buttonIndex + 1,
+            },
+            { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } },
+        );
+
+        const situation = data.data;
+        activeQuestion.value = {
+            buttonIndex,
+            situationId: situation.id,
+            questionId: situation.question.id,
+            title: situation.title || situation.question.perex,
+            // perex ukážeme jen tehdy, když má situace vlastní titulek (jinak by se opakoval)
+            perex: situation.title ? situation.question.perex : null,
+            description: situation.question.description,
+            options: situation.question.options,
+            openedAt: Date.now(),
+        };
+    } catch (error) {
+        guideMessage.value = error.response?.status === 404
+            ? '<p>Pro tento úkol už nejsou žádné další situace.</p>'
+            : '<p>Situaci se nepodařilo načíst. Zkuste to prosím za chvíli znovu.</p>';
+    } finally {
+        loadingQuestion.value = false;
+    }
 };
 
 const closeQuestion = () => {
     activeQuestion.value = null;
 };
 
-const answerQuestion = (optionIndex) => {
+// zpětná vazba po špatné odpovědi – hodnocení zvolené možnosti, případně otázky
+const wrongAnswerHint = (result, optionId) => {
+    const chosen = (result.evaluations ?? []).find((evaluation) => evaluation.optionId === optionId);
+    return chosen?.evaluation || result.correctAnswerEvaluation || null;
+};
+
+// odešle zvolenou odpověď na endpoint, ten vyhodnotí správnost a případnou kartu bezpečí
+const answerQuestion = async (option) => {
     const question = activeQuestion.value;
     const island = selectedIsland.value;
-    if (!question || !island) return;
+    if (!question || !island || answerSubmitting.value) return;
 
+    answerSubmitting.value = true;
     const i = question.buttonIndex;
 
-    if (optionIndex === question.correct) {
-        // správná odpověď – tlačítko zazelená a odemkne se další v pořadí
-        if (island.buttonStates[i] !== 'green') {
-            island.tasks.completed = Math.min(island.tasks.total, island.tasks.completed + 1);
-        }
-        island.buttonStates[i] = 'green';
-        if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
-            island.buttonStates[i + 1] = 'default';
-        }
-        guideMessage.value = '<p>Skvělá práce! Takhle se podvodům úspěšně bráníš.</p>';
-    } else {
-        // špatná odpověď – tlačítko zoranžoví, jde zkusit znovu
-        island.buttonStates[i] = 'orange';
-        guideMessage.value = '<p>Tentokrát to nevyšlo. Zkus si situaci znovu promyslet.</p>';
-    }
+    try {
+        const { data } = await axios.post(
+            props.answerUrl,
+            {
+                respondent_token: props.respondentToken,
+                question_id: question.questionId,
+                option_ids: [option.id],
+                seconds: Math.max(0, Math.round((Date.now() - question.openedAt) / 1000)),
+                attempt: 1,
+                island_id: island.key,
+                button: i + 1,
+            },
+            { headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } },
+        );
 
-    activeQuestion.value = null;
+        const result = data.data;
+        activeQuestion.value = null;
+
+        if (result.correct) {
+            // správně – tlačítko zazelená, odemkne se další a hráč získá kartu bezpečí
+            if (island.buttonStates[i] !== 'green') {
+                island.tasks.completed = Math.min(island.tasks.total, island.tasks.completed + 1);
+            }
+            island.buttonStates[i] = 'green';
+            if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
+                island.buttonStates[i + 1] = 'default';
+            }
+            guideMessage.value = result.safetyCard
+                ? `<p><strong>Získal jsi kartu bezpečí!</strong></p><p>${result.safetyCard}</p>`
+                : '<p>Skvělá práce! Situaci jsi zvládl správně.</p>';
+        } else {
+            // špatně – tlačítko zoranžoví, po kliknutí se nabídne další situace
+            island.buttonStates[i] = 'orange';
+            const hint = wrongAnswerHint(result, option.id);
+            guideMessage.value = hint
+                ? `<p>Tentokrát to nevyšlo.</p><p>${hint}</p>`
+                : '<p>Tentokrát to nevyšlo. Zkus si situaci znovu promyslet.</p>';
+        }
+    } catch (error) {
+        guideMessage.value = '<p>Odpověď se nepodařilo odeslat. Zkuste to prosím za chvíli znovu.</p>';
+    } finally {
+        answerSubmitting.value = false;
+    }
 };
 </script>
 
@@ -1012,6 +1089,20 @@ const answerQuestion = (optionIndex) => {
 .question-modal-backdrop {
     background: rgba(8, 38, 70, 0.6);
     backdrop-filter: blur(4px);
+}
+
+.question-modal-text :deep(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+.question-modal-text :deep(p) {
+    margin: 0 0 0.6rem;
+}
+
+.question-modal-text :deep(p:last-child) {
+    margin-bottom: 0;
 }
 
 .modal-fade-enter-active,

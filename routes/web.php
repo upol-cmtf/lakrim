@@ -55,3 +55,9 @@ Route::get('/pexeso/{quizEvent:hash?}', [Web\QuizGrid\HomepageController::class,
 
 Route::get('/ostrov/{quizEvent:hash?}', [Web\IslandGame\HomepageController::class, 'index'])
     ->name('web.island-game.homepage');
+
+Route::post('/ostrov/situace', [Web\IslandGame\SituationController::class, 'show'])
+    ->name('web.island-game.situation');
+
+Route::post('/ostrov/odpoved', [Web\IslandGame\AnswerController::class, 'store'])
+    ->name('web.island-game.answer');
