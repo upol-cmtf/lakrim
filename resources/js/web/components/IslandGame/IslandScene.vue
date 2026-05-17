@@ -349,6 +349,11 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    // token respondenta – použije se pro volání endpointu na načtení další situace
+    respondentToken: {
+        type: String,
+        default: '',
+    },
 });
 
 // rozmístění ostrovů ve scéně – přiřazuje se podle pořadí, není v DB
