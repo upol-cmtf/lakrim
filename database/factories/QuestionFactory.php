@@ -34,4 +34,14 @@ class QuestionFactory extends Factory
     {
         return $this->has(QuestionImage::factory()->count($count), 'images');
     }
+
+    /**
+     * Otázka bez skupiny – 3. verze (ostrovní hra) skupiny otázek nepoužívá.
+     *
+     * @return Factory<Question>
+     */
+    public function withoutGroup(): Factory
+    {
+        return $this->state(fn(): array => ['question_group_id' => null]);
+    }
 }
