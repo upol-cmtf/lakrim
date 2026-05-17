@@ -32,7 +32,7 @@ class RespondentSituationsTest extends TestCase
             ]);
     }
 
-    public function testReturnsSeededIslandsWithEmptySituationsByDefault(): void
+    public function testReturnsSeededIslandsWithNothingCompletedByDefault(): void
     {
         $respondent = Respondent::factory()->createOneQuietly([
             'version' => Version::Three->value,
@@ -52,7 +52,15 @@ class RespondentSituationsTest extends TestCase
             $this->assertArrayHasKey('id', $island);
             $this->assertArrayHasKey('name', $island);
             $this->assertArrayHasKey('image', $island);
-            $this->assertSame([], $island['situations']);
+
+            $situations = $island['situations'];
+            assert(is_array($situations));
+
+            // čerstvý respondent nemá splněnou žádnou situaci
+            foreach ($situations as $situation) {
+                assert(is_array($situation));
+                $this->assertFalse($situation['completed']);
+            }
         }
     }
 
