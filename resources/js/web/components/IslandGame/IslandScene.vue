@@ -132,7 +132,7 @@
                     </button>
                 </div>
 
-                <div v-else key="detail" class="fixed inset-0 z-10 flex flex-col p-3 sm:p-6">
+                <div v-else key="detail" class="absolute inset-0 z-10 flex flex-col p-3 sm:p-6">
 
                     <div class="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
                         <div class="island-stage relative">
