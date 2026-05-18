@@ -141,6 +141,21 @@
                                 :alt="selectedIsland.name"
                                 class="island-shadow-soft block h-full w-full"
                             >
+                            <!-- lampa na trávě nalevo od kamene – rozzáří se po správné odpovědi -->
+                            <div
+                                v-for="(pos, i) in selectedIsland.pathButtonPositions"
+                                :key="`lamp-${i}`"
+                                :style="pos"
+                                class="path-lamp absolute"
+                                :class="{ 'path-lamp--lit': selectedIsland.buttonStates[i] === 'green' }"
+                                aria-hidden="true"
+                            >
+                                <img
+                                    :src="selectedIsland.buttonStates[i] === 'green' ? lampOnImg : lampOffImg"
+                                    alt=""
+                                    class="path-lamp-img block w-full"
+                                >
+                            </div>
                             <button
                                 v-for="(pos, i) in selectedIsland.pathButtonPositions"
                                 :key="`btn-${i}`"
@@ -198,6 +213,29 @@
                             <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </button>
+
+                    <!-- odpočet času – jen u situací s limitem (settings.time_limit) -->
+                    <div
+                        v-if="questionTimeLimit !== null"
+                        class="question-timer mb-4 pr-10 sm:pr-12"
+                        :class="{ 'question-timer--low': timeIsLow }"
+                        role="timer"
+                    >
+                        <div class="question-timer-head">
+                            <span class="question-timer-badge">
+                                <svg viewBox="0 0 24 24" class="question-timer-icon" aria-hidden="true">
+                                    <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 9v4l2.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span>{{ formattedRemainingTime }}</span>
+                            </span>
+                            <span class="question-timer-label">{{ timeIsLow ? 'Pospěš si!' : 'Čas na odpověď' }}</span>
+                        </div>
+                        <div class="question-timer-track" aria-hidden="true">
+                            <div class="question-timer-fill" :style="{ width: `${timerPercent}%` }"></div>
+                        </div>
+                    </div>
 
                     <div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto sm:flex-row sm:gap-8">
                         <!-- levá část: popis situace -->
@@ -339,6 +377,8 @@ const waveOuterPath = 'M210.0,38.0L211.3,39.3L211.6,40.8L210.8,41.9L209.1,42.5L2
 const waveInnerPath = 'M188.0,38.0L188.9,38.9L189.3,40.1L188.8,41.0L187.7,41.5L186.3,41.6L184.8,41.4L183.5,41.4L182.4,41.9L181.5,43.0L180.6,44.5L179.5,46.1L178.1,47.5L176.3,48.3L174.3,48.5L172.0,48.2L169.6,47.7L167.2,47.4L164.8,47.6L162.4,48.3L160.0,49.6L157.6,51.2L154.9,52.5L152.1,53.3L149.2,53.4L146.1,52.9L142.9,52.2L139.7,51.5L136.5,51.3L133.3,51.6L130.1,52.6L126.9,53.8L123.6,54.9L120.2,55.6L116.8,55.6L113.4,55.0L110.0,54.0L106.6,53.0L103.2,52.2L99.9,52.1L96.5,52.6L93.1,53.5L89.8,54.4L86.4,54.9L83.2,54.8L80.0,54.1L77.0,52.8L74.1,51.4L71.2,50.3L68.3,49.7L65.5,49.7L62.6,50.2L59.8,50.9L57.0,51.2L54.5,51.1L52.2,50.2L50.1,48.9L48.2,47.3L46.5,45.9L44.8,44.9L43.0,44.5L41.1,44.7L39.2,45.0L37.4,45.3L35.8,45.0L34.7,44.2L34.1,42.9L34.0,41.3L34.1,40.0L34.1,39.1L33.9,38.7L33.1,38.5L32.0,38.0L31.1,37.1L30.7,35.9L31.2,35.0L32.3,34.5L33.7,34.4L35.2,34.6L36.5,34.6L37.6,34.1L38.5,33.0L39.4,31.5L40.5,29.9L41.9,28.5L43.7,27.7L45.7,27.5L48.0,27.8L50.4,28.3L52.8,28.6L55.2,28.4L57.6,27.7L60.0,26.4L62.4,24.8L65.1,23.5L67.9,22.7L70.8,22.6L73.9,23.1L77.1,23.8L80.3,24.5L83.5,24.7L86.7,24.4L89.9,23.4L93.1,22.2L96.4,21.1L99.8,20.4L103.2,20.4L106.6,21.0L110.0,22.0L113.4,23.0L116.8,23.8L120.1,23.9L123.5,23.4L126.9,22.5L130.2,21.6L133.6,21.1L136.8,21.2L140.0,21.9L143.0,23.2L145.9,24.6L148.8,25.7L151.7,26.3L154.5,26.3L157.4,25.8L160.2,25.1L163.0,24.8L165.5,24.9L167.8,25.8L169.9,27.1L171.8,28.7L173.5,30.1L175.2,31.1L177.0,31.5L178.9,31.3L180.8,31.0L182.6,30.7L184.2,31.0L185.3,31.8L185.9,33.1L186.0,34.7L185.9,36.0L185.9,36.9L186.1,37.3L186.9,37.5Z';
 
 const lighthouseImg = asset('lighthouse.webp');
+const lampOffImg = new URL('../../../../images/turned_off_lamp.webp', import.meta.url).href;
+const lampOnImg = new URL('../../../../images/turned_on_lamp.webp', import.meta.url).href;
 
 // mraky kolem majáku – základní pozice (překrývají maják) a směr odplutí
 const clouds = [
@@ -448,6 +488,63 @@ const descriptionImageOnly = computed(() => {
 });
 const bubbleEl = ref(null);
 
+// --- časový limit na odpověď (volitelný, settings.time_limit = počet sekund) ---
+const remainingSeconds = ref(0);
+let questionTimer = null;
+
+// počet sekund z nastavení otázky; null = situace bez limitu
+const parseTimeLimit = (settings) => {
+    const seconds = Number(settings?.time_limit);
+    return Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : null;
+};
+
+const questionTimeLimit = computed(() => activeQuestion.value?.timeLimit ?? null);
+const timeIsLow = computed(() => questionTimeLimit.value !== null && remainingSeconds.value <= 10);
+
+const formattedRemainingTime = computed(() => {
+    const total = Math.max(0, remainingSeconds.value);
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+});
+
+const timerPercent = computed(() => (
+    questionTimeLimit.value ? Math.max(0, remainingSeconds.value) / questionTimeLimit.value * 100 : 0
+));
+
+const stopQuestionTimer = () => {
+    if (questionTimer !== null) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+};
+
+// vypršení času se počítá jako špatný pokus – tlačítko zoranžoví a situace jde zkusit znovu
+const handleTimeUp = () => {
+    stopQuestionTimer();
+
+    const question = activeQuestion.value;
+    const island = selectedIsland.value;
+    if (!question || !island) return;
+
+    activeQuestion.value = null;
+    island.buttonStates[question.buttonIndex] = 'orange';
+    guideMessage.value = '<p>Čas vypršel – odpověď ses nestihl/a poslat. Zkus situaci znovu.</p>';
+};
+
+const startQuestionTimer = () => {
+    stopQuestionTimer();
+
+    if (questionTimeLimit.value === null) return;
+
+    remainingSeconds.value = questionTimeLimit.value;
+    questionTimer = setInterval(() => {
+        remainingSeconds.value -= 1;
+
+        if (remainingSeconds.value <= 0) {
+            handleTimeUp();
+        }
+    }, 1000);
+};
+
 // kliknutí kamkoliv mimo bublinu ji zavře
 let outsideClickTimer = null;
 // prodleva, než se po otevření detailu ostrova ukáže úvodní zpráva průvodce
@@ -473,6 +570,7 @@ watch(guideMessage, (value) => {
 onBeforeUnmount(() => {
     clearTimeout(outsideClickTimer);
     clearTimeout(introTimer);
+    stopQuestionTimer();
     document.removeEventListener('click', handleOutsideClick);
 });
 
@@ -529,8 +627,10 @@ const openQuestion = async (buttonIndex) => {
             perex: situation.title ? situation.question.perex : null,
             description: situation.question.description,
             options: situation.question.options,
+            timeLimit: parseTimeLimit(situation.question.settings),
             openedAt: Date.now(),
         };
+        startQuestionTimer();
     } catch (error) {
         guideMessage.value = error.response?.status === 404
             ? '<p>Pro tento úkol už nejsou žádné další situace.</p>'
@@ -541,6 +641,7 @@ const openQuestion = async (buttonIndex) => {
 };
 
 const closeQuestion = () => {
+    stopQuestionTimer();
     activeQuestion.value = null;
 };
 
@@ -556,6 +657,8 @@ const answerQuestion = async (option) => {
     const island = selectedIsland.value;
     if (!question || !island || answerSubmitting.value) return;
 
+    // hráč odpověděl včas – odpočet zastavíme
+    stopQuestionTimer();
     answerSubmitting.value = true;
     const i = question.buttonIndex;
 
@@ -722,6 +825,56 @@ const answerQuestion = async (option) => {
 .path-button--locked > img {
     opacity: 0.55;
     filter: grayscale(0.85);
+}
+
+/* --- lampa u kamene: výchozí stav zhasnutá, po správné odpovědi se rozzáří --- */
+.path-lamp {
+    /* lampa stojí na trávě nalevo od kamene; transformem se doladí přesná pozice */
+    width: 5%;
+    transform: translate(-210%, -118%);
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+}
+
+.path-lamp-img {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 4px 4px rgba(8, 38, 70, 0.5));
+    transition: filter 0.6s ease;
+}
+
+/* teplá záře kolem hlavy lampy – schovaná, dokud kámen není vyřešený */
+.path-lamp::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 18%;
+    width: 260%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 243, 200, 0.95) 0%,
+        rgba(255, 224, 140, 0.55) 28%,
+        rgba(255, 224, 140, 0) 68%
+    );
+    opacity: 0;
+    mix-blend-mode: screen;
+    transition: opacity 0.7s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.path-lamp--lit::before {
+    opacity: 1;
+}
+
+.path-lamp--lit .path-lamp-img {
+    filter:
+        drop-shadow(0 4px 4px rgba(8, 38, 70, 0.5))
+        drop-shadow(0 0 9px rgba(255, 224, 140, 0.95));
 }
 
 .path-button-lock {
@@ -1146,6 +1299,78 @@ const answerQuestion = async (option) => {
     margin-bottom: 0;
 }
 
+/* --- odpočet času na odpověď --- */
+.question-timer-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+}
+
+.question-timer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.7rem;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #3a2a05;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+        0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.question-timer-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
+.question-timer-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.question-timer-track {
+    height: 0.4rem;
+    border-radius: 9999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.question-timer-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+    transition: width 1s linear, background 0.3s ease;
+}
+
+/* posledních pár sekund – varovná červená a pulzování */
+.question-timer--low .question-timer-badge {
+    background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+    color: #fff;
+    animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.question-timer--low .question-timer-label {
+    color: #dc2626;
+}
+
+.question-timer--low .question-timer-fill {
+    background: linear-gradient(90deg, #f87171 0%, #dc2626 100%);
+}
+
+@keyframes timer-pulse {
+    0%, 100% { transform: scale(1);    }
+    50%      { transform: scale(1.07); }
+}
+
 .modal-fade-enter-active,
 .modal-fade-leave-active {
     transition: opacity 0.2s ease;
@@ -1171,6 +1396,7 @@ const answerQuestion = async (option) => {
     .island-bob,
     .lighthouse-bob,
     .lighthouse-cloud-img,
-    .lighthouse-glow { animation: none; }
+    .lighthouse-glow,
+    .question-timer--low .question-timer-badge { animation: none; }
 }
 </style>
