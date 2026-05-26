@@ -23,7 +23,7 @@ final class HomepageController extends Controller
 
         return view('web.island-game.index', [
             'respondentToken' => $respondent->token,
-            'islands' => Island::query()->get(['id', 'name', 'image', 'guide']),
+            'islands' => Island::query()->get(['id', 'name', 'image', 'guide', 'intro']),
         ]);
     }
 }
