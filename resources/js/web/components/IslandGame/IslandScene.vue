@@ -164,9 +164,9 @@
                                 class="path-button absolute"
                                 :class="{
                                     'path-button--locked': selectedIsland.buttonStates[i] === 'locked',
-                                    'path-button--done': selectedIsland.buttonStates[i] === 'green',
+                                    'path-button--done': selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red',
                                 }"
-                                :disabled="selectedIsland.buttonStates[i] === 'locked' || selectedIsland.buttonStates[i] === 'green'"
+                                :disabled="selectedIsland.buttonStates[i] === 'locked' || selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red'"
                                 :aria-label="`Úkol ${i + 1}`"
                                 @click="openQuestion(i)"
                             >
@@ -202,7 +202,10 @@
                 :aria-label="activeQuestion.title"
                 @click.self="closeQuestion"
             >
-                <div class="question-modal relative flex h-full w-full max-w-[1600px] flex-col rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
+                <div
+                    class="question-modal relative flex h-full w-full max-w-[1600px] flex-col rounded-2xl bg-white p-6 sm:p-8 shadow-2xl"
+                    :class="{ 'question-modal--dimmed': guideMessage }"
+                >
                     <button
                         type="button"
                         class="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -262,33 +265,153 @@
                         </div>
 
                         <!-- pravá část: možnosti na výběr -->
-                        <ul class="space-y-2 sm:w-2/5 sm:border-l sm:border-slate-200 sm:pl-8">
+                        <div class="sm:w-2/5 sm:border-l sm:border-slate-200 sm:pl-8">
+                            <h3 class="mb-3 text-base font-semibold text-slate-900">
+                                Jak byste se zachovali?
+                            </h3>
+                            <p class="mb-4 text-sm text-slate-600">
+                                Vyberte odpověď, která nejlépe odpovídá tomu, co byste v této situaci udělali.
+                            </p>
+                            <ul class="space-y-2">
                             <li
                                 v-for="option in activeQuestion.options"
                                 :key="option.id"
                             >
                                 <button
                                     type="button"
-                                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-800 transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-                                    :disabled="answerSubmitting"
+                                    :class="optionClass(option)"
+                                    :disabled="isOptionDisabled(option)"
                                     @click="answerQuestion(option)"
                                 >
-                                    {{ option.name }}
+                                    <span>{{ option.name }}</span>
+                                    <svg
+                                        v-if="optionVariant(option) === 'correct'"
+                                        class="h-5 w-5 flex-shrink-0 text-emerald-600"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <svg
+                                        v-else-if="optionVariant(option) === 'wrong'"
+                                        class="h-5 w-5 flex-shrink-0 text-red-500"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                                    </svg>
                                 </button>
                             </li>
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </transition>
         </div>
 
+        <!-- karta bezpečí – po správné odpovědi vyskočí vpravo nahoře a po chvilce sama zmizí -->
+        <transition name="safety-card-fade">
+            <div v-if="safetyCard" class="safety-card" role="status" aria-label="Karta bezpečí">
+                <div class="safety-card-corner safety-card-corner--tl" aria-hidden="true"></div>
+                <div class="safety-card-corner safety-card-corner--tr" aria-hidden="true"></div>
+                <div class="safety-card-corner safety-card-corner--bl" aria-hidden="true"></div>
+                <div class="safety-card-corner safety-card-corner--br" aria-hidden="true"></div>
+
+                <div class="safety-card-header">KARTA BEZPEČÍ</div>
+
+                <div class="safety-card-illustration" aria-hidden="true">
+                    <svg viewBox="0 0 120 130">
+                        <defs>
+                            <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#fde68a"/>
+                                <stop offset="100%" stop-color="#d4a437"/>
+                            </linearGradient>
+                            <linearGradient id="shieldStroke" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#8b6818"/>
+                                <stop offset="100%" stop-color="#6b4f10"/>
+                            </linearGradient>
+                            <radialGradient id="shieldGlow" cx="50%" cy="40%" r="70%">
+                                <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
+                                <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <g transform="translate(60 65)">
+                            <path
+                                d="M0 -50 L45 -35 L45 5 C45 30 25 50 0 60 C-25 50 -45 30 -45 5 L-45 -35 Z"
+                                fill="url(#shieldFill)"
+                                stroke="url(#shieldStroke)"
+                                stroke-width="3"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M0 -50 L45 -35 L45 5 C45 30 25 50 0 60 C-25 50 -45 30 -45 5 L-45 -35 Z"
+                                fill="url(#shieldGlow)"
+                            />
+                            <path
+                                d="M-18 5 L-5 18 L20 -10"
+                                fill="none"
+                                stroke="#fff"
+                                stroke-width="6"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </g>
+                        <g fill="#d4a437" opacity="0.8">
+                            <circle cx="15" cy="20" r="2"/>
+                            <circle cx="105" cy="20" r="2"/>
+                            <circle cx="15" cy="110" r="2"/>
+                            <circle cx="105" cy="110" r="2"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="safety-card-body" v-html="safetyCard"></div>
+            </div>
+        </transition>
+
         <div
             v-if="selectedIsland"
             class="island-guide absolute bottom-0 right-0"
+            :class="{ 'island-guide--above-modal': activeQuestion }"
         >
             <transition name="guide-fade">
-                <div v-if="guideMessage" ref="bubbleEl" class="island-guide-bubble" role="status">
+                <div
+                    v-if="guideMessage"
+                    ref="bubbleEl"
+                    class="island-guide-bubble"
+                    role="status"
+                >
+                    <span
+                        v-if="guideTone !== 'default'"
+                        :class="['island-guide-shield', `island-guide-shield--${guideTone}`]"
+                        aria-hidden="true"
+                    >
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z" fill="currentColor"/>
+                            <path
+                                v-if="guideTone === 'success'"
+                                d="M8.5 12l2.5 2.5L16 9.5"
+                                fill="none"
+                                stroke="#fff"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                v-else-if="guideTone === 'failure'"
+                                d="M9 9l6 6M15 9l-6 6"
+                                fill="none"
+                                stroke="#fff"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            />
+                            <g v-else>
+                                <path d="M12 8v4" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                                <circle cx="12" cy="15" r="1.1" fill="#fff"/>
+                            </g>
+                        </svg>
+                    </span>
                     <button
                         type="button"
                         class="island-guide-close"
@@ -300,6 +423,14 @@
                         </svg>
                     </button>
                     <div class="island-guide-text" v-html="guideMessage"></div>
+                    <button
+                        v-if="guideAction"
+                        type="button"
+                        class="island-guide-action"
+                        @click="runGuideAction"
+                    >
+                        {{ guideAction.label }}
+                    </button>
                 </div>
             </transition>
             <img :src="selectedIsland.guideImage" alt="Průvodce" class="island-guide-img">
@@ -316,13 +447,15 @@ const buttonVariants = [1, 2, 3, 4, 5].map((n) => ({
     default: new URL(`../../../../images/button${n}_default.svg`, import.meta.url).href,
     green: new URL(`../../../../images/button${n}_green.svg`, import.meta.url).href,
     orange: new URL(`../../../../images/button${n}_orange.svg`, import.meta.url).href,
+    red: new URL(`../../../../images/button${n}_red.svg`, import.meta.url).href,
 }));
 
-// button state: 'locked' | 'default' | 'green' (správně) | 'orange' (špatně)
+// button state: 'locked' | 'default' | 'green' (správně) | 'orange' (1× špatně – lze zkusit znovu) | 'red' (2× špatně – další úkol odemčen)
 const buttonSrc = (index, state) => {
     const variant = buttonVariants[index];
     if (state === 'green') return variant.green;
     if (state === 'orange') return variant.orange;
+    if (state === 'red') return variant.red;
     return variant.default;
 };
 
@@ -390,21 +523,8 @@ const clouds = [
     { top: '42%',  left: '52%',  width: '76%', dx: '150%',  dy: '85%',   floatClass: 'cloud-float-c', delay: '-5s' },
 ];
 
-// úvodní promluva průvodce při otevření detailu ostrova
-const exploitedEmotionsIntro =
-    '<p>Vítejte na Ostrově zneužitých citů, kapitáne. Tohle místo vypadá na první pohled vlídně, ale nenechte se zmást. Podvodníci zde neútočí jen na vaše zařízení, ale především na vaše srdce, vaši lásku k rodině a vaši ochotu pomáhat.</p>'
-    + '<p>Aby vás podvodníci dostali tam, kam chtějí, používají tyto nekalé postupy:</p>'
-    + '<ul>'
-    + '<li><strong>Zneužití strachu a emocí:</strong> Budou vám tvrdit, že váš vnuk měl nehodu nebo že je váš telefon v ohrožení virem. Chtějí vás vyděsit, abyste je v panice poslechli.</li>'
-    + '<li><strong>Hra na city a osamělost:</strong> Budou se vydávat za sympatické lidi v nouzi nebo osamělé hrdiny, kteří potřebují právě vaši pomoc. Budují si u vás důvěru jen proto, aby ji později zpeněžili.</li>'
-    + '<li><strong>Falešná autorita a nátlak:</strong> Někdy vystupují jako policisté nebo bankéři. Budou na vás spěchat a nutit vás k tajnostem před rodinou, abyste se nemohli s nikým poradit.</li>'
-    + '</ul>'
-    + '<p>Pamatujte si jedno zlaté pravidlo: Skutečná policie, banka nebo váš blízký po vás nikdy nebudou chtít, abyste své peníze narychlo někam posílali nebo si do telefonu instalovali neznámé programy. Jakmile na vás někdo v telefonu tlačí, zakazuje vám o tom mluvit s rodinou nebo vás straší virem, je to téměř jistě podvodník.</p>'
-    + '<p>Na cestě k majáku Ostrova zneužitých citů vás čeká pět zkoušek. Vaším úkolem je nenechat se ovládnout emocemi. Pokud ucítíte tlak, zastavte se. Ověřte si vše u svých blízkých nebo přímo v bance.</p>'
-    + '<p>Jste připraveni prokouknout jejich pasti a rozsvítit tento ostrov naplno? Pojďme na to.</p>';
-
 const props = defineProps({
-    // ostrovy z DB (modul islands) – očekává pole { id, name, image, guide }
+    // ostrovy z DB (modul islands) – očekává pole { id, name, image, guide, intro }
     islandsData: {
         type: Array,
         default: () => [],
@@ -436,11 +556,6 @@ const islandLayouts = [
     { position: { right: '6%', bottom: '9%' }, bobClass: 'island-4', beamAngle: -56 },
 ];
 
-// úvodní promluvy průvodce podle názvu obrázku ostrova – nejsou v DB
-const introMessages = {
-    'exploited_emotions.webp': exploitedEmotionsIntro,
-};
-
 const islands = reactive(
     props.islandsData.map((island, index) => {
         const layout = islandLayouts[index % islandLayouts.length];
@@ -451,13 +566,16 @@ const islands = reactive(
             image: asset(island.image),
             detailImage: asset(`detail/${island.image}`),
             guideImage: island.guide ? asset(island.guide) : null,
-            introMessage: introMessages[island.image] ?? null,
+            introMessage: island.intro ?? null,
             position: layout.position,
             bobClass: layout.bobClass,
             beamAngle: layout.beamAngle,
             tasks: { completed: 0, total: 5 },
             pathButtonPositions: defaultPathButtonPositions,
             buttonStates: initialButtonStates(),
+            // počet dosavadních neúspěšných pokusů a uložená rozehraná situace pro každé tlačítko
+            attempts: [0, 0, 0, 0, 0],
+            cachedQuestions: [null, null, null, null, null],
         };
     }),
 );
@@ -477,9 +595,46 @@ const cloudStyle = (cloud) => ({
 
 const selectedIsland = ref(null);
 const activeQuestion = ref(null);
+// stav rozehrané situace v modálu: 'live' = čeká na odpověď, 'retry' = po 1. špatném pokusu, 'finished' = vyhodnoceno (správně nebo 2. špatně)
+const questionStatus = ref('live');
 const loadingQuestion = ref(false);
 const answerSubmitting = ref(false);
 const guideMessage = ref(null);
+// barevné ladění bubliny průvodce: 'default' | 'success' | 'retry' | 'failure'
+const guideTone = ref('default');
+// historie zvolených možností v právě otevřené situaci – zvýrazňuje se v modalu
+const wrongOptionIds = ref([]);
+const correctOptionId = ref(null);
+
+const optionVariant = (option) => {
+    if (correctOptionId.value === option.id) return 'correct';
+    if (wrongOptionIds.value.includes(option.id)) return 'wrong';
+    return 'default';
+};
+
+const optionClass = (option) => {
+    const base = 'flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-80';
+    const variant = optionVariant(option);
+    if (variant === 'correct') return `${base} border-emerald-400 bg-emerald-50 text-emerald-900`;
+    if (variant === 'wrong') return `${base} border-red-300 bg-red-50 text-red-900`;
+    return `${base} border-slate-200 bg-slate-50 text-slate-800 hover:border-blue-400 hover:bg-blue-50`;
+};
+
+const isOptionDisabled = (option) => (
+    answerSubmitting.value
+    || questionStatus.value === 'finished'
+    || wrongOptionIds.value.includes(option.id)
+);
+// volitelné tlačítko v bublině průvodce (po odpovědi) – { label, handler }
+const guideAction = ref(null);
+// obsah karty bezpečí, která se po správné odpovědi objeví fade-inem nad modálem
+const safetyCard = ref(null);
+
+const runGuideAction = () => {
+    const action = guideAction.value;
+    guideAction.value = null;
+    action?.handler();
+};
 
 // popis otázky tvořený jen obrázkem (žádný text) – obrázek pak vyplní modal
 const descriptionImageOnly = computed(() => {
@@ -517,7 +672,7 @@ const stopQuestionTimer = () => {
     }
 };
 
-// vypršení času se počítá jako špatný pokus – tlačítko zoranžoví a situace jde zkusit znovu
+// vypršení času se počítá jako špatný pokus – po prvním zoranžoví, po druhém zčervená a odemkne další úkol
 const handleTimeUp = () => {
     stopQuestionTimer();
 
@@ -525,9 +680,29 @@ const handleTimeUp = () => {
     const island = selectedIsland.value;
     if (!question || !island) return;
 
-    activeQuestion.value = null;
-    island.buttonStates[question.buttonIndex] = 'orange';
-    guideMessage.value = '<p>Čas vypršel – odpověď ses nestihl/a poslat. Zkus situaci znovu.</p>';
+    const i = question.buttonIndex;
+    const attemptNumber = island.attempts[i] + 1;
+    island.attempts[i] = attemptNumber;
+
+    if (attemptNumber >= 2) {
+        island.buttonStates[i] = 'red';
+        island.cachedQuestions[i] = null;
+        if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
+            island.buttonStates[i + 1] = 'default';
+        }
+        questionStatus.value = 'finished';
+        guideTone.value = 'failure';
+        guideMessage.value = '<p>Čas vypršel a druhý pokus už není možný. Pojďme dál.</p>';
+        guideAction.value = buildContinueAction(island, i);
+    } else {
+        island.buttonStates[i] = 'orange';
+        island.cachedQuestions[i] = { ...question };
+        // modal zůstává otevřený – hráč si po dovysvětlení může zkusit odpovědět znovu
+        questionStatus.value = 'retry';
+        guideTone.value = 'retry';
+        guideMessage.value = '<p>Čas vypršel – odpověď ses nestihl/a poslat. Zkus situaci znovu.</p>';
+        guideAction.value = retryAction;
+    }
 };
 
 const startQuestionTimer = () => {
@@ -549,6 +724,49 @@ const startQuestionTimer = () => {
 let outsideClickTimer = null;
 // prodleva, než se po otevření detailu ostrova ukáže úvodní zpráva průvodce
 let introTimer = null;
+// karta bezpečí sama zmizí po nastavené době
+let safetyCardTimer = null;
+const safetyCardDismissDelay = 6000;
+
+const showSafetyCard = (content) => {
+    clearTimeout(safetyCardTimer);
+    safetyCard.value = content;
+    safetyCardTimer = setTimeout(() => {
+        safetyCard.value = null;
+    }, safetyCardDismissDelay);
+};
+
+const hideSafetyCard = () => {
+    clearTimeout(safetyCardTimer);
+    safetyCard.value = null;
+};
+
+// klíč v sessionStorage – intro se ukáže jednou za session, příští spuštění aplikace ho zobrazí znovu
+const seenIntrosStorageKey = 'islandGame.seenIntros';
+
+const readSeenIntros = () => {
+    try {
+        const raw = window.sessionStorage.getItem(seenIntrosStorageKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+};
+
+const hasSeenIntro = (islandId) => readSeenIntros().includes(islandId);
+
+const markIntroSeen = (islandId) => {
+    try {
+        const seen = readSeenIntros();
+        if (!seen.includes(islandId)) {
+            seen.push(islandId);
+            window.sessionStorage.setItem(seenIntrosStorageKey, JSON.stringify(seen));
+        }
+    } catch (error) {
+        // sessionStorage nemusí být dostupné (privátní režim) – v tom případě se intro ukáže příště znovu
+    }
+};
 
 const handleOutsideClick = (event) => {
     if (bubbleEl.value && !bubbleEl.value.contains(event.target)) {
@@ -564,12 +782,17 @@ watch(guideMessage, (value) => {
         outsideClickTimer = setTimeout(() => {
             document.addEventListener('click', handleOutsideClick);
         }, 0);
+    } else {
+        // s bublinou mizí i případné akční tlačítko a barevné ladění
+        guideAction.value = null;
+        guideTone.value = 'default';
     }
 });
 
 onBeforeUnmount(() => {
     clearTimeout(outsideClickTimer);
     clearTimeout(introTimer);
+    clearTimeout(safetyCardTimer);
     stopQuestionTimer();
     document.removeEventListener('click', handleOutsideClick);
 });
@@ -580,11 +803,13 @@ const open = (island) => {
     guideMessage.value = null;
 
     // detail se otevře hned, úvodní zpráva průvodce naběhne až po krátké prodlevě
-    if (island.introMessage) {
+    // intro se ukáže jen při prvním otevření – další otevření už ho přeskočí
+    if (island.introMessage && !hasSeenIntro(island.key)) {
         introTimer = setTimeout(() => {
             // pojistka: hráč mezitím nemusel detail zavřít / přepnout
             if (selectedIsland.value === island) {
                 guideMessage.value = island.introMessage;
+                markIntroSeen(island.key);
             }
         }, 700);
     }
@@ -594,16 +819,44 @@ const close = () => {
     clearTimeout(introTimer);
     selectedIsland.value = null;
     guideMessage.value = null;
+    hideSafetyCard();
+};
+
+// po vyhodnocení situace (správně / 2× špatně) nabídneme pokračování nebo dokončení ostrova
+const buildContinueAction = (island, i) => {
+    const isLastStone = i === island.buttonStates.length - 1;
+    return isLastStone
+        ? { label: 'Zpět na mapu ostrovů', handler: close }
+        : { label: 'Pokračovat na další kámen', handler: closeQuestion };
+};
+
+const retryAction = {
+    label: 'Zkusit odpovědět znovu',
+    handler: () => {
+        guideMessage.value = null;
+    },
 };
 
 // načte situaci pro dané tlačítko z DB (endpoint vybere otázku adaptivní obtížnosti)
 const openQuestion = async (buttonIndex) => {
     const island = selectedIsland.value;
     const state = island?.buttonStates[buttonIndex];
-    if (!island || state === 'locked' || state === 'green') return;
+    if (!island || state === 'locked' || state === 'green' || state === 'red') return;
     if (loadingQuestion.value) return;
 
     guideMessage.value = null;
+    questionStatus.value = 'live';
+    wrongOptionIds.value = [];
+    correctOptionId.value = null;
+
+    // po prvním špatném pokusu nabízíme stejnou situaci znovu – bez dalšího volání endpointu
+    const cached = island.cachedQuestions[buttonIndex];
+    if (cached) {
+        activeQuestion.value = { ...cached, openedAt: Date.now() };
+        startQuestionTimer();
+        return;
+    }
+
     loadingQuestion.value = true;
 
     try {
@@ -643,6 +896,10 @@ const openQuestion = async (buttonIndex) => {
 const closeQuestion = () => {
     stopQuestionTimer();
     activeQuestion.value = null;
+    questionStatus.value = 'live';
+    wrongOptionIds.value = [];
+    correctOptionId.value = null;
+    hideSafetyCard();
 };
 
 // zpětná vazba po špatné odpovědi – hodnocení zvolené možnosti, případně otázky
@@ -661,6 +918,7 @@ const answerQuestion = async (option) => {
     stopQuestionTimer();
     answerSubmitting.value = true;
     const i = question.buttonIndex;
+    const attemptNumber = island.attempts[i] + 1;
 
     try {
         const { data } = await axios.post(
@@ -670,7 +928,7 @@ const answerQuestion = async (option) => {
                 question_id: question.questionId,
                 option_ids: [option.id],
                 seconds: Math.max(0, Math.round((Date.now() - question.openedAt) / 1000)),
-                attempt: 1,
+                attempt: attemptNumber,
                 island_id: island.key,
                 button: i + 1,
             },
@@ -678,27 +936,59 @@ const answerQuestion = async (option) => {
         );
 
         const result = data.data;
-        activeQuestion.value = null;
 
         if (result.correct) {
             // správně – tlačítko zazelená, odemkne se další a hráč získá kartu bezpečí
+            correctOptionId.value = option.id;
             if (island.buttonStates[i] !== 'green') {
                 island.tasks.completed = Math.min(island.tasks.total, island.tasks.completed + 1);
             }
             island.buttonStates[i] = 'green';
+            island.cachedQuestions[i] = null;
             if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
                 island.buttonStates[i + 1] = 'default';
             }
-            guideMessage.value = result.safetyCard
-                ? `<p><strong>Získal jsi kartu bezpečí!</strong></p><p>${result.safetyCard}</p>`
-                : '<p>Skvělá práce! Situaci jsi zvládl správně.</p>';
+            questionStatus.value = 'finished';
+            guideTone.value = 'success';
+            if (result.safetyCard) {
+                // karta vpravo nahoře jen oslavně oznámí zisk; popis vysvětlí průvodce
+                showSafetyCard('<p><strong>Získal jsi kartu bezpečí!</strong></p>');
+                guideMessage.value = result.safetyCard;
+            } else {
+                guideMessage.value = '<p>Skvělá práce! Situaci jsi zvládl správně.</p>';
+            }
+            guideAction.value = buildContinueAction(island, i);
         } else {
-            // špatně – tlačítko zoranžoví, po kliknutí se nabídne další situace
-            island.buttonStates[i] = 'orange';
+            island.attempts[i] = attemptNumber;
+            if (!wrongOptionIds.value.includes(option.id)) {
+                wrongOptionIds.value = [...wrongOptionIds.value, option.id];
+            }
             const hint = wrongAnswerHint(result, option.id);
-            guideMessage.value = hint
-                ? `<p>${hint}</p>`
-                : '<p>Tentokrát to nevyšlo. Zkus si situaci znovu promyslet.</p>';
+
+            if (attemptNumber >= 2) {
+                // druhá špatná odpověď – tlačítko zčervená, další úkol se odemkne
+                island.buttonStates[i] = 'red';
+                island.cachedQuestions[i] = null;
+                if (i + 1 < island.buttonStates.length && island.buttonStates[i + 1] === 'locked') {
+                    island.buttonStates[i + 1] = 'default';
+                }
+                questionStatus.value = 'finished';
+                guideTone.value = 'failure';
+                guideMessage.value = hint
+                    ? `<p>${hint}</p><p>Druhý pokus už nevyšel – pojďme dál.</p>`
+                    : '<p>Bohužel ani druhý pokus nevyšel. Pojďme dál.</p>';
+                guideAction.value = buildContinueAction(island, i);
+            } else {
+                // první špatná odpověď – tlačítko zoranžoví a stejná situace se nabídne k druhému pokusu
+                island.buttonStates[i] = 'orange';
+                island.cachedQuestions[i] = { ...question };
+                questionStatus.value = 'retry';
+                guideTone.value = 'retry';
+                guideMessage.value = hint
+                    ? `<p>${hint}</p><p>Zkus tuhle situaci ještě jednou.</p>`
+                    : '<p>Tentokrát to nevyšlo. Zkus tuhle situaci ještě jednou.</p>';
+                guideAction.value = retryAction;
+            }
         }
     } catch (error) {
         guideMessage.value = '<p>Odpověď se nepodařilo odeslat. Zkuste to prosím za chvíli znovu.</p>';
@@ -1144,6 +1434,12 @@ const answerQuestion = async (option) => {
     padding: 0.75rem;
 }
 
+/* nad otevřeným modalem – průvodce stojí v rohu obrazovky, bublina je vždy vidět */
+.island-guide--above-modal {
+    position: fixed;
+    z-index: 60;
+}
+
 .island-guide-img {
     height: 14rem;
     width: auto;
@@ -1166,6 +1462,37 @@ const answerQuestion = async (option) => {
     box-shadow:
         0 6px 18px rgba(0, 20, 50, 0.4),
         inset 0 0 0 1px rgba(20, 74, 120, 0.15);
+}
+
+.island-guide-shield {
+    position: absolute;
+    top: -1.1rem;
+    left: -1.1rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 9999px;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(8, 38, 70, 0.35);
+}
+
+.island-guide-shield svg {
+    width: 1.7rem;
+    height: 1.7rem;
+}
+
+.island-guide-shield--success {
+    color: #16a34a;
+}
+
+.island-guide-shield--retry {
+    color: #f59e0b;
+}
+
+.island-guide-shield--failure {
+    color: #dc2626;
 }
 
 .island-guide-close {
@@ -1196,6 +1523,28 @@ const answerQuestion = async (option) => {
 .island-guide-close svg {
     width: 1rem;
     height: 1rem;
+}
+
+.island-guide-action {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 1.4rem;
+    padding: 0.55rem 1.25rem;
+    border: 0;
+    border-radius: 0.55rem;
+    background: #11365e;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.island-guide-action:hover,
+.island-guide-action:focus-visible {
+    background: #1d4f86;
+    transform: translateY(-1px);
+    outline: none;
 }
 
 .island-guide-text :deep(p) {
@@ -1297,6 +1646,113 @@ const answerQuestion = async (option) => {
 
 .question-modal-text :deep(p:last-child) {
     margin-bottom: 0;
+}
+
+/* --- karta bezpečí – vyskočí vpravo nahoře jako sběratelská karta --- */
+.safety-card {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 70;
+    width: min(17rem, calc(100vw - 2.5rem));
+    max-height: calc(100vh - 2.5rem);
+    overflow-y: auto;
+    padding: 1.05rem 1.05rem 1.2rem;
+    text-align: center;
+    background:
+        radial-gradient(ellipse at top, rgba(255, 250, 235, 0.95) 0%, #fff7e6 60%, #f6e4b8 100%);
+    border-radius: 0.85rem;
+    border: 2px solid #b88a2c;
+    box-shadow:
+        0 20px 40px rgba(8, 38, 70, 0.4),
+        inset 0 0 0 3px #fff,
+        inset 0 0 0 4px #d4a437;
+}
+
+/* dekorativní rohy karty */
+.safety-card-corner {
+    position: absolute;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 2px solid #8b6818;
+    pointer-events: none;
+}
+
+.safety-card-corner--tl { top: 0.45rem; left: 0.45rem; border-right: 0; border-bottom: 0; border-top-left-radius: 0.3rem; }
+.safety-card-corner--tr { top: 0.45rem; right: 0.45rem; border-left: 0; border-bottom: 0; border-top-right-radius: 0.3rem; }
+.safety-card-corner--bl { bottom: 0.45rem; left: 0.45rem; border-right: 0; border-top: 0; border-bottom-left-radius: 0.3rem; }
+.safety-card-corner--br { bottom: 0.45rem; right: 0.45rem; border-left: 0; border-top: 0; border-bottom-right-radius: 0.3rem; }
+
+.safety-card-header {
+    display: block;
+    margin: 0 auto 0.85rem;
+    padding: 0.35rem 0;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #6b4f10;
+    letter-spacing: 0.18em;
+    border-top: 1px solid rgba(139, 104, 24, 0.4);
+    border-bottom: 1px solid rgba(139, 104, 24, 0.4);
+}
+
+.safety-card-illustration {
+    margin: 0.25rem auto 0.85rem;
+    width: 6.25rem;
+    height: 6.75rem;
+    filter: drop-shadow(0 4px 6px rgba(139, 104, 24, 0.35));
+}
+
+.safety-card-illustration svg {
+    width: 100%;
+    height: 100%;
+}
+
+.safety-card-body {
+    color: #11365e;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    text-align: left;
+    padding: 0.5rem 0.25rem 0;
+    border-top: 1px dashed rgba(139, 104, 24, 0.4);
+}
+
+.safety-card-body :deep(p) {
+    margin: 0 0 0.6rem;
+}
+
+.safety-card-body :deep(p:last-child) {
+    margin-bottom: 0;
+}
+
+.safety-card-body :deep(strong) {
+    font-weight: 800;
+}
+
+.safety-card-fade-enter-active {
+    transition: opacity 1.1s ease, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.safety-card-fade-leave-active {
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.safety-card-fade-enter-from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+}
+
+.safety-card-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+}
+
+/* když průvodce zobrazí bublinu nad modal, ztlumíme obsah modalu, aby s ní nesoupeřil */
+.question-modal--dimmed {
+    transition: filter 0.2s ease, opacity 0.2s ease;
+    filter: blur(2px) grayscale(0.7) brightness(0.92);
+    opacity: 0.9;
+    pointer-events: none;
 }
 
 /* --- odpočet času na odpověď --- */
