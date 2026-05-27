@@ -13,6 +13,14 @@ class SituationTest extends TestCase
 {
     private const ROUTE_NAME = 'web.island-game.situation';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seedované situace by interferovaly s testovacími – každý test si vytváří vlastní.
+        Situation::query()->delete();
+    }
+
     public function testRequiredParametersAreNotSet(): void
     {
         $this->postJson(route(self::ROUTE_NAME))
