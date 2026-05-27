@@ -826,7 +826,7 @@ const close = () => {
 const buildContinueAction = (island, i) => {
     const isLastStone = i === island.buttonStates.length - 1;
     return isLastStone
-        ? { label: 'Zpět na mapu ostrovů', handler: close }
+        ? { label: 'Zpět na mapu ostrovů', handler: () => { closeQuestion(); close(); } }
         : { label: 'Pokračovat na další kámen', handler: closeQuestion };
 };
 
