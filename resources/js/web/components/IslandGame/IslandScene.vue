@@ -59,12 +59,26 @@
 
             <transition name="scene-fade">
                 <div v-if="!selectedIsland" key="scene" class="absolute inset-0">
-                    <div class="island-wrap lighthouse-wrap absolute top-1/2 left-1/2 w-[22%] -translate-x-1/2 -translate-y-1/2">
+                    <div
+                        class="island-wrap lighthouse-wrap absolute top-1/2 left-1/2 w-[22%] -translate-x-1/2 -translate-y-1/2"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Otevřít maják"
+                        @mouseenter="lighthouseHovered = true"
+                        @mouseleave="lighthouseHovered = false"
+                        @focus="lighthouseHovered = true"
+                        @blur="lighthouseHovered = false"
+                        @click="openLighthouse"
+                        @keydown.enter.prevent="openLighthouse"
+                        @keydown.space.prevent="openLighthouse"
+                    >
                         <svg class="ripple" viewBox="0 0 220 70" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                             <use class="ring ring-outer" href="#wave-outer"/>
                             <use class="ring ring-inner" href="#wave-inner"/>
                         </svg>
-                        <img :src="lighthouseImg" alt="Maják" class="island-shadow lighthouse-bob relative block w-full">
+                        <div class="lighthouse-figure relative block w-full">
+                            <img :src="lighthouseImg" alt="Maják" class="island-shadow lighthouse-bob block w-full">
+                        </div>
 
                         <!-- mraky halící maják, rozestupují se s počtem získaných karet bezpečí -->
                         <div
@@ -108,6 +122,14 @@
                                 <path d="M12 2l7 3v6c0 4.4-3 8.6-7 11-4-2.4-7-6.6-7-11V5l7-3z"/>
                             </svg>
                             <span>{{ collectedCards }}/{{ totalCards }}</span>
+                        </span>
+
+                        <!-- nápověda, že na maják lze kliknout (klik řeší obalující prvek) -->
+                        <span class="lighthouse-hint" :class="{ 'lighthouse-hint--hover': lighthouseHovered }" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" class="lighthouse-hint-icon">
+                                <path d="M9 3a2 2 0 012 2v6h1V7a2 2 0 014 0v4h1V9a2 2 0 014 0v6a6 6 0 01-6 6h-2.5a4 4 0 01-3-1.35l-3.6-4.1a2 2 0 012.9-2.75L11 14V5a2 2 0 01-2-2z" fill="currentColor"/>
+                            </svg>
+                            <span>Vstoupit do majáku</span>
                         </span>
                     </div>
 
@@ -165,6 +187,7 @@
                                 :class="{
                                     'path-button--locked': selectedIsland.buttonStates[i] === 'locked',
                                     'path-button--done': selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red',
+                                    'path-button--pulse': shouldPulse(i),
                                 }"
                                 :disabled="selectedIsland.buttonStates[i] === 'locked' || selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red'"
                                 :aria-label="`Úkol ${i + 1}`"
@@ -313,60 +336,35 @@
         <!-- karta bezpečí – po správné odpovědi vyskočí vpravo nahoře a po chvilce sama zmizí -->
         <transition name="safety-card-fade">
             <div v-if="safetyCard" class="safety-card" role="status" aria-label="Karta bezpečí">
-                <div class="safety-card-corner safety-card-corner--tl" aria-hidden="true"></div>
-                <div class="safety-card-corner safety-card-corner--tr" aria-hidden="true"></div>
-                <div class="safety-card-corner safety-card-corner--bl" aria-hidden="true"></div>
-                <div class="safety-card-corner safety-card-corner--br" aria-hidden="true"></div>
-
-                <div class="safety-card-header">KARTA BEZPEČÍ</div>
-
-                <div class="safety-card-illustration" aria-hidden="true">
-                    <svg viewBox="0 0 120 130">
-                        <defs>
-                            <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#fde68a"/>
-                                <stop offset="100%" stop-color="#d4a437"/>
-                            </linearGradient>
-                            <linearGradient id="shieldStroke" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#8b6818"/>
-                                <stop offset="100%" stop-color="#6b4f10"/>
-                            </linearGradient>
-                            <radialGradient id="shieldGlow" cx="50%" cy="40%" r="70%">
-                                <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
-                                <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-                            </radialGradient>
-                        </defs>
-                        <g transform="translate(60 65)">
-                            <path
-                                d="M0 -50 L45 -35 L45 5 C45 30 25 50 0 60 C-25 50 -45 30 -45 5 L-45 -35 Z"
-                                fill="url(#shieldFill)"
-                                stroke="url(#shieldStroke)"
-                                stroke-width="3"
-                                stroke-linejoin="round"
-                            />
-                            <path
-                                d="M0 -50 L45 -35 L45 5 C45 30 25 50 0 60 C-25 50 -45 30 -45 5 L-45 -35 Z"
-                                fill="url(#shieldGlow)"
-                            />
-                            <path
-                                d="M-18 5 L-5 18 L20 -10"
-                                fill="none"
-                                stroke="#fff"
-                                stroke-width="6"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                        </g>
-                        <g fill="#d4a437" opacity="0.8">
-                            <circle cx="15" cy="20" r="2"/>
-                            <circle cx="105" cy="20" r="2"/>
-                            <circle cx="15" cy="110" r="2"/>
-                            <circle cx="105" cy="110" r="2"/>
-                        </g>
-                    </svg>
-                </div>
-
+                <img :src="safetyCardImg" alt="Karta bezpečí" class="safety-card-frame">
                 <div class="safety-card-body" v-html="safetyCard"></div>
+            </div>
+        </transition>
+
+        <!-- modal majáku – interiér majáku (ukázka), minimální okraje, ať vynikne obrázek -->
+        <transition name="modal-fade">
+            <div
+                v-if="lighthouseModalOpen"
+                class="question-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Maják"
+                @click.self="closeLighthouse"
+            >
+                <div class="lighthouse-modal relative">
+                    <button
+                        type="button"
+                        class="absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 shadow-md transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Zavřít"
+                        @click="closeLighthouse"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <img :src="lighthouseInteriorImg" alt="Interiér majáku" class="lighthouse-modal-img">
+                </div>
             </div>
         </transition>
 
@@ -512,13 +510,15 @@ const waveInnerPath = 'M188.0,38.0L188.9,38.9L189.3,40.1L188.8,41.0L187.7,41.5L1
 const lighthouseImg = asset('lighthouse.webp');
 const lampOffImg = new URL('../../../../images/turned_off_lamp.webp', import.meta.url).href;
 const lampOnImg = new URL('../../../../images/turned_on_lamp.webp', import.meta.url).href;
+const safetyCardImg = new URL('../../../../images/safety_card.webp', import.meta.url).href;
+const lighthouseInteriorImg = new URL('../../../../images/lighthouse_interior.webp', import.meta.url).href;
 
 // mraky kolem majáku – základní pozice (překrývají maják) a směr odplutí
 const clouds = [
-    { top: '-20%', left: '5%',   width: '92%', dx: '-12%',  dy: '-150%', floatClass: 'cloud-float-a', delay: '0s'  },
+    { top: '-20%', left: '5%',   width: '92%', dx: '-12%',  dy: '-185%', floatClass: 'cloud-float-a', delay: '0s'  },
     { top: '8%',   left: '-32%', width: '84%', dx: '-150%', dy: '-25%',  floatClass: 'cloud-float-b', delay: '-4s' },
     { top: '2%',   left: '50%',  width: '88%', dx: '150%',  dy: '-35%',  floatClass: 'cloud-float-c', delay: '-7s' },
-    { top: '20%',  left: '8%',   width: '88%', dx: '5%',    dy: '-165%', floatClass: 'cloud-float-b', delay: '-2s' },
+    { top: '20%',  left: '8%',   width: '88%', dx: '5%',    dy: '-185%', floatClass: 'cloud-float-b', delay: '-2s' },
     { top: '42%',  left: '-24%', width: '72%', dx: '-150%', dy: '75%',   floatClass: 'cloud-float-a', delay: '-9s' },
     { top: '42%',  left: '52%',  width: '76%', dx: '150%',  dy: '85%',   floatClass: 'cloud-float-c', delay: '-5s' },
 ];
@@ -584,16 +584,49 @@ const islands = reactive(
 const totalCards = computed(() => islands.reduce((sum, island) => sum + island.tasks.total, 0));
 const collectedCards = computed(() => islands.reduce((sum, island) => sum + island.tasks.completed, 0));
 const progress = computed(() => (totalCards.value > 0 ? collectedCards.value / totalCards.value : 0));
-// mraky halí maják na začátku, s postupem se rozestoupí a odplují
-const cloudStyle = (cloud) => ({
-    top: cloud.top,
-    left: cloud.left,
-    width: cloud.width,
-    opacity: Math.max(0, 1 - progress.value),
-    transform: `translate(calc(${cloud.dx} * ${progress.value}), calc(${cloud.dy} * ${progress.value}))`,
-});
+// najetí myší na maják (na úvodní obrazovce) mraky kolem majáku jen rozestoupí (nezmizí)
+const lighthouseHovered = ref(false);
+// jak moc se mraky při hoveru rozestoupí – dost na odhalení celého majáku včetně špičky, ale zůstanou viditelné okolo
+const cloudHoverSpread = 0.85;
+// mraky halí maják na začátku; s postupem hráče odplují, při hoveru se jen pootevřou kolem majáku
+const cloudStyle = (cloud) => {
+    // posun (rozestup) – buď podle postupu, nebo aspoň o kousek při hoveru
+    const spread = lighthouseHovered.value
+        ? Math.max(progress.value, cloudHoverSpread)
+        : progress.value;
+    return {
+        top: cloud.top,
+        left: cloud.left,
+        width: cloud.width,
+        // průhlednost drží postup hráče – hover mraky neschová, jen je rozhrne
+        opacity: Math.max(0, 1 - progress.value),
+        transform: `translate(calc(${cloud.dx} * ${spread}), calc(${cloud.dy} * ${spread}))`,
+    };
+};
 
 const selectedIsland = ref(null);
+
+// modal majáku – přehled nasbíraných karet bezpečí (otevře se kliknutím na maják)
+const lighthouseModalOpen = ref(false);
+
+const openLighthouse = () => {
+    lighthouseModalOpen.value = true;
+};
+
+const closeLighthouse = () => {
+    lighthouseModalOpen.value = false;
+    lighthouseHovered.value = false;
+};
+
+// první kámen pulzuje, dokud hráč na ostrově na nic neodpověděl – navádí, kde začít
+const shouldPulse = (i) => {
+    const island = selectedIsland.value;
+    if (!island || i !== 0) return false;
+    return island.buttonStates[0] === 'default'
+        && island.tasks.completed === 0
+        && island.attempts.every((attempt) => attempt === 0);
+};
+
 const activeQuestion = ref(null);
 // stav rozehrané situace v modálu: 'live' = čeká na odpověď, 'retry' = po 1. špatném pokusu, 'finished' = vyhodnoceno (správně nebo 2. špatně)
 const questionStatus = ref('live');
@@ -613,7 +646,7 @@ const optionVariant = (option) => {
 };
 
 const optionClass = (option) => {
-    const base = 'flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-80';
+    const base = 'flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-80';
     const variant = optionVariant(option);
     if (variant === 'correct') return `${base} border-emerald-400 bg-emerald-50 text-emerald-900`;
     if (variant === 'wrong') return `${base} border-red-300 bg-red-50 text-red-900`;
@@ -726,7 +759,7 @@ let outsideClickTimer = null;
 let introTimer = null;
 // karta bezpečí sama zmizí po nastavené době
 let safetyCardTimer = null;
-const safetyCardDismissDelay = 6000;
+const safetyCardDismissDelay = 11000;
 
 const showSafetyCard = (content) => {
     clearTimeout(safetyCardTimer);
@@ -809,6 +842,7 @@ const open = (island) => {
             // pojistka: hráč mezitím nemusel detail zavřít / přepnout
             if (selectedIsland.value === island) {
                 guideMessage.value = island.introMessage;
+                guideAction.value = startPlayingAction;
                 markIntroSeen(island.key);
             }
         }, 700);
@@ -832,6 +866,14 @@ const buildContinueAction = (island, i) => {
 
 const retryAction = {
     label: 'Zkusit odpovědět znovu',
+    handler: () => {
+        guideMessage.value = null;
+    },
+};
+
+// tlačítko pod úvodní zprávou ostrova – zavře intro a hráč může začít plnit úkoly
+const startPlayingAction = {
+    label: 'Začít hrát',
     handler: () => {
         guideMessage.value = null;
     },
@@ -951,9 +993,9 @@ const answerQuestion = async (option) => {
             questionStatus.value = 'finished';
             guideTone.value = 'success';
             if (result.safetyCard) {
-                // karta vpravo nahoře jen oslavně oznámí zisk; popis vysvětlí průvodce
-                showSafetyCard('<p><strong>Získal jsi kartu bezpečí!</strong></p>');
-                guideMessage.value = result.safetyCard;
+                // karta vpravo nahoře (obrázek s rámem) ukáže obsah karty ve svém bílém poli
+                showSafetyCard(result.safetyCard);
+                guideMessage.value = '<p>Skvělá práce! Získal/a jsi kartu bezpečí.</p>';
             } else {
                 guideMessage.value = '<p>Skvělá práce! Situaci jsi zvládl správně.</p>';
             }
@@ -1106,6 +1148,29 @@ const answerQuestion = async (option) => {
 
 .path-button--locked {
     cursor: not-allowed;
+}
+
+/* první kámen pulzuje, dokud hráč na ostrově nezačal odpovídat – upoutá pozornost */
+.path-button--pulse {
+    animation: path-button-pulse 1.8s ease-in-out infinite;
+}
+
+.path-button--pulse:hover,
+.path-button--pulse:focus {
+    animation: none;
+}
+
+@keyframes path-button-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.12);
+        filter:
+            drop-shadow(0 6px 6px rgba(0, 0, 0, 0.55))
+            drop-shadow(0 0 10px rgba(255, 224, 140, 0.9));
+    }
 }
 
 .path-button--done {
@@ -1293,6 +1358,47 @@ const answerQuestion = async (option) => {
 /* --- maják: mlha, paprsky, záře, počítadlo karet bezpečí --- */
 .lighthouse-wrap {
     z-index: 3;
+    cursor: pointer;
+    outline: none;
+}
+
+/* maják se při najetí myší / fokusu rozzáří a mírně povyroste – signál, že je klikatelný (mraky se navíc rozestoupí) */
+.lighthouse-figure {
+    transform-origin: 50% 88%; /* roste od základny */
+    transition: transform 0.3s ease;
+}
+
+.lighthouse-wrap:hover .lighthouse-figure,
+.lighthouse-wrap:focus-visible .lighthouse-figure {
+    transform: scale(1.07);
+}
+
+.lighthouse-wrap .lighthouse-bob {
+    transition: filter 0.3s ease;
+}
+
+.lighthouse-wrap:hover .lighthouse-bob,
+.lighthouse-wrap:focus-visible .lighthouse-bob {
+    filter:
+        drop-shadow(0 6px 4px rgba(8, 38, 70, 0.55))
+        drop-shadow(0 0 22px rgba(255, 232, 150, 0.85));
+}
+
+/* modal majáku – jen obrázek interiéru s minimálním okrajem, ať vynikne */
+.lighthouse-modal {
+    display: flex;
+    max-width: 96vw;
+    max-height: 96vh;
+}
+
+.lighthouse-modal-img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 96vw;
+    max-height: 96vh;
+    border-radius: 0.75rem;
+    box-shadow: 0 24px 48px rgba(8, 38, 70, 0.5);
 }
 
 .lighthouse-cloud {
@@ -1414,6 +1520,61 @@ const answerQuestion = async (option) => {
     }
 }
 
+/* nápověda na středu majáku – ukáže se, až se po najetí myší rozestoupí mraky */
+.lighthouse-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #3a2a05;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow:
+        0 4px 16px rgba(245, 158, 11, 0.5),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 6;
+    /* schovaná, dokud hráč nenajede na maják */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
+}
+
+.lighthouse-hint-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: #6b4f10;
+}
+
+/* po rozestoupení mraků (hover na maják) nápověda naběhne na středu majáku – s mírným zpožděním, ať jdou mraky první */
+.lighthouse-hint--hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+    transition-delay: 0.15s;
+    animation: lighthouse-hint-pulse 1.8s ease-in-out 0.15s infinite;
+}
+
+@keyframes lighthouse-hint-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    }
+    50%      { transform: translate(-50%, -50%) scale(1.06); }
+}
+
+@media (max-width: 639px) {
+    .lighthouse-hint {
+        font-size: 0.72rem;
+        padding: 0.3rem 0.7rem;
+    }
+}
+
 .scene-fade-enter-active,
 .scene-fade-leave-active {
     transition: opacity 0.25s ease;
@@ -1430,7 +1591,8 @@ const answerQuestion = async (option) => {
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
-    max-width: min(94vw, 54rem);
+    /* širší prostor, aby se dlouhé intro roztáhlo do šířky a nepřetékalo nahoře */
+    max-width: min(96vw, 76rem);
     padding: 0.75rem;
 }
 
@@ -1547,6 +1709,16 @@ const answerQuestion = async (option) => {
     outline: none;
 }
 
+/* dlouhé intro neroztáhne bublinu nad horní okraj obrazovky – text se uvnitř roluje */
+.island-guide-text {
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* prostor pro scrollbar, ať nepřekrývá text */
+    padding-right: 0.25rem;
+    margin-right: -0.25rem;
+}
+
 .island-guide-text :deep(p) {
     margin: 0 0 0.85rem;
 }
@@ -1654,67 +1826,35 @@ const answerQuestion = async (option) => {
     top: 1.25rem;
     right: 1.25rem;
     z-index: 70;
-    width: min(17rem, calc(100vw - 2.5rem));
+    width: min(21rem, calc(100vw - 2.5rem));
+    /* obrázek si nese vlastní rám i nadpis, drží svůj poměr stran */
     max-height: calc(100vh - 2.5rem);
-    overflow-y: auto;
-    padding: 1.05rem 1.05rem 1.2rem;
-    text-align: center;
-    background:
-        radial-gradient(ellipse at top, rgba(255, 250, 235, 0.95) 0%, #fff7e6 60%, #f6e4b8 100%);
-    border-radius: 0.85rem;
-    border: 2px solid #b88a2c;
-    box-shadow:
-        0 20px 40px rgba(8, 38, 70, 0.4),
-        inset 0 0 0 3px #fff,
-        inset 0 0 0 4px #d4a437;
+    filter: drop-shadow(0 20px 40px rgba(8, 38, 70, 0.4));
 }
 
-/* dekorativní rohy karty */
-.safety-card-corner {
-    position: absolute;
-    width: 0.85rem;
-    height: 0.85rem;
-    border: 2px solid #8b6818;
-    pointer-events: none;
-}
-
-.safety-card-corner--tl { top: 0.45rem; left: 0.45rem; border-right: 0; border-bottom: 0; border-top-left-radius: 0.3rem; }
-.safety-card-corner--tr { top: 0.45rem; right: 0.45rem; border-left: 0; border-bottom: 0; border-top-right-radius: 0.3rem; }
-.safety-card-corner--bl { bottom: 0.45rem; left: 0.45rem; border-right: 0; border-top: 0; border-bottom-left-radius: 0.3rem; }
-.safety-card-corner--br { bottom: 0.45rem; right: 0.45rem; border-left: 0; border-top: 0; border-bottom-right-radius: 0.3rem; }
-
-.safety-card-header {
+.safety-card-frame {
     display: block;
-    margin: 0 auto 0.85rem;
-    padding: 0.35rem 0;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: #6b4f10;
-    letter-spacing: 0.18em;
-    border-top: 1px solid rgba(139, 104, 24, 0.4);
-    border-bottom: 1px solid rgba(139, 104, 24, 0.4);
-}
-
-.safety-card-illustration {
-    margin: 0.25rem auto 0.85rem;
-    width: 6.25rem;
-    height: 6.75rem;
-    filter: drop-shadow(0 4px 6px rgba(139, 104, 24, 0.35));
-}
-
-.safety-card-illustration svg {
     width: 100%;
-    height: 100%;
+    height: auto;
 }
 
+/* text karty leží v prázdném bílém poli uvnitř obrázku – kopíruje jeho rozměry, ať se vejde bez scrollu */
 .safety-card-body {
+    position: absolute;
+    top: 43.5%;
+    left: 25%;
+    right: 25%;
+    bottom: 22%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
     color: #11365e;
-    font-size: 0.92rem;
-    line-height: 1.5;
-    text-align: left;
-    padding: 0.5rem 0.25rem 0;
-    border-top: 1px dashed rgba(139, 104, 24, 0.4);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: center;
 }
 
 .safety-card-body :deep(p) {
@@ -1833,7 +1973,9 @@ const answerQuestion = async (option) => {
 }
 
 .modal-fade-enter-active .question-modal,
-.modal-fade-leave-active .question-modal {
+.modal-fade-leave-active .question-modal,
+.modal-fade-enter-active .lighthouse-modal,
+.modal-fade-leave-active .lighthouse-modal {
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -1843,7 +1985,9 @@ const answerQuestion = async (option) => {
 }
 
 .modal-fade-enter-from .question-modal,
-.modal-fade-leave-to .question-modal {
+.modal-fade-leave-to .question-modal,
+.modal-fade-enter-from .lighthouse-modal,
+.modal-fade-leave-to .lighthouse-modal {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
 }
