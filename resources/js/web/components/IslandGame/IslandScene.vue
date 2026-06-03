@@ -23,10 +23,10 @@
             type="button"
             class="absolute top-3 left-3 z-20 inline-flex items-center gap-2 rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.95rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:px-4 sm:py-2 sm:text-base"
             @click="close"
-            aria-label="Zpět"
+            aria-label="Zpět na mapu ostrovů"
         >
             <span aria-hidden="true">←</span>
-            <span class="hidden sm:inline">Zpět</span>
+            <span class="hidden sm:inline">Zpět na mapu ostrovů</span>
         </button>
 
         <h2 v-if="selectedIsland" class="island-detail-label absolute top-3 left-1/2 z-20 -translate-x-1/2">
@@ -189,8 +189,10 @@
                                     'path-button--done': selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red',
                                     'path-button--pulse': shouldPulse(i),
                                 }"
-                                :disabled="selectedIsland.buttonStates[i] === 'locked' || selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red'"
-                                :aria-label="`Úkol ${i + 1}`"
+                                :disabled="selectedIsland.buttonStates[i] === 'locked'"
+                                :aria-label="selectedIsland.buttonStates[i] === 'green' || selectedIsland.buttonStates[i] === 'red'
+                                    ? `Úkol ${i + 1} – prohlédnout`
+                                    : `Úkol ${i + 1}`"
                                 @click="openQuestion(i)"
                             >
                                 <img
@@ -240,9 +242,23 @@
                         </svg>
                     </button>
 
+                    <!-- prohlížení vyřešeného kamene – info, že je situace už zodpovězená -->
+                    <div
+                        v-if="reviewMode"
+                        class="review-banner mb-4 mr-10 sm:mr-12"
+                        role="status"
+                    >
+                        <svg viewBox="0 0 24 24" class="review-banner-icon" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" fill="currentColor"/>
+                            <path d="M12 11v5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="1.2" fill="#fff"/>
+                        </svg>
+                        <span>Situace již byla zodpovězena.</span>
+                    </div>
+
                     <!-- odpočet času – jen u situací s limitem (settings.time_limit) -->
                     <div
-                        v-if="questionTimeLimit !== null"
+                        v-if="questionTimeLimit !== null && !reviewMode"
                         class="question-timer mb-4 pr-10 sm:pr-12"
                         :class="{ 'question-timer--low': timeIsLow }"
                         role="timer"
@@ -293,7 +309,9 @@
                                 Jak byste se zachovali?
                             </h3>
                             <p class="mb-4 text-sm text-slate-600">
-                                Vyberte odpověď, která nejlépe odpovídá tomu, co byste v této situaci udělali.
+                                {{ reviewMode
+                                    ? 'Tvoje tehdejší odpověď je zvýrazněná níže.'
+                                    : 'Vyberte odpověď, která nejlépe odpovídá tomu, co byste v této situaci udělali.' }}
                             </p>
                             <ul class="space-y-2">
                             <li
@@ -341,29 +359,151 @@
             </div>
         </transition>
 
-        <!-- modal majáku – interiér majáku (ukázka), minimální okraje, ať vynikne obrázek -->
+        <!-- modal majáku – interiér majáku (ukázka); v pozadí zůstává moře s ostrovy -->
         <transition name="modal-fade">
             <div
                 v-if="lighthouseModalOpen"
-                class="question-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3"
+                class="lighthouse-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Maják"
                 @click.self="closeLighthouse"
             >
+                <button
+                    type="button"
+                    class="absolute top-3 left-3 z-10 inline-flex items-center gap-2 rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.95rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:px-4 sm:py-2 sm:text-base"
+                    aria-label="Zpět na mapu ostrovů"
+                    @click="closeLighthouse"
+                >
+                    <span aria-hidden="true">←</span>
+                    <span class="hidden sm:inline">Zpět na mapu ostrovů</span>
+                </button>
+
                 <div class="lighthouse-modal relative">
+                    <div class="lighthouse-modal-stage">
+                        <img :src="lighthouseInteriorImg" alt="Interiér majáku" class="lighthouse-modal-img">
+
+                        <!-- záchranný kruh na stěně – houpe se a otevírá důležité kontakty -->
+                        <button
+                            type="button"
+                            class="lighthouse-hotspot lighthouse-hotspot--ring"
+                            aria-label="Důležité kontakty"
+                            @click="openContacts"
+                        >
+                            <img :src="lifeRingImg" alt="" class="lighthouse-hotspot-img life-ring-swing">
+                            <span class="lighthouse-hotspot-label">Důležité kontakty</span>
+                        </button>
+
+                        <!-- nástěnka na stěně – otevírá sbírku karet bezpečí -->
+                        <button
+                            type="button"
+                            class="lighthouse-hotspot lighthouse-hotspot--board"
+                            aria-label="Moje karty bezpečí"
+                            @click="openCards"
+                        >
+                            <img :src="corkboardImg" alt="" class="lighthouse-hotspot-img">
+                            <span class="lighthouse-hotspot-label">Moje karty bezpečí</span>
+                        </button>
+
+                        <!-- koš na ryby na stole s popiskem (dekorace) -->
+                        <div class="lighthouse-decor lighthouse-decor--basket" aria-hidden="true">
+                            <img :src="fishingBasketImg" alt="" class="lighthouse-decor-img">
+                            <span class="lighthouse-hotspot-label">Ulovené ryby</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- důležité kontakty – otevřou se ze záchranného kruhu v majáku -->
+        <transition name="modal-fade">
+            <div
+                v-if="contactsOpen"
+                class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Důležité kontakty"
+                @click.self="closeContacts"
+            >
+                <div class="contacts-modal relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
                     <button
                         type="button"
-                        class="absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 shadow-md transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Zavřít"
-                        @click="closeLighthouse"
+                        @click="closeContacts"
                     >
                         <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
                             <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </button>
 
-                    <img :src="lighthouseInteriorImg" alt="Interiér majáku" class="lighthouse-modal-img">
+                    <h3 class="mb-1 pr-8 text-xl font-bold text-blue-900">Důležité kontakty</h3>
+                    <p class="mb-4 text-sm text-slate-600">Tady najdeš čísla, která se hodí mít po ruce.</p>
+
+                    <ul class="space-y-2">
+                        <li v-for="contact in importantContacts" :key="contact.phone">
+                            <a :href="`tel:${contact.phone.replace(/\s/g, '')}`" class="contact-row">
+                                <span class="contact-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M6.6 10.8a15.5 15.5 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.4 11.4 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.4 11.4 0 00.58 3.6 1 1 0 01-.24 1l-2.24 2.2z" fill="currentColor"/>
+                                    </svg>
+                                </span>
+                                <span class="contact-text">
+                                    <span class="contact-name">{{ contact.label }}</span>
+                                    <span class="contact-note">{{ contact.note }}</span>
+                                </span>
+                                <span class="contact-phone">{{ contact.phone }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+
+        <!-- moje karty bezpečí – otevřou se z nástěnky v majáku -->
+        <transition name="modal-fade">
+            <div
+                v-if="cardsOpen"
+                class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Moje karty bezpečí"
+                @click.self="closeCards"
+            >
+                <div class="cards-modal relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+                    <button
+                        type="button"
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Zavřít"
+                        @click="closeCards"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <h3 class="mb-1 pr-8 text-xl font-bold text-blue-900">Moje karty bezpečí</h3>
+                    <p class="mb-4 text-sm text-slate-600">
+                        Získané karty: {{ collectedSafetyCards.length }} / {{ totalCards }}
+                    </p>
+
+                    <p
+                        v-if="collectedSafetyCards.length === 0"
+                        class="cards-empty"
+                    >
+                        Zatím nemáš žádnou kartu bezpečí. Získáš je správným vyřešením situací na ostrovech.
+                    </p>
+
+                    <div v-else class="cards-grid">
+                        <div
+                            v-for="(card, idx) in collectedSafetyCards"
+                            :key="idx"
+                            class="collected-card"
+                        >
+                            <img :src="safetyCardImg" alt="" class="collected-card-frame">
+                            <div class="collected-card-body" v-html="card.content"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </transition>
@@ -512,6 +652,9 @@ const lampOffImg = new URL('../../../../images/turned_off_lamp.webp', import.met
 const lampOnImg = new URL('../../../../images/turned_on_lamp.webp', import.meta.url).href;
 const safetyCardImg = new URL('../../../../images/safety_card.webp', import.meta.url).href;
 const lighthouseInteriorImg = new URL('../../../../images/lighthouse_interior.webp', import.meta.url).href;
+const lifeRingImg = new URL('../../../../images/life_ring.webp', import.meta.url).href;
+const fishingBasketImg = new URL('../../../../images/fishing_basket.webp', import.meta.url).href;
+const corkboardImg = new URL('../../../../images/corkboard.webp', import.meta.url).href;
 
 // mraky kolem majáku – základní pozice (překrývají maják) a směr odplutí
 const clouds = [
@@ -576,6 +719,8 @@ const islands = reactive(
             // počet dosavadních neúspěšných pokusů a uložená rozehraná situace pro každé tlačítko
             attempts: [0, 0, 0, 0, 0],
             cachedQuestions: [null, null, null, null, null],
+            // snímek vyřešené situace (otázka + jak hráč odpověděl) pro pozdější prohlížení
+            reviews: [null, null, null, null, null],
         };
     }),
 );
@@ -618,6 +763,41 @@ const closeLighthouse = () => {
     lighthouseHovered.value = false;
 };
 
+// při otevřeném modalu majáku zamkneme rolování stránky pod ním
+watch(lighthouseModalOpen, (open) => {
+    document.body.style.overflow = open ? 'hidden' : '';
+});
+
+// důležité kontakty – otevře se kliknutím na záchranný kruh na stěně majáku
+const contactsOpen = ref(false);
+const importantContacts = [
+    { label: 'Tísňové volání', phone: '112', note: 'Jednotné evropské číslo tísňového volání' },
+    { label: 'Policie ČR', phone: '158', note: 'Podvody, krádeže, ohrožení' },
+    { label: 'Záchranná služba', phone: '155', note: 'Zdravotní pomoc' },
+    { label: 'Hasiči', phone: '150', note: 'Požár, nehoda, únik' },
+    { label: 'Linka pomoci obětem', phone: '116 006', note: 'Bezplatná nonstop pomoc obětem (Bílý kruh bezpečí)' },
+];
+
+const openContacts = () => {
+    contactsOpen.value = true;
+};
+
+const closeContacts = () => {
+    contactsOpen.value = false;
+};
+
+// moje karty bezpečí – sbírka karet získaných za správně vyřešené situace (nástěnka v majáku)
+const cardsOpen = ref(false);
+const collectedSafetyCards = ref([]);
+
+const openCards = () => {
+    cardsOpen.value = true;
+};
+
+const closeCards = () => {
+    cardsOpen.value = false;
+};
+
 // první kámen pulzuje, dokud hráč na ostrově na nic neodpověděl – navádí, kde začít
 const shouldPulse = (i) => {
     const island = selectedIsland.value;
@@ -630,6 +810,10 @@ const shouldPulse = (i) => {
 const activeQuestion = ref(null);
 // stav rozehrané situace v modálu: 'live' = čeká na odpověď, 'retry' = po 1. špatném pokusu, 'finished' = vyhodnoceno (správně nebo 2. špatně)
 const questionStatus = ref('live');
+// prohlížení už vyřešeného kamene – jen čtení, nejde znovu odpovídat
+const reviewMode = ref(false);
+// při prohlížení: byl kámen vyřešen správně? (kvůli zobrazení stavu „už zodpovězeno")
+const reviewCorrect = ref(false);
 const loadingQuestion = ref(false);
 const answerSubmitting = ref(false);
 const guideMessage = ref(null);
@@ -654,7 +838,8 @@ const optionClass = (option) => {
 };
 
 const isOptionDisabled = (option) => (
-    answerSubmitting.value
+    reviewMode.value
+    || answerSubmitting.value
     || questionStatus.value === 'finished'
     || wrongOptionIds.value.includes(option.id)
 );
@@ -724,6 +909,7 @@ const handleTimeUp = () => {
             island.buttonStates[i + 1] = 'default';
         }
         questionStatus.value = 'finished';
+        storeReview(island, i);
         guideTone.value = 'failure';
         guideMessage.value = '<p>Čas vypršel a druhý pokus už není možný. Pojďme dál.</p>';
         guideAction.value = buildContinueAction(island, i);
@@ -828,6 +1014,8 @@ onBeforeUnmount(() => {
     clearTimeout(safetyCardTimer);
     stopQuestionTimer();
     document.removeEventListener('click', handleOutsideClick);
+    // pojistka, ať po odpojení komponenty nezůstane stránka zamčená
+    document.body.style.overflow = '';
 });
 
 const open = (island) => {
@@ -883,9 +1071,26 @@ const startPlayingAction = {
 const openQuestion = async (buttonIndex) => {
     const island = selectedIsland.value;
     const state = island?.buttonStates[buttonIndex];
-    if (!island || state === 'locked' || state === 'green' || state === 'red') return;
+    if (!island) return;
+
+    // už vyřešený kámen (správně i 2× špatně) → jen prohlížení situace a vlastní odpovědi, nelze odpovídat
+    if (state === 'green' || state === 'red') {
+        const review = island.reviews[buttonIndex];
+        if (!review) return;
+        guideMessage.value = null;
+        reviewMode.value = true;
+        reviewCorrect.value = review.correct;
+        questionStatus.value = 'finished';
+        wrongOptionIds.value = [...review.wrongOptionIds];
+        correctOptionId.value = review.correctOptionId;
+        activeQuestion.value = { ...review.question };
+        return;
+    }
+
+    if (state === 'locked') return;
     if (loadingQuestion.value) return;
 
+    reviewMode.value = false;
     guideMessage.value = null;
     questionStatus.value = 'live';
     wrongOptionIds.value = [];
@@ -939,9 +1144,21 @@ const closeQuestion = () => {
     stopQuestionTimer();
     activeQuestion.value = null;
     questionStatus.value = 'live';
+    reviewMode.value = false;
     wrongOptionIds.value = [];
     correctOptionId.value = null;
     hideSafetyCard();
+};
+
+// uloží snímek právě vyřešené situace, ať se k ní hráč může později vrátit a prohlédnout si ji
+const storeReview = (island, i) => {
+    if (!activeQuestion.value) return;
+    island.reviews[i] = {
+        question: { ...activeQuestion.value },
+        wrongOptionIds: [...wrongOptionIds.value],
+        correctOptionId: correctOptionId.value,
+        correct: island.buttonStates[i] === 'green',
+    };
 };
 
 // zpětná vazba po špatné odpovědi – hodnocení zvolené možnosti, případně otázky
@@ -954,7 +1171,8 @@ const wrongAnswerHint = (result, optionId) => {
 const answerQuestion = async (option) => {
     const question = activeQuestion.value;
     const island = selectedIsland.value;
-    if (!question || !island || answerSubmitting.value) return;
+    // v režimu prohlížení vyřešeného kamene se neodpovídá
+    if (reviewMode.value || !question || !island || answerSubmitting.value) return;
 
     // hráč odpověděl včas – odpočet zastavíme
     stopQuestionTimer();
@@ -984,6 +1202,10 @@ const answerQuestion = async (option) => {
             correctOptionId.value = option.id;
             if (island.buttonStates[i] !== 'green') {
                 island.tasks.completed = Math.min(island.tasks.total, island.tasks.completed + 1);
+                // novou kartu bezpečí přidáme do sbírky na nástěnce v majáku
+                if (result.safetyCard) {
+                    collectedSafetyCards.value.push({ island: island.name, content: result.safetyCard });
+                }
             }
             island.buttonStates[i] = 'green';
             island.cachedQuestions[i] = null;
@@ -991,6 +1213,7 @@ const answerQuestion = async (option) => {
                 island.buttonStates[i + 1] = 'default';
             }
             questionStatus.value = 'finished';
+            storeReview(island, i);
             guideTone.value = 'success';
             if (result.safetyCard) {
                 // karta vpravo nahoře (obrázek s rámem) ukáže obsah karty ve svém bílém poli
@@ -1015,6 +1238,7 @@ const answerQuestion = async (option) => {
                     island.buttonStates[i + 1] = 'default';
                 }
                 questionStatus.value = 'finished';
+                storeReview(island, i);
                 guideTone.value = 'failure';
                 guideMessage.value = hint
                     ? `<p>${hint}</p><p>Druhý pokus už nevyšel – pojďme dál.</p>`
@@ -1173,8 +1397,15 @@ const answerQuestion = async (option) => {
     }
 }
 
+/* vyřešený kámen jde znovu otevřít a prohlédnout si situaci i vlastní odpověď */
 .path-button--done {
-    cursor: default;
+    cursor: pointer;
+}
+
+.path-button--done:hover,
+.path-button--done:focus {
+    transform: translate(-50%, -50%) scale(1.06);
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.5));
 }
 
 .path-button--locked > img {
@@ -1384,21 +1615,295 @@ const answerQuestion = async (option) => {
         drop-shadow(0 0 22px rgba(255, 232, 150, 0.85));
 }
 
-/* modal majáku – jen obrázek interiéru s minimálním okrajem, ať vynikne */
+/* modal majáku – bez tmavého překryvu, jen jemně rozmazané moře s ostrovy v pozadí */
+.lighthouse-modal-backdrop {
+    background: rgba(8, 38, 70, 0.12);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+/* modal majáku – obrázek interiéru v dřevěno-mosazném rámu, ať to působí jako uvnitř majáku */
 .lighthouse-modal {
+    position: relative;
     display: flex;
-    max-width: 96vw;
-    max-height: 96vh;
+    padding: clamp(0.7rem, 1.8vw, 1.5rem);
+    border-radius: 1.1rem;
+    background:
+        linear-gradient(145deg, #caa15a 0%, #9c6b2f 42%, #6f4a1e 100%);
+    box-shadow:
+        0 24px 48px rgba(8, 38, 70, 0.55),
+        inset 0 2px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* nýtky v rozích rámu – nautický detail */
+.lighthouse-modal::after {
+    content: '';
+    position: absolute;
+    inset: clamp(0.32rem, 0.8vw, 0.6rem);
+    border-radius: 0.7rem;
+    pointer-events: none;
+    background:
+        radial-gradient(circle, #f4e3b0 0%, #b88a2c 55%, #6b4f10 100%) no-repeat left top,
+        radial-gradient(circle, #f4e3b0 0%, #b88a2c 55%, #6b4f10 100%) no-repeat right top,
+        radial-gradient(circle, #f4e3b0 0%, #b88a2c 55%, #6b4f10 100%) no-repeat left bottom,
+        radial-gradient(circle, #f4e3b0 0%, #b88a2c 55%, #6b4f10 100%) no-repeat right bottom;
+    background-size: 0.5rem 0.5rem;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.lighthouse-modal-stage {
+    position: relative;
+    display: block;
+    line-height: 0;
 }
 
 .lighthouse-modal-img {
     display: block;
     width: auto;
     height: auto;
-    max-width: 96vw;
-    max-height: 96vh;
+    max-width: 92vw;
+    max-height: 86vh;
+    border-radius: 0.5rem;
+    box-shadow:
+        0 0 0 2px rgba(60, 38, 12, 0.7),
+        0 0 0 4px rgba(244, 227, 176, 0.35),
+        0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* statické dekorace ve scéně majáku (koš na ryby na stole) */
+.lighthouse-decor {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    user-select: none;
+}
+
+.lighthouse-decor-img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.lighthouse-decor--basket {
+    top: 52.5%;
+    left: 25%;
+    width: 17%;
+}
+
+.lighthouse-decor--basket .lighthouse-decor-img {
+    filter: drop-shadow(0 7px 6px rgba(8, 38, 70, 0.35));
+}
+
+
+/* interaktivní prvky ve scéně majáku (záchranný kruh apod.) */
+.lighthouse-hotspot {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 2;
+}
+
+/* poloha záchranného kruhu na stěně vpravo od dveří */
+.lighthouse-hotspot--ring {
+    top: 4%;
+    left: 60%;
+    width: 11%;
+}
+
+/* poloha nástěnky na stěně vlevo od dveří */
+.lighthouse-hotspot--board {
+    top: 7%;
+    left: 21%;
+    width: 18%;
+}
+
+.lighthouse-hotspot--board .lighthouse-hotspot-img {
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.lighthouse-hotspot--board:hover .lighthouse-hotspot-img,
+.lighthouse-hotspot--board:focus-visible .lighthouse-hotspot-img {
+    transform: scale(1.04);
+}
+
+.lighthouse-hotspot-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform-origin: 50% 5%;
+    filter: drop-shadow(0 6px 8px rgba(8, 38, 70, 0.45));
+    transition: filter 0.25s ease;
+}
+
+/* záchranný kruh se zlehka houpe jako na háčku */
+.life-ring-swing {
+    animation: life-ring-swing 4.5s ease-in-out infinite;
+}
+
+@keyframes life-ring-swing {
+    0%, 100% { transform: rotate(-6deg); }
+    50%      { transform: rotate(6deg);  }
+}
+
+.lighthouse-hotspot:hover .lighthouse-hotspot-img,
+.lighthouse-hotspot:focus-visible .lighthouse-hotspot-img {
+    filter:
+        drop-shadow(0 6px 8px rgba(8, 38, 70, 0.5))
+        drop-shadow(0 0 10px rgba(255, 238, 170, 0.95));
+}
+
+.lighthouse-hotspot-label {
+    margin-top: 0.4rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.96);
+    color: #11365e;
+    font-size: clamp(0.62rem, 1.1vw, 0.85rem);
+    font-weight: 700;
+    /* explicitně, ať popisek nepřebírá line-height: 0 ze stage (jinak text v <div> košíku zkolaboval) */
+    line-height: 1.15;
+    white-space: nowrap;
+    box-shadow:
+        0 2px 6px rgba(0, 20, 50, 0.35),
+        inset 0 0 0 1px rgba(20, 74, 120, 0.15);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.lighthouse-hotspot:hover .lighthouse-hotspot-label,
+.lighthouse-hotspot:focus-visible .lighthouse-hotspot-label {
+    transform: scale(1.06);
+    background: #fff;
+}
+
+/* --- modal důležitých kontaktů --- */
+.contact-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
     border-radius: 0.75rem;
-    box-shadow: 0 24px 48px rgba(8, 38, 70, 0.5);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.contact-row:hover,
+.contact-row:focus-visible {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    outline: none;
+}
+
+.contact-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #3a2a05;
+}
+
+.contact-icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.contact-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.contact-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.contact-note {
+    font-size: 0.78rem;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+.contact-phone {
+    flex-shrink: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #11365e;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- modal „Moje karty bezpečí" --- */
+.cards-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.1rem;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 0.25rem;
+}
+
+.collected-card {
+    position: relative;
+}
+
+.collected-card-frame {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* text karty leží v bílém poli rámu (stejné poměry jako u vyskakovací karty) */
+.collected-card-body {
+    position: absolute;
+    top: 43.5%;
+    left: 25%;
+    right: 25%;
+    bottom: 22%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    color: #11365e;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.collected-card-body :deep(p) {
+    margin: 0 0 0.4rem;
+}
+
+.collected-card-body :deep(p:last-child) {
+    margin-bottom: 0;
+}
+
+.collected-card-body :deep(strong) {
+    font-weight: 800;
 }
 
 .lighthouse-cloud {
@@ -1893,6 +2398,28 @@ const answerQuestion = async (option) => {
     filter: blur(2px) grayscale(0.7) brightness(0.92);
     opacity: 0.9;
     pointer-events: none;
+}
+
+/* --- info pruh při prohlížení už vyřešené situace (neutrální, modré) --- */
+.review-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border: 1px solid #bfdbfe;
+}
+
+.review-banner-icon {
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: #3b82f6;
 }
 
 /* --- odpočet času na odpověď --- */
