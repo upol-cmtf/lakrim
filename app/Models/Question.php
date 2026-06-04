@@ -53,7 +53,6 @@ class Question extends Model
     protected $attributes = [
         'type' => QuestionType::Select->value,
         'version' => Version::One->value,
-        'bonus' => false,
     ];
 
     protected $casts = [
