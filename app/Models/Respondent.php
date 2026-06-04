@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property QuizEvent|null $event
  * @property Collection<RespondentAnswer> $answers
  * @property Collection<RespondentSituation> $situations
+ * @property Collection<RespondentEasterEgg> $easterEggs
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
  * @property int|null $cnt
@@ -63,6 +64,11 @@ class Respondent extends Model
     public function situations(): HasMany
     {
         return $this->hasMany(RespondentSituation::class);
+    }
+
+    public function easterEggs(): HasMany
+    {
+        return $this->hasMany(RespondentEasterEgg::class);
     }
 
     public function event(): BelongsTo
