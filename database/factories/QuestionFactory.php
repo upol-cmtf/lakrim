@@ -24,6 +24,7 @@ class QuestionFactory extends Factory
             'perex' => $this->faker->sentence,
             'description' => $this->faker->text,
             'difficulty_id' => Difficulty::Easy->value,
+            'bonus' => false,
         ];
     }
 
