@@ -383,14 +383,16 @@
                     <div class="lighthouse-modal-stage">
                         <img :src="lighthouseInteriorImg" alt="Interiér majáku" class="lighthouse-modal-img">
 
-                        <!-- záchranný kruh na stěně – houpe se a otevírá důležité kontakty -->
+                        <!-- záchranný kruh visící na háčku na stěně – houpe se a otevírá důležité kontakty -->
                         <button
                             type="button"
                             class="lighthouse-hotspot lighthouse-hotspot--ring"
                             aria-label="Důležité kontakty"
                             @click="openContacts"
                         >
-                            <img :src="lifeRingImg" alt="" class="lighthouse-hotspot-img life-ring-swing">
+                            <span class="lighthouse-ring-swing">
+                                <img :src="lifeRingImg" alt="" class="lighthouse-hotspot-img">
+                            </span>
                             <span class="lighthouse-hotspot-label">Důležité kontakty</span>
                         </button>
 
@@ -1712,18 +1714,28 @@ const answerQuestion = async (option) => {
     z-index: 2;
 }
 
-/* poloha záchranného kruhu na stěně vpravo od dveří */
+/* poloha záchranného kruhu na háčku na stěně vpravo od dveří */
 .lighthouse-hotspot--ring {
-    top: 4%;
-    left: 60%;
-    width: 11%;
+    top: 6%;
+    left: 61%;
+    width: 13%;
 }
 
-/* poloha nástěnky na stěně vlevo od dveří */
+/* kruh se na hoveru zlehka zvětší, stejně jako nástěnka */
+.lighthouse-hotspot--ring .lighthouse-hotspot-img {
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.lighthouse-hotspot--ring:hover .lighthouse-hotspot-img,
+.lighthouse-hotspot--ring:focus-visible .lighthouse-hotspot-img {
+    transform: scale(1.05);
+}
+
+/* poloha nástěnky na stěně vlevo od dveří (frontálně, v jedné linii se dveřmi) */
 .lighthouse-hotspot--board {
-    top: 7%;
-    left: 21%;
-    width: 18%;
+    top: 10%;
+    left: 19.5%;
+    width: 21%;
 }
 
 .lighthouse-hotspot--board .lighthouse-hotspot-img {
@@ -1735,6 +1747,20 @@ const answerQuestion = async (option) => {
     transform: scale(1.04);
 }
 
+/* popisek blíž k nástěnce (deska je natočená, spodní střed je výš než roh) */
+.lighthouse-hotspot--board .lighthouse-hotspot-label {
+    position: absolute;
+    left: 50%;
+    top: 82%;
+    transform: translateX(-50%);
+    margin-top: 0;
+}
+
+.lighthouse-hotspot--board:hover .lighthouse-hotspot-label,
+.lighthouse-hotspot--board:focus-visible .lighthouse-hotspot-label {
+    transform: translateX(-50%) scale(1.06);
+}
+
 .lighthouse-hotspot-img {
     display: block;
     width: 100%;
@@ -1744,14 +1770,18 @@ const answerQuestion = async (option) => {
     transition: filter 0.25s ease;
 }
 
-/* záchranný kruh se zlehka houpe jako na háčku */
-.life-ring-swing {
+/* obal kruhu se zlehka houpe jako na háčku (pivot nahoře u háčku) */
+.lighthouse-ring-swing {
+    display: block;
+    width: 100%;
+    /* pivot v místě, kde lano leží na háčku, ať se kruh houpe okolo háčku */
+    transform-origin: 48% 8%;
     animation: life-ring-swing 4.5s ease-in-out infinite;
 }
 
 @keyframes life-ring-swing {
-    0%, 100% { transform: rotate(-6deg); }
-    50%      { transform: rotate(6deg);  }
+    0%, 100% { transform: rotate(-5deg); }
+    50%      { transform: rotate(5deg);  }
 }
 
 .lighthouse-hotspot:hover .lighthouse-hotspot-img,
