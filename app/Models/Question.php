@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $perex
  * @property string $description
  * @property Version $version
+ * @property bool $bonus
  * @property Difficulty $difficulty
  * @property QuestionType $type
  * @property Collection<QuestionOption> $options
@@ -38,8 +39,9 @@ class Question extends Model
     protected $table = 'questions';
 
     protected $fillable = [
-        'question',
+        'bonus',
         'difficulty_id',
+        'question',
         'question_group_id',
         'version',
     ];
@@ -51,12 +53,14 @@ class Question extends Model
     protected $attributes = [
         'type' => QuestionType::Select->value,
         'version' => Version::One->value,
+        'bonus' => false,
     ];
 
     protected $casts = [
         'settings' => 'array',
         'type' => QuestionType::class,
         'version' => Version::class,
+        'bonus' => 'boolean',
     ];
 
     public function difficulty(): BelongsTo
