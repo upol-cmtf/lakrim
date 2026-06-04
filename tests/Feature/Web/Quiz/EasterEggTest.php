@@ -134,8 +134,12 @@ class EasterEggTest extends TestCase
         ])
             ->assertOk();
 
-        $this->assertStringContainsString('<img', (string) $response->json('data.description'));
-        $this->assertStringContainsString('mapa.png', (string) $response->json('data.description'));
-        $this->assertStringContainsString('odmena.png', (string) $response->json('data.evaluation'));
+        $description = $response->json('data.description');
+        $evaluation = $response->json('data.evaluation');
+        assert(is_string($description) && is_string($evaluation));
+
+        $this->assertStringContainsString('<img', $description);
+        $this->assertStringContainsString('mapa.png', $description);
+        $this->assertStringContainsString('odmena.png', $evaluation);
     }
 }

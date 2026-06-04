@@ -3,6 +3,7 @@ namespace Tests\Feature\Web\Quiz;
 
 use App\Models\EasterEgg;
 use App\Models\Respondent;
+use App\Models\RespondentEasterEgg;
 use Tests\TestCase;
 
 class RespondentEasterEggTest extends TestCase
@@ -62,7 +63,7 @@ class RespondentEasterEggTest extends TestCase
         ]);
 
         $record = $respondent->easterEggs()->where('easter_egg_id', $easterEgg->id)->first();
-        assert($record !== null);
+        assert($record instanceof RespondentEasterEgg);
         $this->assertNotNull($record->completed_at);
     }
 
