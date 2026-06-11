@@ -42,19 +42,32 @@
                 type="button"
                 class="sea-fish absolute"
                 :style="fishStyle(f)"
-                aria-label="Bonusový úkol"
+                aria-label="Oddechněte si"
                 @click="loadEasterEgg(f)"
             >
-                <span class="sea-fish-bob" :style="fishTintStyle(f)">
-                    <svg class="sea-fish-svg" :style="fishInnerStyle(f)" viewBox="0 0 64 40" aria-hidden="true">
-                        <path d="M20 20C20 11 30 6 42 6s18 5 18 14-8 14-18 14-22-5-22-14z" fill="#ff9f43"/>
-                        <path d="M20 20 6 9l5 11-5 11z" fill="#f97316"/>
-                        <path d="M40 11q7 0 11 4-6 1-11-1z" fill="#ffbe76"/>
-                        <circle cx="51" cy="16" r="2.4" fill="#1f2d3d"/>
-                    </svg>
+                <span class="sea-fish-bob">
+                    <img class="sea-fish-img" :src="f.img" :style="fishInnerStyle(f)" alt="" aria-hidden="true">
                 </span>
             </button>
         </div>
+
+        <!-- pobídka chytat rybky – jen na přehledu moře, po delší nečinnosti hráče -->
+        <transition name="fish-hint-fade">
+            <div v-if="!selectedIsland && fishHintVisible" class="fish-hint" role="status">
+                <span class="fish-hint-icon" aria-hidden="true">🐟</span>
+                <span class="fish-hint-text">Zkuste si chytnout nějakou rybku</span>
+                <button
+                    type="button"
+                    class="fish-hint-close"
+                    aria-label="Zavřít"
+                    @click="hideFishHint"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </transition>
 
         <!-- na mapě necháme prázdnou vodu propustnou pro klik (klik projde na rybku pod kontejnerem) -->
         <div
@@ -305,13 +318,11 @@
                         </div>
                     </div>
 
-                    <div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto sm:flex-row sm:gap-8">
-                        <!-- levá část: popis situace -->
-                        <div class="sm:w-3/5">
-                            <h3 class="mb-4 pr-8 text-xl font-bold leading-tight text-blue-900 sm:pr-0">
-                                {{ activeQuestion.title }}
-                            </h3>
-
+                    <!-- na mobilu scrolluje celý řádek (sloupce jsou pod sebou),
+                         na desktopu scrollují sloupce samostatně – ať dlouhé zadání nehýbe celým modalem -->
+                    <div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto sm:flex-row sm:gap-8 sm:overflow-hidden">
+                        <!-- levá část: popis situace (vlastní scroll u delšího zadání) -->
+                        <div class="sm:w-3/5 sm:min-h-0 sm:overflow-y-auto sm:pr-3">
                             <p
                                 v-if="activeQuestion.perex"
                                 class="mb-3 text-sm font-semibold leading-relaxed text-slate-800"
@@ -326,11 +337,12 @@
                                     { 'question-modal-text--cover': descriptionImageOnly },
                                 ]"
                                 v-html="activeQuestion.description"
+                                @click="openImageZoom"
                             ></div>
                         </div>
 
-                        <!-- pravá část: možnosti na výběr -->
-                        <div class="sm:w-2/5 sm:border-l sm:border-slate-200 sm:pl-8">
+                        <!-- pravá část: možnosti na výběr (vlastní scroll, ať se neořízne při delším seznamu) -->
+                        <div class="sm:w-2/5 sm:border-l sm:border-slate-200 sm:pl-8 sm:min-h-0 sm:overflow-y-auto">
                             <h3 class="mb-3 text-base font-semibold text-slate-900">
                                 Jak byste se zachovali?
                             </h3>
@@ -382,6 +394,30 @@
             <div v-if="safetyCard" class="safety-card" role="status" aria-label="Karta bezpečí">
                 <img :src="safetyCardImg" alt="Karta bezpečí" class="safety-card-frame">
                 <div class="safety-card-body" v-html="safetyCard"></div>
+            </div>
+        </transition>
+
+        <!-- zvětšený obrázek ze zadání situace – zavře se klikem kamkoliv nebo křížkem -->
+        <transition name="modal-fade">
+            <div
+                v-if="zoomImage"
+                class="image-zoom-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Zvětšený obrázek"
+                @click="closeImageZoom"
+            >
+                <button
+                    type="button"
+                    class="image-zoom-close"
+                    aria-label="Zavřít"
+                    @click="closeImageZoom"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <img :src="zoomImage" :alt="zoomAlt" class="image-zoom-img">
             </div>
         </transition>
 
@@ -448,8 +484,13 @@
                             </span>
                         </button>
 
-                        <!-- koš na ryby na stole – ulovené ryby v něm leží -->
-                        <div class="lighthouse-basket" aria-hidden="true">
+                        <!-- koš na ryby na stole – ulovené ryby v něm leží; klik otevře jejich přehled -->
+                        <button
+                            type="button"
+                            class="lighthouse-basket lighthouse-hotspot--basket"
+                            aria-label="Moje ulovené ryby"
+                            @click="openBasket"
+                        >
                             <img :src="fishingBasketImg" alt="" class="lighthouse-basket-img">
                             <!-- ulovené ryby ležící v koši -->
                             <span
@@ -474,7 +515,7 @@
                                 <span class="hidden sm:inline">Moje ulovené ryby</span>
                                 <span class="island-progress">{{ caughtFish.length }}</span>
                             </span>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -573,6 +614,56 @@
             </div>
         </transition>
 
+        <!-- moje ulovené ryby – otevřou se z koše v majáku; klik na rybu úkol znovu otevře -->
+        <transition name="modal-fade">
+            <div
+                v-if="basketOpen"
+                class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Moje ulovené ryby"
+                @click.self="closeBasket"
+            >
+                <div class="cards-modal relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+                    <button
+                        type="button"
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Zavřít"
+                        @click="closeBasket"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+
+                    <h3 class="mb-1 pr-8 text-xl font-bold text-blue-900">Moje ulovené ryby</h3>
+                    <p class="mb-4 text-sm text-slate-600">
+                        Ulovené ryby: {{ caughtFish.length }} / {{ easterEggsCount }}
+                    </p>
+
+                    <p
+                        v-if="caughtFish.length === 0"
+                        class="cards-empty"
+                    >
+                        Zatím nemáš uloveno nic. Rybky plavou v moři jako bonusové úkoly – chyť je a procvič si je.
+                    </p>
+
+                    <div v-else class="caught-fish-grid">
+                        <button
+                            v-for="cf in caughtFish"
+                            :key="cf.key"
+                            type="button"
+                            class="caught-fish-card"
+                            @click="reviewEasterEgg(cf)"
+                        >
+                            <img :src="cf.img" alt="" class="caught-fish-card-img">
+                            <span class="caught-fish-card-label">{{ eggTitle(cf.egg) }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
         <!-- bonusový úkol (easter egg) – otevře se kliknutím na rybku ve scéně -->
         <transition name="modal-fade">
             <div
@@ -580,7 +671,7 @@
                 class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
                 role="dialog"
                 aria-modal="true"
-                aria-label="Bonusový úkol"
+                aria-label="Oddechněte si"
                 @click.self="closeEasterEgg"
             >
                 <div class="easter-egg-modal relative flex max-h-[92vh] w-full max-w-[1500px] flex-col rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
@@ -595,13 +686,9 @@
                         </svg>
                     </button>
 
-                    <h3 class="mb-4 pr-8 text-xl font-bold text-blue-900">
-                        {{ easterEggView === 'evaluation' ? 'Vyhodnocení' : 'Bonusový úkol' }}
-                    </h3>
-
-                    <p v-if="easterEggLoading" class="py-8 text-center text-slate-500">Načítám úkol…</p>
+                    <p v-if="easterEggLoading" class="py-8 text-center text-slate-500">Načítám…</p>
                     <p v-else-if="easterEggEmpty" class="py-8 text-center text-slate-500">
-                        Zatím tu žádný bonusový úkol nečeká. Zkus to později!
+                        Zatím tu na tebe nic nečeká. Zkus to později!
                     </p>
                     <template v-else>
                         <div
@@ -783,6 +870,10 @@ const lighthouseInteriorImg = new URL('../../../../images/lighthouse_interior.we
 const lifeRingImg = new URL('../../../../images/life_ring.webp', import.meta.url).href;
 const fishingBasketImg = new URL('../../../../images/fishing_basket.webp', import.meta.url).href;
 const corkboardImg = new URL('../../../../images/corkboard.webp', import.meta.url).href;
+// všechny varianty rybek – každá plující rybka dostane náhodně jednu z nich
+const fishImgs = Object.values(
+    import.meta.glob('../../../../images/fishes/*.webp', { eager: true, query: '?url', import: 'default' }),
+);
 
 // mraky kolem majáku – základní pozice (překrývají maják) a směr odplutí
 const clouds = [
@@ -869,8 +960,36 @@ const islands = reactive(
 );
 
 // rybky plující po moři – každá rybka je jeden easter egg (bonusový úkol)
-// rozmístění/rychlost/směr jsou náhodné, ať každá plave trochu jinak
-const fishCount = Math.max(0, props.easterEggsCount);
+// rozmístění/rychlost/směr jsou náhodné, ať každá plave trochu jinak.
+
+// ulovené rybky („Moje ulovené ryby") přežívají i přenačtení stránky – držíme
+// je v localStorage pod klíčem svázaným s tokenem respondenta, i se zněním
+// úkolu, aby se daly v koši znovu otevřít a projít.
+const caughtFishStorageKey = `lakrim.caughtFish.${props.respondentToken}`;
+
+const loadCaughtFish = () => {
+    try {
+        const raw = window.localStorage.getItem(caughtFishStorageKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+};
+
+// ulovené rybky – zobrazují se v koši v majáku a dají se znovu otevřít
+const caughtFish = ref(loadCaughtFish());
+
+const persistCaughtFish = () => {
+    try {
+        window.localStorage.setItem(caughtFishStorageKey, JSON.stringify(caughtFish.value));
+    } catch (error) {
+        // úložiště nemusí být dostupné (privátní režim apod.) – tiše ignorujeme
+    }
+};
+
+// v moři plavou už jen nesplněné easter eggy (ty ulovené leží v koši)
+const fishCount = Math.max(0, props.easterEggsCount - caughtFish.value.length);
 
 // vyvážené náhodné rozdělení směrů – polovina doprava, polovina doleva,
 // pak zamícháno (Fisher–Yates), ať jsou obě strany vidět i při pár rybkách
@@ -880,21 +999,29 @@ for (let i = fishDirections.length - 1; i > 0; i--) {
     [fishDirections[i], fishDirections[j]] = [fishDirections[j], fishDirections[i]];
 }
 
+// každá rybka v moři má unikátní obrázek – nikdy nejsou vidět dvě stejné.
+// vynecháme i obrázky už ulovených ryb, ať se nepřekrývá celá sada (max 5 < 9).
+const usedImgs = new Set(caughtFish.value.map((cf) => cf.img));
+const availableImgs = fishImgs.filter((img) => !usedImgs.has(img));
+for (let i = availableImgs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [availableImgs[i], availableImgs[j]] = [availableImgs[j], availableImgs[i]];
+}
+
 // reactive – ulovená rybka se z pole odebere a zmizí z moře
 const fish = reactive(Array.from({ length: fishCount }, (_, i) => ({
     key: `fish-${i}`,
     top: `${10 + Math.random() * 74}%`,
-    duration: `${22 + Math.random() * 20}s`,
+    duration: `${30 + Math.random() * 26}s`,
     delay: `${(-Math.random() * 30).toFixed(1)}s`,
     scale: (0.75 + Math.random() * 0.55).toFixed(2),
-    // plné spektrum – každá rybka má jinou barvu
+    // unikátní obrázek rybky; pojistka pro případ, že by úkolů bylo víc než obrázků
+    img: availableImgs[i] ?? fishImgs[i % fishImgs.length],
+    // plné spektrum – využívá se ještě pro siluetu v koši ulovených ryb
     hue: Math.round(Math.random() * 360),
     // true = plave zleva doprava, false = zprava doleva
     rightward: fishDirections[i],
 })));
-
-// ulovené rybky – zobrazují se v koši v majáku ("Moje ulovené ryby")
-const caughtFish = ref([]);
 
 const fishStyle = (f) => ({
     top: f.top,
@@ -905,13 +1032,10 @@ const fishStyle = (f) => ({
     '--fish-scale': f.scale,
 });
 
+// obrázky rybek jsou nakreslené hlavou doleva, takže zrcadlíme obráceně:
+// plave-li doprava (rightward), otočíme ji hlavou doprava
 const fishInnerStyle = (f) => ({
-    transform: `scaleX(${f.rightward ? 1 : -1})`,
-});
-
-// barevný odstín rybky držíme na obalu, ať ho hover záře (filtr na SVG) nepřepíše
-const fishTintStyle = (f) => ({
-    filter: `hue-rotate(${f.hue}deg)`,
+    transform: `scaleX(${f.rightward ? -1 : 1})`,
 });
 
 // celkový postup hráče – z něj se odvozuje mlha i záře majáku
@@ -939,6 +1063,34 @@ const cloudStyle = (cloud) => {
 };
 
 const selectedIsland = ref(null);
+
+// pobídka „zkuste chytit rybku" – ukáže se na přehledu moře, když hráč delší dobu
+// žádnou rybku (easter egg) neulovil a nějaké mu tam ještě plavou
+const fishHintVisible = ref(false);
+const fishHintDelay = 25000;
+let fishHintTimer = null;
+
+const hideFishHint = () => {
+    clearTimeout(fishHintTimer);
+    fishHintVisible.value = false;
+};
+
+// (re)start odpočtu: po nečinnosti hlášku ukážeme, jakmile se chytne rybka nebo
+// odejde z přehledu, schováme ji a odpočet běží znovu od začátku
+const scheduleFishHint = () => {
+    hideFishHint();
+    if (selectedIsland.value || fish.length === 0) return;
+    fishHintTimer = setTimeout(() => {
+        if (!selectedIsland.value && fish.length > 0) {
+            fishHintVisible.value = true;
+        }
+    }, fishHintDelay);
+};
+
+// na přehledu moře odpočet běží, v detailu ostrova se hláška schová
+watch(selectedIsland, () => {
+    scheduleFishHint();
+}, { immediate: true });
 
 // modal majáku – přehled nasbíraných karet bezpečí (otevře se kliknutím na maják)
 const lighthouseModalOpen = ref(false);
@@ -1007,6 +1159,8 @@ const easterEggLoading = ref(false);
 const easterEggEmpty = ref(false);
 // rybka, ze které se modal otevřel (po zavření ji ulovíme)
 const easterEggActiveFish = ref(null);
+// true = úkol jen prohlížíme z koše (znovu se neloguje ani neloví)
+const easterEggReviewMode = ref(false);
 // čas otevření modalu – pro výpočet, jak dlouho hráč u úkolu byl
 let easterEggOpenedAt = 0;
 
@@ -1075,30 +1229,82 @@ const catchActiveFish = () => {
     const index = fish.findIndex((x) => x.key === activeFish.key);
     if (index !== -1) fish.splice(index, 1);
 
-    // a uloží se do koše – náhodně rozházená v ústí koše, ať to vypadá jako hromádka
+    // a uloží se do koše – náhodně rozházená v ústí koše, ať to vypadá jako hromádka.
+    // ukládáme i znění úkolu a obrázek rybky, aby se dala v koši znovu otevřít.
     caughtFish.value.push({
-        key: activeFish.key,
+        key: `caught-${egg.id}`,
+        egg,
+        img: activeFish.img,
         hue: activeFish.hue,
         x: `${24 + Math.random() * 52}%`,
         y: `${14 + Math.random() * 26}%`,
         rot: Math.round(Math.random() * 50 - 25),
         scale: (0.9 + Math.random() * 0.3).toFixed(2),
     });
+    persistCaughtFish();
+
+    // rybka ulovena → schováme případnou pobídku a odpočet spustíme znovu
+    scheduleFishHint();
 };
 
 const closeEasterEgg = () => {
-    catchActiveFish();
+    // jen při prvním splnění úkol ulovíme a zalogujeme; při prohlížení z koše ne
+    const wasReview = easterEggReviewMode.value;
+    if (!wasReview) {
+        catchActiveFish();
+    }
     easterEggModalOpen.value = false;
     easterEgg.value = null;
     easterEggView.value = 'description';
     easterEggEmpty.value = false;
     easterEggActiveFish.value = null;
+    easterEggReviewMode.value = false;
+    // po zavření prohlížené rybky se vrátíme zpět do koše ulovených ryb
+    if (wasReview) {
+        basketOpen.value = true;
+    }
 };
 
-// při otevřeném modalu easter eggu zamkneme rolování stránky pod ním
+// při otevřeném modalu easter eggu zamkneme rolování stránky pod ním.
+// při zavření odemkneme jen tehdy, když pod ním nezůstává otevřený maják
 watch(easterEggModalOpen, (open) => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) {
+        document.body.style.overflow = 'hidden';
+    } else if (!lighthouseModalOpen.value) {
+        document.body.style.overflow = '';
+    }
 });
+
+// koš ulovených ryb – modal s přehledem, kliknutím na rybu se úkol znovu otevře
+const basketOpen = ref(false);
+
+const openBasket = () => {
+    basketOpen.value = true;
+};
+
+const closeBasket = () => {
+    basketOpen.value = false;
+};
+
+// vytáhne nadpis úkolu z jeho HTML (text uvnitř prvního <h3 class="ee-title">…</h3>)
+const eggTitle = (egg) => {
+    if (!egg || !egg.description) return 'Bonusový úkol';
+    const match = egg.description.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
+    return match ? match[1].replace(/<[^>]+>/g, '').trim() : 'Bonusový úkol';
+};
+
+// znovu otevře úkol ulovené rybky v režimu prohlížení (nic se neloguje)
+const reviewEasterEgg = (cf) => {
+    if (!cf || !cf.egg) return;
+    basketOpen.value = false;
+    easterEggActiveFish.value = null;
+    easterEggReviewMode.value = true;
+    easterEgg.value = cf.egg;
+    easterEggView.value = 'description';
+    easterEggEmpty.value = false;
+    easterEggLoading.value = false;
+    easterEggModalOpen.value = true;
+};
 
 // první kámen pulzuje, dokud hráč na ostrově na nic neodpověděl – navádí, kde začít
 const shouldPulse = (i) => {
@@ -1314,6 +1520,7 @@ onBeforeUnmount(() => {
     clearTimeout(outsideClickTimer);
     clearTimeout(introTimer);
     clearTimeout(safetyCardTimer);
+    clearTimeout(fishHintTimer);
     stopQuestionTimer();
     document.removeEventListener('click', handleOutsideClick);
     // pojistka, ať po odpojení komponenty nezůstane stránka zamčená
@@ -1450,6 +1657,27 @@ const closeQuestion = () => {
     wrongOptionIds.value = [];
     correctOptionId.value = null;
     hideSafetyCard();
+};
+
+// při otevřeném detailu situace zamkneme rolování stránky pod ním
+watch(activeQuestion, (question) => {
+    document.body.style.overflow = question ? 'hidden' : '';
+});
+
+// zvětšení obrázku ze zadání situace (lightbox) – obrázky jsou v HTML popisu,
+// proto klik chytáme delegovaně na kontejneru a otevřeme ten, na který se kliklo
+const zoomImage = ref(null);
+const zoomAlt = ref('');
+
+const openImageZoom = (event) => {
+    const img = event.target.closest('img');
+    if (!img) return;
+    zoomImage.value = img.currentSrc || img.src;
+    zoomAlt.value = img.alt || '';
+};
+
+const closeImageZoom = () => {
+    zoomImage.value = null;
 };
 
 // uloží snímek právě vyřešené situace, ať se k ní hráč může později vrátit a prohlédnout si ji
@@ -1669,7 +1897,7 @@ const answerQuestion = async (option) => {
     50%      { transform: translateY(-14%) rotate(2deg); }
 }
 
-.sea-fish-svg {
+.sea-fish-img {
     display: block;
     width: 100%;
     height: auto;
@@ -1677,11 +1905,92 @@ const answerQuestion = async (option) => {
     transition: filter 0.2s ease;
 }
 
-.sea-fish:hover .sea-fish-svg,
-.sea-fish:focus-visible .sea-fish-svg {
+.sea-fish:hover .sea-fish-img,
+.sea-fish:focus-visible .sea-fish-img {
     filter:
         drop-shadow(0 4px 4px rgba(8, 38, 70, 0.45))
         drop-shadow(0 0 10px rgba(255, 224, 140, 0.95));
+}
+
+/* pobídka „zkuste chytit rybku" – plovoucí lišta dole uprostřed přehledu moře.
+   teplý sluneční gradient + pulzující záře, ať na modré vodě nezapadne */
+.fish-hint {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: calc(100% - 2rem);
+    padding: 0.7rem 0.75rem 0.7rem 1.15rem;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #ffc24a 0%, #ff9b21 100%);
+    color: #5a2c00;
+    font-weight: 800;
+    font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+    line-height: 1.2;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+        0 8px 22px rgba(0, 20, 50, 0.3),
+        0 0 0 0 rgba(255, 193, 74, 0.7);
+    animation: fish-hint-pulse 1.8s ease-in-out infinite;
+}
+
+.fish-hint-icon {
+    font-size: 1.3em;
+    line-height: 1;
+    /* houpe jen rybka, ať to neruší slide-in/out celé lišty */
+    animation: fish-hint-bob 2.6s ease-in-out infinite;
+}
+
+.fish-hint-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(90, 44, 0, 0.18);
+    color: #5a2c00;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.fish-hint-close:hover,
+.fish-hint-close:focus-visible {
+    background: rgba(90, 44, 0, 0.32);
+    outline: none;
+}
+
+.fish-hint-close svg {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+@keyframes fish-hint-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+
+/* pulzující záře okolo lišty – mění jen box-shadow, transform zůstává na slide-in */
+@keyframes fish-hint-pulse {
+    0%, 100% { box-shadow: 0 8px 22px rgba(0, 20, 50, 0.3), 0 0 0 0 rgba(255, 193, 74, 0.7); }
+    50%      { box-shadow: 0 8px 22px rgba(0, 20, 50, 0.3), 0 0 0 12px rgba(255, 193, 74, 0); }
+}
+
+.fish-hint-fade-enter-active,
+.fish-hint-fade-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fish-hint-fade-enter-from,
+.fish-hint-fade-leave-to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
 }
 
 /* tlačítko ve spodní liště modalu easter eggu (zobrazit vyhodnocení / zpět) */
@@ -1716,6 +2025,23 @@ const answerQuestion = async (option) => {
 
 /* layout obsahu easter eggu řídíme tady (scoped přes :deep), */
 /* protože <style> vložený přes v-html se ve scoped komponentě nemusí uplatnit */
+
+/* titulek easter eggu – přichází z HTML (description/evaluation), proto ho stylujeme tady */
+/* padding-right dělá místo pro křížek (zavřít) vpravo nahoře */
+.easter-egg-content :deep(.ee-title) {
+    margin: 0 0 1rem;
+    padding-right: 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #1e3a8a;
+}
+
+/* popisek nad obrázky – odsazení, ať obrázky nejsou nalepené na text */
+.easter-egg-content :deep(.ee-diff__hint) {
+    margin: 0 0 16px;
+}
+
 .easter-egg-content :deep(.ee-diff__images) {
     display: flex;
     flex-wrap: wrap;
@@ -1745,14 +2071,20 @@ const answerQuestion = async (option) => {
     justify-content: center;
 }
 
+/* vyhodnocení má dva obrázky vedle sebe – stejně jako zadání sdílejí řádek rovným dílem */
 .easter-egg-content :deep(.ee-diff--result .easter-egg-image) {
-    /* jeden výsledkový obrázek neroztahujeme na celou šířku – omezíme výškou, ať se vejde bez scrollu */
-    flex: 0 1 auto;
-    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
     max-width: 100%;
-    max-height: 68vh;
     height: auto;
     border-radius: 8px;
+}
+
+/* na úzkém displeji i vyhodnocení pod sebe (musí být až za pravidlem výše, ať ho přebije) */
+@media (max-width: 639px) {
+    .easter-egg-content :deep(.ee-diff--result .easter-egg-image) {
+        flex-basis: 100%;
+    }
 }
 
 .ripple {
@@ -2134,8 +2466,14 @@ const answerQuestion = async (option) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    pointer-events: none;
+    /* je to tlačítko – vyresetujeme nativní vzhled */
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
     user-select: none;
+    z-index: 2;
 }
 
 .lighthouse-basket-img {
@@ -2143,6 +2481,23 @@ const answerQuestion = async (option) => {
     width: 100%;
     height: auto;
     filter: drop-shadow(0 7px 6px rgba(8, 38, 70, 0.35));
+    transform-origin: 50% 100%;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* koš se na hoveru zlehka zvětší a rozzáří – stejně jako nástěnka a kruh */
+.lighthouse-basket:hover .lighthouse-basket-img,
+.lighthouse-basket:focus-visible .lighthouse-basket-img {
+    transform: scale(1.05);
+    filter:
+        drop-shadow(0 7px 6px rgba(8, 38, 70, 0.4))
+        drop-shadow(0 0 10px rgba(255, 238, 170, 0.95));
+}
+
+.lighthouse-basket:hover .lighthouse-basket-label,
+.lighthouse-basket:focus-visible .lighthouse-basket-label {
+    transform: scale(1.06);
+    background: #fff;
 }
 
 /* jednotlivá ulovená ryba ležící v ústí koše (pozici/rotaci dává inline styl) */
@@ -2435,6 +2790,62 @@ const answerQuestion = async (option) => {
 
 .collected-card-body :deep(strong) {
     font-weight: 800;
+}
+
+/* --- modal „Moje ulovené ryby" --- */
+.caught-fish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    /* větší mezery (hlavně mezi řádky), ať se zvětšení karty na hoveru vejde */
+    gap: 1.75rem 1.1rem;
+    overflow-y: auto;
+    min-height: 0;
+    /* prostor nahoře/po stranách, aby povylezlá karta nezajela pod hlavičku ani okraj */
+    padding: 0.5rem 0.25rem 0.25rem;
+}
+
+/* ulovená ryba je tlačítko – klik znovu otevře daný úkol */
+.caught-fish-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.caught-fish-card:hover,
+.caught-fish-card:focus-visible {
+    transform: translateY(-3px);
+    border-color: #7dd3fc;
+    box-shadow: 0 8px 18px rgba(8, 38, 70, 0.18);
+    outline: none;
+}
+
+/* jednotná výška obrázku – vysoká rybka (mořský koník) se vejde celá,
+   ostatní se vycentrují, takže nadpisy pak sedí v jedné linii */
+.caught-fish-card-img {
+    display: block;
+    width: 100%;
+    max-width: 130px;
+    height: 120px;
+    object-fit: contain;
+    object-position: center;
+    filter: drop-shadow(0 4px 5px rgba(8, 38, 70, 0.25));
+}
+
+.caught-fish-card-label {
+    /* nadpis vždy dole na kartě, ať řádek nadpisů lícuje napříč mřížkou */
+    margin-top: auto;
+    color: #11365e;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
 }
 
 .lighthouse-cloud {
@@ -2840,6 +3251,13 @@ const answerQuestion = async (option) => {
     height: auto;
     margin: 0 auto 0.75rem;
     border-radius: 0.5rem;
+    /* obrázek lze kliknutím zvětšit */
+    cursor: zoom-in;
+    transition: filter 0.18s ease;
+}
+
+.question-modal-text :deep(img:hover) {
+    filter: brightness(1.04) drop-shadow(0 4px 10px rgba(8, 38, 70, 0.3));
 }
 
 /* popis je jen obrázek – nech ho vyplnit výšku modalu */
@@ -2921,6 +3339,53 @@ const answerQuestion = async (option) => {
 .safety-card-fade-leave-to {
     opacity: 0;
     transform: translateY(-8px) scale(0.97);
+}
+
+/* --- lightbox: zvětšený obrázek ze zadání situace --- */
+.image-zoom-backdrop {
+    background: rgba(8, 20, 40, 0.85);
+    cursor: zoom-out;
+}
+
+.image-zoom-img {
+    max-width: 92vw;
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+    cursor: zoom-out;
+}
+
+.image-zoom-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #11365e;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.image-zoom-close:hover,
+.image-zoom-close:focus-visible {
+    background: #fff;
+    transform: scale(1.06);
+    outline: none;
+}
+
+.image-zoom-close svg {
+    width: 1.3rem;
+    height: 1.3rem;
 }
 
 /* když průvodce zobrazí bublinu nad modal, ztlumíme obsah modalu, aby s ní nesoupeřil */
