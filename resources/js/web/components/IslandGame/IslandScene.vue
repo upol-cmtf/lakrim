@@ -1008,20 +1008,46 @@ for (let i = availableImgs.length - 1; i > 0; i--) {
     [availableImgs[i], availableImgs[j]] = [availableImgs[j], availableImgs[i]];
 }
 
+// aby rybky nikdy neplavaly „ve dvojici", rozdělíme moře na tolik vodorovných
+// pruhů, kolik je rybek – každá dostane vlastní pruh (nikdy stejná výška) a
+// k tomu vlastní časovou fázi rovnoměrně po dráze (nikdy nevyplavou současně).
+// Pořadí pruhů i fází zamícháme zvlášť, ať mezi výškou a fází není závislost.
+const laneCount = Math.max(1, fishCount);
+const laneSpan = 74 / laneCount; // celý rozsah výšek je 10–84 %
+const lanes = Array.from({ length: laneCount }, (_, i) => i);
+const phaseSlots = Array.from({ length: laneCount }, (_, i) => i);
+const shuffle = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+};
+shuffle(lanes);
+shuffle(phaseSlots);
+
 // reactive – ulovená rybka se z pole odebere a zmizí z moře
-const fish = reactive(Array.from({ length: fishCount }, (_, i) => ({
-    key: `fish-${i}`,
-    top: `${10 + Math.random() * 74}%`,
-    duration: `${30 + Math.random() * 26}s`,
-    delay: `${(-Math.random() * 30).toFixed(1)}s`,
-    scale: (0.75 + Math.random() * 0.55).toFixed(2),
-    // unikátní obrázek rybky; pojistka pro případ, že by úkolů bylo víc než obrázků
-    img: availableImgs[i] ?? fishImgs[i % fishImgs.length],
-    // plné spektrum – využívá se ještě pro siluetu v koši ulovených ryb
-    hue: Math.round(Math.random() * 360),
-    // true = plave zleva doprava, false = zprava doleva
-    rightward: fishDirections[i],
-})));
+const fish = reactive(Array.from({ length: fishCount }, (_, i) => {
+    const duration = 30 + Math.random() * 26;
+    // pruh + drobný jitter uvnitř pruhu, ať nesedí přesně na mřížce, ale se
+    // zachovaným odstupem od sousedů (10 % okraj z obou stran pruhu)
+    const top = 10 + (lanes[i] + 0.1 + Math.random() * 0.8) * laneSpan;
+    // fáze rovnoměrně po celé dráze (slot + jitter v rámci slotu) → posun do
+    // animace je záporný, takže každá rybka startuje v jiném místě dráhy
+    const phase = (phaseSlots[i] + Math.random()) / laneCount;
+    return {
+        key: `fish-${i}`,
+        top: `${top.toFixed(1)}%`,
+        duration: `${duration.toFixed(1)}s`,
+        delay: `${(-phase * duration).toFixed(1)}s`,
+        scale: (0.75 + Math.random() * 0.55).toFixed(2),
+        // unikátní obrázek rybky; pojistka pro případ, že by úkolů bylo víc než obrázků
+        img: availableImgs[i] ?? fishImgs[i % fishImgs.length],
+        // plné spektrum – využívá se ještě pro siluetu v koši ulovených ryb
+        hue: Math.round(Math.random() * 360),
+        // true = plave zleva doprava, false = zprava doleva
+        rightward: fishDirections[i],
+    };
+}));
 
 const fishStyle = (f) => ({
     top: f.top,
