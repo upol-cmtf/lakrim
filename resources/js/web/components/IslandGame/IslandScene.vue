@@ -531,7 +531,7 @@
                 aria-label="Důležité kontakty"
                 @click.self="closeContacts"
             >
-                <div class="contacts-modal relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+                <div class="contacts-modal relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
                     <button
                         type="button"
                         class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -544,11 +544,11 @@
                     </button>
 
                     <h3 class="mb-1 pr-8 text-xl font-bold text-blue-900">Důležité kontakty</h3>
-                    <p class="mb-4 text-sm text-slate-600">Tady najdeš čísla, která se hodí mít po ruce.</p>
+                    <p class="mb-4 text-sm text-slate-600">Tady najdete ověřená čísla, která je dobré mít vždy po ruce. Pokud si nejste jistí, nebojte se o pomoc zavolat.</p>
 
                     <ul class="space-y-2">
-                        <li v-for="contact in importantContacts" :key="contact.phone">
-                            <a :href="`tel:${contact.phone.replace(/\s/g, '')}`" class="contact-row">
+                        <li v-for="contact in importantContacts" :key="contact.label">
+                            <a v-if="contact.phone" :href="`tel:${contact.phone.replace(/\s/g, '')}`" class="contact-row">
                                 <span class="contact-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M6.6 10.8a15.5 15.5 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.4 11.4 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.4 11.4 0 00.58 3.6 1 1 0 01-.24 1l-2.24 2.2z" fill="currentColor"/>
@@ -560,6 +560,18 @@
                                 </span>
                                 <span class="contact-phone">{{ contact.phone }}</span>
                             </a>
+                            <div v-else class="contact-row contact-row--static">
+                                <span class="contact-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M6.6 10.8a15.5 15.5 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.4 11.4 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.4 11.4 0 00.58 3.6 1 1 0 01-.24 1l-2.24 2.2z" fill="currentColor"/>
+                                    </svg>
+                                </span>
+                                <span class="contact-text">
+                                    <span class="contact-name">{{ contact.label }}</span>
+                                    <span class="contact-note">{{ contact.note }}</span>
+                                </span>
+                                <span v-if="contact.phoneNote" class="contact-phone contact-phone--note">{{ contact.phoneNote }}</span>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -1138,11 +1150,12 @@ watch(lighthouseModalOpen, (open) => {
 // důležité kontakty – otevře se kliknutím na záchranný kruh na stěně majáku
 const contactsOpen = ref(false);
 const importantContacts = [
-    { label: 'Tísňové volání', phone: '112', note: 'Jednotné evropské číslo tísňového volání' },
-    { label: 'Policie ČR', phone: '158', note: 'Podvody, krádeže, ohrožení' },
-    { label: 'Záchranná služba', phone: '155', note: 'Zdravotní pomoc' },
-    { label: 'Hasiči', phone: '150', note: 'Požár, nehoda, únik' },
-    { label: 'Linka pomoci obětem', phone: '116 006', note: 'Bezplatná nonstop pomoc obětem (Bílý kruh bezpečí)' },
+    { label: 'Policie ČR', phone: '158', note: 'Hlášení podvodů, krádeží a bezprostředního ohrožení.' },
+    { label: 'Linka seniorů (Elpida)', phone: '800 200 007', note: 'Bezplatná pomoc při obavách, nátlaku nebo pocitu osamění.' },
+    { label: 'Spotřebitelská poradna dTest', phone: '299 149 009', note: 'Právní rady při problémech s e-shopy, nákupy a smlouvami.' },
+    { label: 'Linka pomoci obětem', phone: '116 006', note: 'Nonstop bezplatná podpora obětem trestných činů (Bílý kruh bezpečí).' },
+    { label: 'Záchranná služba', phone: '155', note: 'Přivolání okamžité zdravotnické pomoci.' },
+    { label: 'Infolinka vaší banky', phone: null, phoneNote: 'Na zadní straně karty', note: 'Při podezření na podvod. Číslo najdete na zadní straně vaší platební karty.' },
 ];
 
 const openContacts = () => {
@@ -2758,6 +2771,26 @@ const answerQuestion = async (option) => {
     font-weight: 800;
     color: #11365e;
     font-variant-numeric: tabular-nums;
+}
+
+/* kontakt bez vlastního čísla (např. infolinka banky) – jen poznámka, kam pro číslo */
+.contact-row--static {
+    cursor: default;
+}
+
+.contact-row--static:hover,
+.contact-row--static:focus-visible {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.contact-phone--note {
+    max-width: 7.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: right;
+    color: #64748b;
 }
 
 /* --- modal „Moje karty bezpečí" --- */
