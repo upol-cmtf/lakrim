@@ -11,14 +11,15 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * Vybírá situaci (baterii otázek) pro konkrétní tlačítko ostrova.
  *
- * Adaptivní obtížnost: čím delší má respondent sérii správných odpovědí,
- * tím těžší otázky se mu nabízejí.
+ * Adaptivní obtížnost: drží se jedno skóre znalostí počítané ze všech odpovědí
+ * respondenta napříč všemi ostrovy. Správná odpověď ho zvýší, špatná sníží,
+ * takže čím lépe si respondent celkově vede, tím těžší otázky se mu nabízejí.
  */
 class SituationSelector
 {
-    /** Délka série správných odpovědí potřebná pro obtížnost 2, resp. 3. */
-    private const STREAK_FOR_MEDIUM = 2;
-    private const STREAK_FOR_HARD = 4;
+    /** Skóre znalostí potřebné pro obtížnost 2, resp. 3. */
+    private const SCORE_FOR_MEDIUM = 2;
+    private const SCORE_FOR_HARD = 4;
 
     /**
      * Vrátí situaci pro dané tlačítko, na kterou respondent ještě neodpověděl,
@@ -47,42 +48,40 @@ class SituationSelector
     }
 
     /**
-     * Cílová obtížnost (1–3) odvozená ze série správných odpovědí respondenta.
+     * Cílová obtížnost (1–3) odvozená ze skóre znalostí respondenta.
      */
     private function targetDifficulty(Respondent $respondent): int
     {
-        $streak = $this->correctStreak($respondent);
+        $score = $this->knowledgeScore($respondent);
 
         return match (true) {
-            $streak >= self::STREAK_FOR_HARD => 3,
-            $streak >= self::STREAK_FOR_MEDIUM => 2,
+            $score >= self::SCORE_FOR_HARD => 3,
+            $score >= self::SCORE_FOR_MEDIUM => 2,
             default => 1,
         };
     }
 
     /**
-     * Počet po sobě jdoucích správných odpovědí na první pokus, počítáno
-     * od poslední odpovědi. Špatná odpověď sérii nuluje.
+     * Adaptivní skóre znalostí počítané ze všech odpovědí respondenta napříč
+     * všemi ostrovy. Správná odpověď na první pokus skóre zvýší o 1, špatná
+     * sníží o 1; skóre nikdy neklesne pod 0. Díky tomu se obtížnost přizpůsobuje
+     * oběma směry a jedna chyba neshodí respondenta rovnou na nejlehčí úroveň.
      */
-    private function correctStreak(Respondent $respondent): int
+    private function knowledgeScore(Respondent $respondent): int
     {
         /** @var Collection<int, RespondentAnswer> $answers */
         $answers = $respondent->answers()
             ->where('attempt', 1)
             ->with('option')
-            ->orderByDesc('id')
             ->get();
 
-        $streak = 0;
+        $score = 0;
         foreach ($answers as $answer) {
-            if (!$answer->isRightAnswer()) {
-                break;
-            }
-
-            $streak++;
+            $score += $answer->isRightAnswer() ? 1 : -1;
+            $score = max(0, $score);
         }
 
-        return $streak;
+        return $score;
     }
 
     /**

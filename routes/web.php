@@ -3,7 +3,9 @@
 use App\Http\Controllers\Web;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => view('web.homepage'));
+Route::get('/', fn() => view('web.homepage', [
+    'hasInProgressGame' => Web\IslandGame\HomepageController::hasInProgressGame(),
+]));
 
 Route::get('/saved-game', [Web\SavedGameController::class, 'index'])
     ->name('web.saved-game');
@@ -67,6 +69,9 @@ Route::get('/pexeso/{quizEvent:hash?}', [Web\QuizGrid\HomepageController::class,
 
 Route::get('/ostrov/{quizEvent:hash?}', [Web\IslandGame\HomepageController::class, 'index'])
     ->name('web.island-game.homepage');
+
+Route::get('/ostrov-znovu', [Web\IslandGame\HomepageController::class, 'restart'])
+    ->name('web.island-game.restart');
 
 Route::post('/ostrov/situace', [Web\IslandGame\SituationController::class, 'show'])
     ->name('web.island-game.situation');

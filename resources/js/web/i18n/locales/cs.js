@@ -1,0 +1,92 @@
+// České texty ostrovní hry. Zprávy průvodce obsahují HTML (renderují se přes
+// v-html), interpolace používá zápis {name} dle vue-i18n.
+export default {
+    islandGame: {
+        common: {
+            close: 'Zavřít',
+            backToMap: 'Zpět na mapu ostrovů',
+            home: 'Zpět na úvodní stránku',
+        },
+        sea: {
+            catchFishAria: 'Oddechněte si',
+            hint: 'Zkuste si chytnout nějakou rybku',
+        },
+        guideAlt: 'Průvodce',
+        zoom: {
+            aria: 'Zvětšený obrázek',
+        },
+        safetyCard: {
+            title: 'Karta bezpečí',
+        },
+        map: {
+            openLighthouse: 'Otevřít maják',
+            lighthouseAlt: 'Maják',
+            collectedCardsAria: 'Získané karty bezpečí',
+            enterLighthouse: 'Vstoupit do majáku',
+            openIsland: 'Otevřít ostrov: {name}',
+        },
+        detail: {
+            task: 'Úkol {n}',
+            taskReview: 'Úkol {n} – prohlédnout',
+        },
+        question: {
+            alreadyAnswered: 'Situace již byla zodpovězena.',
+            hurry: 'Pospěš si!',
+            timeLabel: 'Čas na odpověď',
+            prompt: 'Jak byste se zachovali?',
+            reviewHint: 'Tvoje tehdejší odpověď je zvýrazněná níže.',
+            chooseHint: 'Vyberte odpověď, která nejlépe odpovídá tomu, co byste v této situaci udělali.',
+        },
+        lighthouse: {
+            aria: 'Maják',
+            interiorAlt: 'Interiér majáku',
+            contacts: 'Důležité kontakty',
+            cards: 'Moje karty bezpečí',
+            basket: 'Moje ulovené ryby',
+        },
+        contacts: {
+            title: 'Důležité kontakty',
+            intro: 'Tady najdete ověřená čísla, která je dobré mít vždy po ruce. Pokud si nejste jistí, nebojte se o pomoc zavolat.',
+            police: { label: 'Policie ČR', note: 'Hlášení podvodů, krádeží a bezprostředního ohrožení.' },
+            seniors: { label: 'Linka seniorů (Elpida)', note: 'Bezplatná pomoc při obavách, nátlaku nebo pocitu osamění.' },
+            dtest: { label: 'Spotřebitelská poradna dTest', note: 'Právní rady při problémech s e-shopy, nákupy a smlouvami.' },
+            victims: { label: 'Linka pomoci obětem', note: 'Nonstop bezplatná podpora obětem trestných činů (Bílý kruh bezpečí).' },
+            ambulance: { label: 'Záchranná služba', note: 'Přivolání okamžité zdravotnické pomoci.' },
+            bank: { label: 'Infolinka vaší banky', phoneNote: 'Na zadní straně karty', note: 'Při podezření na podvod. Číslo najdete na zadní straně vaší platební karty.' },
+        },
+        cards: {
+            title: 'Moje karty bezpečí',
+            collected: 'Získané karty: {count} / {total}',
+            empty: 'Zatím nemáš žádnou kartu bezpečí. Získáš je správným vyřešením situací na ostrovech.',
+        },
+        basket: {
+            title: 'Moje ulovené ryby',
+            caught: 'Ulovené ryby: {count} / {total}',
+            empty: 'Zatím nemáš uloveno nic. Rybky plavou v moři jako bonusové úkoly – chyť je a procvič si je.',
+        },
+        easterEgg: {
+            aria: 'Oddechněte si',
+            loading: 'Načítám…',
+            empty: 'Zatím tu na tebe nic nečeká. Zkus to později!',
+            showEvaluation: 'Zobrazit vyhodnocení',
+            backToTask: 'Zpět na zadání',
+            defaultTitle: 'Bonusový úkol',
+        },
+        guide: {
+            startPlaying: 'Začít hrát',
+            retry: 'Zkusit odpovědět znovu',
+            continueNext: 'Pokračovat na další kámen',
+            timeUpFinal: '<p>Čas vypršel a druhý pokus už není možný. Pojďme dál.</p>',
+            timeUpRetry: '<p>Čas vypršel – odpověď ses nestihl/a poslat. Zkus situaci znovu.</p>',
+            successCard: '<p>Skvělá práce! Získal/a jsi kartu bezpečí.</p>',
+            success: '<p>Skvělá práce! Situaci jsi zvládl správně.</p>',
+            wrongFinalWithHint: '<p>{hint}</p><p>Druhý pokus už nevyšel – pojďme dál.</p>',
+            wrongFinal: '<p>Bohužel ani druhý pokus nevyšel. Pojďme dál.</p>',
+            wrongRetryWithHint: '<p>{hint}</p><p>Zkus tuhle situaci ještě jednou.</p>',
+            wrongRetry: '<p>Tentokrát to nevyšlo. Zkus tuhle situaci ještě jednou.</p>',
+            noMoreSituations: '<p>Pro tento úkol už nejsou žádné další situace.</p>',
+            loadError: '<p>Situaci se nepodařilo načíst. Zkuste to prosím za chvíli znovu.</p>',
+            answerError: '<p>Odpověď se nepodařilo odeslat. Zkuste to prosím za chvíli znovu.</p>',
+        },
+    },
+};
