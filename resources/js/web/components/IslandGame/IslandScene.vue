@@ -2,18 +2,26 @@
     <div class="island-page relative overflow-hidden">
         <SeaWavelets :wavelets="seaWavelets" :path="seaWaveletPath" />
 
-        <!-- přehled moře: malá ikonka domů vlevo nahoře vede na úvodní stránku -->
-        <a
-            v-if="!selectedIsland"
-            :href="homeUrl"
-            class="absolute top-3 left-3 z-20 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/95 text-blue-900 shadow-md transition hover:bg-white sm:h-8 sm:w-8"
-            :aria-label="$t('islandGame.common.home')"
-        >
-            <svg viewBox="0 0 24 24" class="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" aria-hidden="true">
-                <path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5 10v9a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </a>
+        <!-- přehled moře: ikonka domů + „Jak hrát?" vlevo nahoře -->
+        <div v-if="!selectedIsland" class="absolute top-3 left-3 z-20 flex items-center gap-2">
+            <a
+                :href="homeUrl"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/95 text-blue-900 shadow-md transition hover:bg-white sm:h-8 sm:w-8"
+                :aria-label="$t('islandGame.common.home')"
+            >
+                <svg viewBox="0 0 24 24" class="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" aria-hidden="true">
+                    <path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 10v9a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <button
+                type="button"
+                class="inline-flex items-center rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.8rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:text-sm"
+                @click="tourActive = true"
+            >
+                {{ $t('islandGame.common.howToPlay') }}
+            </button>
+        </div>
 
         <button
             v-if="selectedIsland"
@@ -36,10 +44,11 @@
             :fish="fish"
             :fish-style="fishStyle"
             :fish-inner-style="fishInnerStyle"
+            :paused="tourActive"
             @catch="loadEasterEgg"
         />
 
-        <FishHint :visible="!selectedIsland && fishHintVisible" @close="hideFishHint" />
+        <FishHint :visible="!selectedIsland && fishHintVisible && !tourActive" @close="hideFishHint" />
 
         <!-- na mapě necháme prázdnou vodu propustnou pro klik (klik projde na rybku pod kontejnerem) -->
         <div
@@ -181,6 +190,8 @@
             @close="closeGameComplete"
         />
 
+        <IntroTour :active="tourActive" @finish="finishTour" />
+
         <GuideBubble
             v-if="selectedIsland"
             :guide-image="selectedIsland.guideImage"
@@ -235,6 +246,7 @@ import SafetyCardsModal from './components/SafetyCardsModal.vue';
 import BasketModal from './components/BasketModal.vue';
 import EasterEggModal from './components/EasterEggModal.vue';
 import GameCompleteModal from './components/GameCompleteModal.vue';
+import IntroTour from './components/IntroTour.vue';
 import GuideBubble from './components/GuideBubble.vue';
 
 const props = defineProps({
@@ -393,6 +405,25 @@ const closeGameComplete = () => {
     // poslední kámen mohl nechat otevřené okno otázky – zavřeme ho a vrátíme se na mapu
     closeQuestion();
     close();
+};
+
+// úvodní prohlídka mapy – ukáže se jednou (uloženo u respondenta), znovu přes „Jak hrát?"
+const introStorageKey = `lakrim.introSeen.${props.respondentToken}`;
+const introSeen = () => {
+    try {
+        return window.localStorage.getItem(introStorageKey) === '1';
+    } catch (error) {
+        return false;
+    }
+};
+const tourActive = ref(!introSeen());
+const finishTour = () => {
+    tourActive.value = false;
+    try {
+        window.localStorage.setItem(introStorageKey, '1');
+    } catch (error) {
+        // úložiště nemusí být dostupné – tiše ignorujeme
+    }
 };
 
 // při otevřeném modálu (maják / easter egg / situace) zamkneme rolování stránky pod ním

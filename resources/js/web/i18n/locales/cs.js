@@ -6,6 +6,33 @@ export default {
             close: 'Zavřít',
             backToMap: 'Zpět na mapu ostrovů',
             home: 'Zpět na úvodní stránku',
+            howToPlay: 'Jak hrát?',
+        },
+        tour: {
+            next: 'Další',
+            back: 'Zpět',
+            skip: 'Přeskočit',
+            start: 'Začít',
+            welcome: {
+                title: 'Vítej, kapitáne!',
+                text: 'Tahle výprava tě provede čtyřmi ostrovy plnými digitálních nástrah. Tvým úkolem je proplout je, rozpoznat podvody a sbírat karty bezpečí. Pojďme se rychle rozhlédnout.',
+            },
+            islands: {
+                title: 'Ostrovy',
+                text: 'Klikni na ostrov a postupně ťukej na jeho kameny. U každé situace vybereš, jak bys zareagoval – průvodce ti pak poradí, jestli to byla bezpečná volba.',
+            },
+            lighthouse: {
+                title: 'Maják',
+                text: 'Tady najdeš všechno důležité: získané karty bezpečí, důležitá telefonní čísla i koš s ulovenými rybkami. Stačí na maják kliknout.',
+            },
+            fish: {
+                title: 'Rybky = bonusy',
+                text: 'V moři plavou rybky – to jsou bonusové úkoly pro oddech. Když na rybku klikneš, chytíš ji a otevře se její úkol.',
+            },
+            go: {
+                title: 'A je to!',
+                text: 'Teď už víš, do čeho jdeš. Hodně štěstí a chladnou hlavu, kapitáne – vyraz na výpravu!',
+            },
         },
         sea: {
             catchFishAria: 'Oddechněte si',
