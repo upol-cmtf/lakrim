@@ -74,8 +74,12 @@ class SituationSelector
      *
      * @param int[] $answeredQuestionIds
      */
-    private function maybeBonusSituation(Respondent $respondent, Island $island, int $button, array $answeredQuestionIds): ?Situation
-    {
+    private function maybeBonusSituation(
+        Respondent $respondent,
+        Island $island,
+        int $button,
+        array $answeredQuestionIds,
+    ): ?Situation {
         $allowed = min(self::MAX_BONUSES, $this->allowedBonuses($this->correctStreak($respondent)));
 
         if ($this->answeredBonusCount($answeredQuestionIds) >= $allowed) {
