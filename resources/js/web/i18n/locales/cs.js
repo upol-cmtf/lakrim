@@ -58,6 +58,7 @@ export default {
             title: 'Moje karty bezpečí',
             collected: 'Získané karty: {count} / {total}',
             empty: 'Zatím nemáš žádnou kartu bezpečí. Získáš je správným vyřešením situací na ostrovech.',
+            zoom: 'Zobrazit kartu zvětšenou',
         },
         basket: {
             title: 'Moje ulovené ryby',
