@@ -34,6 +34,7 @@
                 </p>
 
                 <div v-else class="cards-scroll">
+                    <div class="cards-groups">
                     <section
                         v-for="group in groupedCards"
                         :key="group.island"
@@ -56,6 +57,7 @@
                             </button>
                         </div>
                     </section>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,8 +147,17 @@ const groupedCards = computed(() => {
     padding-right: 0.25rem;
 }
 
-.cards-group + .cards-group {
-    margin-top: 1rem;
+/* ostrovy v mřížce 2×2 (na úzkém displeji pod sebou) */
+.cards-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1.75rem;
+}
+
+@media (max-width: 639px) {
+    .cards-groups {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* nadpis ostrova nad jeho kartami */
@@ -215,17 +226,17 @@ const groupedCards = computed(() => {
 /* náhled textu v dlaždici – malý, na čtení je detail po kliknutí */
 .collected-card-body {
     position: absolute;
-    top: 43.5%;
-    left: 25%;
-    right: 25%;
-    bottom: 22%;
+    top: 43%;
+    left: 14%;
+    right: 14%;
+    bottom: 13%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     color: #11365e;
-    font-size: 0.5rem;
+    font-size: 0.55rem;
     font-weight: 600;
     line-height: 1.3;
     text-align: center;
@@ -251,7 +262,7 @@ const groupedCards = computed(() => {
 
 .card-zoom {
     position: relative;
-    width: min(26rem, 88vw);
+    width: min(32rem, 92vw);
     filter: drop-shadow(0 20px 40px rgba(8, 38, 70, 0.45));
 }
 
@@ -264,24 +275,27 @@ const groupedCards = computed(() => {
 /* text karty v bílém poli rámu – tady už pořádně čitelný */
 .card-zoom-body {
     position: absolute;
-    top: 43.5%;
-    left: 25%;
-    right: 25%;
-    bottom: 22%;
+    top: 43%;
+    left: 14%;
+    right: 14%;
+    bottom: 13%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* „safe center" = krátký text vycentruje, ale u dlouhého (přetékajícího)
+       nezarovná na střed (což by ořízlo a znemožnilo doscrollovat začátek) */
+    justify-content: safe center;
     overflow-y: auto;
+    padding: 0 0.3rem;
     color: #11365e;
-    font-size: clamp(0.85rem, 2.6vw, 1.05rem);
+    font-size: clamp(0.85rem, 2.8vw, 1.05rem);
     font-weight: 600;
-    line-height: 1.45;
+    line-height: 1.4;
     text-align: center;
 }
 
 .card-zoom-body :deep(p) {
-    margin: 0 0 0.55rem;
+    margin: 0 0 0.4rem;
 }
 
 .card-zoom-body :deep(p:last-child) {

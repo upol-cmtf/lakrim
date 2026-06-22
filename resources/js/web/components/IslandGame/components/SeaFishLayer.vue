@@ -1,6 +1,6 @@
 <template>
     <!-- rybky (easter eggy) plují přes celou modrou plochu, za ostrovy; vrstva sama nechytá klik, jen rybky -->
-    <div class="sea-fish-layer">
+    <div class="sea-fish-layer" :class="{ 'is-paused': paused }">
         <button
             v-for="f in fish"
             :key="f.key"
@@ -22,18 +22,28 @@ defineProps({
     fish: { type: Array, default: () => [] },
     fishStyle: { type: Function, required: true },
     fishInnerStyle: { type: Function, required: true },
+    // během úvodní prohlídky rybky zastavíme, ať jdou zvýraznit
+    paused: { type: Boolean, default: false },
 });
 defineEmits(['catch']);
 </script>
 
 <style scoped lang="scss">
-/* --- rybky (easter eggy) plující přes celou plochu moře, za ostrovy --- */
-/* plnoplošná vrstva pod centrálním obsahem; vrstvu kliky ignorují, reagují jen rybky */
+/* --- rybky (easter eggy) plující přes celou plochu moře --- */
+/* plnoplošná vrstva NAD ostrovy, ať jde rybka vždy chytit (i když přeplave přes
+   ostrov); samotná vrstva kliky propouští (pointer-events: none), reagují jen
+   rybky – klik na prázdnou vodu tak projde na ostrovy pod vrstvou */
 .sea-fish-layer {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 4;
     pointer-events: none;
+}
+
+/* během úvodní prohlídky rybky zastavíme (kvůli zvýraznění) */
+.sea-fish-layer.is-paused .sea-fish,
+.sea-fish-layer.is-paused .sea-fish-bob {
+    animation-play-state: paused;
 }
 
 .sea-fish {

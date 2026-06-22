@@ -45,6 +45,13 @@ export function useIslands(props, { guideMessage, guideAction, hideSafetyCard })
     const collectedCards = computed(() => islands.reduce((sum, island) => sum + island.tasks.completed, 0));
     const progress = computed(() => (totalCards.value > 0 ? collectedCards.value / totalCards.value : 0));
 
+    // hra je dokončená, když je každý kámen na každém ostrově vyřešený (zeleně i červeně)
+    const allStonesResolved = computed(() =>
+        islands.length > 0
+        && islands.every((island) =>
+            island.buttonStates.every((state) => state === 'green' || state === 'red')),
+    );
+
     // --- obnovení rozehrané hry ---
     // stav ostrovů (vyřešené kameny, pokusy, snímky pro prohlížení, rozehraná
     // situace) i sbírka karet bezpečí přežijí odchod na úvodní stránku a návrat
@@ -229,6 +236,7 @@ export function useIslands(props, { guideMessage, guideAction, hideSafetyCard })
         totalCards,
         collectedCards,
         progress,
+        allStonesResolved,
         collectedSafetyCards,
         lighthouseHovered,
         cloudStyle,
