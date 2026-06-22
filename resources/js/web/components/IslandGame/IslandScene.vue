@@ -170,6 +170,17 @@
             @close="closeEasterEgg"
         />
 
+        <GameCompleteModal
+            :open="gameCompleteOpen"
+            :collected-cards="collectedCards"
+            :total-cards="totalCards"
+            :caught-fish-count="caughtFish.length"
+            :easter-eggs-count="easterEggsCount"
+            :home-url="homeUrl"
+            :video-url="completionVideoUrl"
+            @close="closeGameComplete"
+        />
+
         <GuideBubble
             v-if="selectedIsland"
             :guide-image="selectedIsland.guideImage"
@@ -184,7 +195,7 @@
 </template>
 
 <script setup>
-import { watch, onBeforeUnmount } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 
 import {
     seaWavelets,
@@ -223,6 +234,7 @@ import ContactsModal from './components/ContactsModal.vue';
 import SafetyCardsModal from './components/SafetyCardsModal.vue';
 import BasketModal from './components/BasketModal.vue';
 import EasterEggModal from './components/EasterEggModal.vue';
+import GameCompleteModal from './components/GameCompleteModal.vue';
 import GuideBubble from './components/GuideBubble.vue';
 
 const props = defineProps({
@@ -266,6 +278,11 @@ const props = defineProps({
         type: String,
         default: '/',
     },
+    // URL videa, které se přehraje na konci hry (překvapení po dohrání)
+    completionVideoUrl: {
+        type: String,
+        default: '',
+    },
 });
 
 // bublina průvodce a karta bezpečí – sdílené napříč intro/odpovědí
@@ -279,6 +296,7 @@ const {
     totalCards,
     collectedCards,
     progress,
+    allStonesResolved,
     collectedSafetyCards,
     lighthouseHovered,
     cloudStyle,
@@ -361,6 +379,21 @@ const {
     collectedSafetyCards,
     close,
 });
+
+// po projití všech kamenů na všech ostrovech ukážeme oslavný panel (jen při dohrání,
+// ne při každém načtení – proto reagujeme jen na přechod z nedohráno na dohráno)
+const gameCompleteOpen = ref(false);
+watch(allStonesResolved, (done, wasDone) => {
+    if (done && !wasDone) {
+        gameCompleteOpen.value = true;
+    }
+});
+const closeGameComplete = () => {
+    gameCompleteOpen.value = false;
+    // poslední kámen mohl nechat otevřené okno otázky – zavřeme ho a vrátíme se na mapu
+    closeQuestion();
+    close();
+};
 
 // při otevřeném modálu (maják / easter egg / situace) zamkneme rolování stránky pod ním
 watch([lighthouseModalOpen, easterEggModalOpen, activeQuestion], ([lighthouse, easterEgg, question]) => {

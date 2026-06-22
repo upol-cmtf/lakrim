@@ -73,6 +73,17 @@ export default {
             backToTask: 'Zpět na zadání',
             defaultTitle: 'Bonusový úkol',
         },
+        complete: {
+            title: 'Výborně, zvládli jste to!',
+            subtitle: 'Úspěšně jste propluli celým souostrovím nástrah a bezpečně jste s lodí dorazili do cíle.',
+            p1: 'Na této plavbě jste ukázali tu nejdůležitější věc: zdravý selský rozum, rozvaha a klid jsou mnohem silnější než jakýkoliv podvodník.',
+            p2: 'Zjistili jste, že nepotřebujete znát dokonale všechny moderní technologie. Úplně stačí, když se nenecháte dotlačit k rychlým rozhodnutím, nikomu cizímu nedáte své údaje z karty a neuvěříte lidem, kteří vás chtějí izolovat od vašich blízkých.',
+            p3: 'Kdykoliv v reálném životě ucítíte tlak a strach, vzpomeňte si na náš maják. Zastavte se, nadechněte se a poraďte se s někým, komu věříte.',
+            p4: 'Zůstaňte i nadále takto ostražití a nenechte si nikým vzít svůj klid. A teď už pro vás mám jedno speciální překvapení ze skutečného světa…',
+            cards: 'karet bezpečí',
+            fish: 'ulovených ryb',
+            home: 'Na úvodní stránku',
+        },
         guide: {
             startPlaying: 'Začít hrát',
             retry: 'Zkusit odpovědět znovu',
