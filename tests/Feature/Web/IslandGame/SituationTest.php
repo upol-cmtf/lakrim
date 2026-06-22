@@ -19,6 +19,12 @@ class SituationTest extends TestCase
 
         // Seedované situace by interferovaly s testovacími – každý test si vytváří vlastní.
         Situation::query()->delete();
+
+        // Seedované bonusové otázky by spouštěly bonusovou odměnu v testech obtížnosti –
+        // odstraníme je, bonusové chování má vlastní testy.
+        $bonusIds = Question::query()->where('bonus', true)->pluck('id');
+        QuestionOption::query()->whereIn('question_id', $bonusIds)->delete();
+        Question::query()->whereIn('id', $bonusIds)->delete();
     }
 
     public function testRequiredParametersAreNotSet(): void
@@ -220,6 +226,85 @@ class SituationTest extends TestCase
         ])
             ->assertOk()
             ->assertJsonPath('data.id', $medium->id);
+    }
+
+    public function testServesBonusQuestionAfterCorrectStreak(): void
+    {
+        $respondent = $this->respondent();
+
+        // tři správné odpovědi v řadě → odemkne se bonusová otázka
+        for ($i = 0; $i < 3; $i++) {
+            $this->answer($respondent, Question::factory()->create(), right: true);
+        }
+
+        $bonus = $this->bonusQuestion();
+        // klasická situace by jinak byla k dispozici – bonus ji má nahradit
+        $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.question.id', $bonus->id);
+    }
+
+    public function testDoesNotServeBonusWithoutStreak(): void
+    {
+        $respondent = $this->respondent();
+
+        // jen jedna správná odpověď → série nestačí na bonus
+        $this->answer($respondent, Question::factory()->create(), right: true);
+
+        $this->bonusQuestion();
+        $classic = $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $classic->id);
+    }
+
+    public function testServesAtMostTwoBonusesPerGame(): void
+    {
+        $respondent = $this->respondent();
+
+        // dvě bonusové otázky už respondent zodpověděl (a byly správně → série pokračuje)
+        $this->answer($respondent, $this->bonusQuestion(), right: true);
+        $this->answer($respondent, $this->bonusQuestion(), right: true);
+        $this->answer($respondent, Question::factory()->create(), right: true);
+
+        // další nezodpovězený bonus existuje, ale limit 2 je vyčerpán
+        $this->bonusQuestion();
+        $classic = $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $classic->id);
+    }
+
+    private function bonusQuestion(): Question
+    {
+        $question = Question::factory()->create([
+            'version' => Version::Three->value,
+            'bonus' => true,
+            'difficulty_id' => 1,
+        ]);
+
+        QuestionOption::factory()->create([
+            'question_id' => $question->id,
+            'right' => true,
+        ]);
+
+        return $question;
     }
 
     private function respondent(): Respondent
