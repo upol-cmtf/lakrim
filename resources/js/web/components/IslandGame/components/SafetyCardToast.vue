@@ -68,6 +68,28 @@ defineProps({
     font-weight: 800;
 }
 
+/* telefon naležato: nízká obrazovka – kartu odvodíme z dostupné výšky (obrázek se naškáluje na výšku,
+   šířka dopočítá podle poměru), ať se vejde celá a nezabírá skoro celý displej */
+@media (orientation: landscape) and (max-height: 600px) {
+    .safety-card {
+        top: 0.6rem;
+        /* naležato karta vlevo, průvodce zůstává vpravo – ať se nepřekrývají */
+        right: auto;
+        left: 0.6rem;
+        width: auto;
+        max-height: calc(100dvh - 1.2rem);
+    }
+    .safety-card-frame {
+        height: calc(100dvh - 1.2rem);
+        width: auto;
+        max-width: 40vw;
+    }
+    .safety-card-body {
+        font-size: clamp(0.7rem, 1.9vw, 0.88rem);
+        line-height: 1.3;
+    }
+}
+
 .safety-card-fade-enter-active {
     transition: opacity 1.1s ease, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
 }

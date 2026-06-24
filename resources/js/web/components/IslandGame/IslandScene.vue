@@ -26,12 +26,12 @@
         <button
             v-if="selectedIsland"
             type="button"
-            class="absolute top-3 left-3 z-20 inline-flex items-center gap-2 rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.95rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:px-4 sm:py-2 sm:text-base"
+            class="back-to-map-btn absolute top-3 left-3 z-20 inline-flex items-center gap-2 rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.95rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:px-4 sm:py-2 sm:text-base"
             @click="close"
             :aria-label="$t('islandGame.common.backToMap')"
         >
             <span aria-hidden="true">←</span>
-            <span class="hidden sm:inline">{{ $t('islandGame.common.backToMap') }}</span>
+            <span class="back-to-map-label hidden sm:inline">{{ $t('islandGame.common.backToMap') }}</span>
         </button>
 
         <h2 v-if="selectedIsland" class="island-detail-label absolute top-3 left-1/2 z-20 -translate-x-1/2">
@@ -52,7 +52,7 @@
 
         <!-- na mapě necháme prázdnou vodu propustnou pro klik (klik projde na rybku pod kontejnerem) -->
         <div
-            class="container relative mx-auto flex min-h-screen items-center justify-center px-4 py-6"
+            class="island-stage container relative mx-auto flex items-center justify-center px-4 py-6"
             :class="{ 'pointer-events-none': !selectedIsland }"
         >
             <div class="island-scene relative mx-auto w-full overflow-hidden">
@@ -442,15 +442,49 @@ onBeforeUnmount(() => {
 
 .island-page {
     min-height: 100vh;
+    min-height: 100dvh;
     background: radial-gradient(ellipse at 50% 30%, #4ea6d8 0%, #2c79b0 55%, #144a78 100%);
+}
+
+/* scéna se centruje podle reálně viditelné výšky (dvh) – jinak na mobilu naležato
+   100vh ignoruje lištu prohlížeče a spodní řada ostrovů i s popisky spadne pod okraj obrazovky */
+.island-stage {
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .island-scene {
     background: transparent;
     aspect-ratio: 3 / 2;
-    /* co největší scéna, která se vejde do výšky i šířky obrazovky */
+    /* co největší scéna, která se vejde do výšky i šířky obrazovky.
+       dvh (dynamická výška viewportu) – na mobilu naležato počítáme s reálně viditelnou plochou,
+       ne se 100vh, které ignoruje lištu prohlížeče a ořezávalo spodní popisky ostrovů. */
     max-width: min(96rem, calc((100vh - 3rem) * 3 / 2));
     max-height: calc(100vh - 3rem);
+    max-width: min(96rem, calc((100dvh - 3rem) * 3 / 2));
+    max-height: calc(100dvh - 3rem);
+}
+
+/* telefon naležato: scéna je nízká, poměr 3:2 ji srazil do malého rámečku a popisky spodních
+   ostrovů se ořezávaly. Na mobilu naležato proto necháme moře s ostrovy roztáhnout přes celou
+   obrazovku – zrušíme pevný poměr stran i omezení šířky kontejneru a scéna vyplní viewport. */
+@media (orientation: landscape) and (max-height: 600px) {
+    .island-stage {
+        max-width: none;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .island-scene {
+        aspect-ratio: auto;
+        max-width: none;
+        max-height: none;
+        height: calc(100dvh - 1rem);
+    }
+
+    /* na šířku je text „Zpět na mapu ostrovů" moc dlouhý – necháme jen šipku */
+    .back-to-map-label {
+        display: none;
+    }
 }
 
 .sea-caustics {
@@ -489,6 +523,21 @@ onBeforeUnmount(() => {
         gap: 0.45rem;
         padding: 0.3rem 0.5rem 0.3rem 0.75rem;
         font-size: 0.95rem;
+    }
+}
+
+/* telefon naležato: tlačítko zpět (jen šipka) i štítek s názvem ostrova zmenšíme, ať nezabírají moc místa */
+@media (orientation: landscape) and (max-height: 600px) {
+    .back-to-map-btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .island-detail-label {
+        gap: 0.35rem;
+        padding: 0.2rem 0.45rem 0.2rem 0.6rem;
+        font-size: 0.82rem;
+        border-radius: 0.4rem;
     }
 }
 

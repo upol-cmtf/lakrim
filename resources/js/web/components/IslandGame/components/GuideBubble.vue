@@ -300,6 +300,51 @@ onBeforeUnmount(() => {
     }
 }
 
+/* telefon naležato: nízká obrazovka – průvodce i jeho bublinu výrazně zmenšíme, ať nezabírají skoro celý displej */
+@media (orientation: landscape) and (max-height: 600px) {
+    .island-guide {
+        gap: 0.4rem;
+        padding: 0.4rem;
+        /* drží se v pravé části obrazovky – vlevo je místo pro kartu bezpečí */
+        max-width: 56vw;
+    }
+    .island-guide-img {
+        height: 6.5rem;
+        width: auto;
+    }
+    .island-guide-bubble {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        padding: 0.55rem 0.8rem;
+        margin-bottom: 1.75rem;
+        border-radius: 1rem;
+    }
+    .island-guide-text {
+        max-height: calc(100dvh - 4rem);
+    }
+    .island-guide-action {
+        margin-top: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.82rem;
+    }
+    .island-guide-shield {
+        width: 2rem;
+        height: 2rem;
+        top: -0.8rem;
+        left: -0.8rem;
+    }
+    .island-guide-shield svg {
+        width: 1.3rem;
+        height: 1.3rem;
+    }
+    .island-guide-close {
+        width: 1.6rem;
+        height: 1.6rem;
+        top: -0.55rem;
+        right: -0.55rem;
+    }
+}
+
 .guide-fade-enter-active,
 .guide-fade-leave-active {
     transition: opacity 0.25s ease, transform 0.25s ease;

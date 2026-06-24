@@ -3,13 +3,13 @@
     <transition name="modal-fade">
         <div
             v-if="open"
-            class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4"
+            class="question-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4"
             role="dialog"
             aria-modal="true"
             :aria-label="$t('islandGame.contacts.title')"
             @click.self="$emit('close')"
         >
-            <div class="contacts-modal relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+            <div class="contacts-modal relative my-auto max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-8">
                 <button
                     type="button"
                     class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-blue-900 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"

@@ -1,5 +1,5 @@
 <template>
-    <div class="absolute inset-0">
+    <div class="island-field absolute inset-0">
         <div
             class="island-wrap lighthouse-wrap absolute top-1/2 left-1/2 w-[22%] -translate-x-1/2 -translate-y-1/2"
             role="button"
@@ -183,6 +183,20 @@ defineEmits(['open-island', 'open-lighthouse', 'lighthouse-hover']);
 @media (max-width: 639px) {
     .island-label {
         padding: 0.2rem 0.35rem;
+    }
+}
+
+/* telefon naležato: nízká scéna ořezávala titulky spodních ostrovů (scéna má overflow:hidden kvůli paprskům majáku).
+   Pole ostrovů povytáhneme ode dna a titulek zmenšíme, ať se popisky vejdou nad spodní hranu scény. */
+@media (orientation: landscape) and (max-height: 600px) {
+    .island-field {
+        bottom: 2.25rem;
+    }
+
+    .island-label {
+        bottom: -1.1rem;
+        font-size: 0.8rem;
+        padding: 0.15rem 0.3rem;
     }
 }
 
