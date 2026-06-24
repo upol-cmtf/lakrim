@@ -40,6 +40,14 @@
     }
 }
 
+// telefon naležato: štítek s názvem ostrova je menší, ať odpovídá i progress pilulka
+@media (orientation: landscape) and (max-height: 600px) {
+    .island-progress--lg {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.72rem;
+    }
+}
+
 // společný fade pro všechna modální okna (vnitřní transform si řeší konkrétní modal)
 .modal-fade-enter-active,
 .modal-fade-leave-active {
