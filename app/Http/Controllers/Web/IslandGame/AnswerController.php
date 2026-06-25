@@ -11,6 +11,10 @@ use App\Models\Situation;
 
 final class AnswerController extends ApiController
 {
+    // bonusové otázky nemají vlastní situaci, a tedy ani kartu bezpečí – po jejich
+    // správném vyřešení dáme tuto univerzální kartu (rozpoznání bezpečné situace)
+    private const BONUS_SAFETY_CARD = 'Ne každá zpráva je podvod. Bezpečné situace umíte rozpoznat – a to je stejně důležité jako odhalit past.';
+
     public function store(): ArrayResource
     {
         $questionId = $this->request->get('question_id', -1);
@@ -71,6 +75,11 @@ final class AnswerController extends ApiController
                 ['completed_at' => now()],
             );
             $safetyCard = $situation->safety_card;
+        }
+
+        // bonusová otázka nemá situaci ani vlastní kartu – po správné odpovědi dáme univerzální kartu
+        if ($correct && $question->bonus && $safetyCard === null) {
+            $safetyCard = self::BONUS_SAFETY_CARD;
         }
 
         return new ArrayResource([
