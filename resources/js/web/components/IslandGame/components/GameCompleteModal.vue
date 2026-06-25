@@ -20,9 +20,8 @@
                     </svg>
                 </button>
 
-                <div class="game-complete-glow" aria-hidden="true"></div>
-
                 <div class="game-complete-scroll">
+                <div class="game-complete-glow" aria-hidden="true"></div>
                 <div class="game-complete-badge" aria-hidden="true">🗼</div>
 
                 <h2 class="game-complete-title">{{ $t('islandGame.complete.title') }}</h2>
@@ -129,12 +128,16 @@ watch(() => props.open, (isOpen) => {
 
 /* vlastní scroll je tady, uvnitř zaobleného rámu */
 .game-complete-scroll {
+    position: relative;
+    /* obsah leží NAD září – záře tak zůstane jen pozadím nahoře a nebarví scrollovaný text */
+    z-index: 1;
     max-height: 90vh;
     overflow-y: auto;
     padding: 2.75rem 2.25rem 2rem;
 }
 
-/* teplá záře za špičkou majáku */
+/* teplá záře za špičkou majáku – je součástí scrollovaného obsahu, takže se posouvá
+   spolu s majákem (při odscrollování zmizí) a leží za textem (z-index), aby ho nebarvila */
 .game-complete-glow {
     position: absolute;
     top: -3.5rem;
@@ -145,6 +148,7 @@ watch(() => props.open, (isOpen) => {
     pointer-events: none;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255, 224, 140, 0.7) 0%, rgba(255, 224, 140, 0) 70%);
+    z-index: -1;
 }
 
 .game-complete-badge {
@@ -282,6 +286,8 @@ watch(() => props.open, (isOpen) => {
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
+    /* nad scrollovaným obsahem (ten má z-index: 1) */
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
