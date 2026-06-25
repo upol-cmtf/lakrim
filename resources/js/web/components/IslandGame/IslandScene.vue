@@ -187,6 +187,7 @@
             :easter-eggs-count="easterEggsCount"
             :home-url="homeUrl"
             :video-url="completionVideoUrl"
+            :contacts="importantContacts"
             @close="closeGameComplete"
         />
 
@@ -201,6 +202,7 @@
             :above-modal="!!activeQuestion"
             @close="guideMessage = null"
             @run-action="runGuideAction"
+            @replay-intro="replayIntro"
         />
     </div>
 </template>
@@ -315,6 +317,7 @@ const {
     shouldPulse,
     open,
     close,
+    replayIntro,
 } = useIslands(props, { guideMessage, guideAction, hideSafetyCard });
 
 // rybky v moři + koš ulovených ryb + pobídka

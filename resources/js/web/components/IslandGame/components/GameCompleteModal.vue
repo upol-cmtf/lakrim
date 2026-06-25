@@ -43,7 +43,16 @@
                     controls
                     playsinline
                     preload="metadata"
+                    @ended="showContacts = true"
                 ></video>
+
+                <!-- po dohrání videa (nebo hned, není-li video) ukážeme důležitá telefonní čísla z majáku -->
+                <transition name="modal-fade">
+                    <div v-if="contacts.length && (showContacts || !videoUrl)" class="game-complete-contacts">
+                        <h3 class="game-complete-contacts-title">{{ $t('islandGame.contacts.title') }}</h3>
+                        <contacts-list :contacts="contacts" />
+                    </div>
+                </transition>
 
                 <div class="game-complete-stats">
                     <span class="game-complete-stat">
@@ -69,7 +78,10 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, watch } from 'vue';
+import ContactsList from './ContactsList.vue';
+
+const props = defineProps({
     open: { type: Boolean, default: false },
     collectedCards: { type: Number, default: 0 },
     totalCards: { type: Number, default: 0 },
@@ -77,8 +89,20 @@ defineProps({
     easterEggsCount: { type: Number, default: 0 },
     homeUrl: { type: String, default: '/' },
     videoUrl: { type: String, default: '' },
+    contacts: { type: Array, default: () => [] },
 });
 defineEmits(['close']);
+
+// důležitá telefonní čísla se ukážou až po dohrání videa (video o nich mluví);
+// když žádné video není, zobrazíme je rovnou
+const showContacts = ref(false);
+
+watch(() => props.open, (isOpen) => {
+    if (isOpen) {
+        // při každém novém otevření začneme zase od videa
+        showContacts.value = false;
+    }
+});
 </script>
 
 <style scoped lang="scss">
@@ -175,6 +199,21 @@ defineEmits(['close']);
     border-radius: 0.85rem;
     background: #000;
     box-shadow: 0 8px 22px rgba(8, 38, 70, 0.35);
+}
+
+/* důležitá telefonní čísla po videu */
+.game-complete-contacts {
+    max-width: 32rem;
+    margin: 1.5rem auto 0;
+    text-align: left;
+}
+
+.game-complete-contacts-title {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #11365e;
+    text-align: center;
 }
 
 .game-complete-stats {
