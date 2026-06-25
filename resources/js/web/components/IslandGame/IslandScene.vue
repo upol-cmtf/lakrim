@@ -6,17 +6,17 @@
         <div v-if="!selectedIsland" class="absolute top-3 left-3 z-20 flex items-center gap-2">
             <a
                 :href="homeUrl"
-                class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/95 text-blue-900 shadow-md transition hover:bg-white sm:h-8 sm:w-8"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/95 text-blue-900 shadow-md transition hover:bg-white sm:h-10 sm:w-10"
                 :aria-label="$t('islandGame.common.home')"
             >
-                <svg viewBox="0 0 24 24" class="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="h-5 w-5 sm:h-[1.4rem] sm:w-[1.4rem]" aria-hidden="true">
                     <path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M5 10v9a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </a>
             <button
                 type="button"
-                class="inline-flex items-center rounded-lg bg-white/95 px-2.5 py-[0.3rem] text-[0.8rem] font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:text-sm"
+                class="inline-flex h-9 items-center rounded-lg bg-white/95 px-3.5 text-sm font-semibold leading-tight text-blue-900 shadow-md transition hover:bg-white sm:h-10 sm:text-base"
                 @click="tourActive = true"
             >
                 {{ $t('islandGame.common.howToPlay') }}
