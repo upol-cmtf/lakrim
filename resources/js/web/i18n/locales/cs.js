@@ -113,6 +113,7 @@ export default {
         },
         guide: {
             startPlaying: 'Začít hrát',
+            replay: 'Zobrazit úvodní zprávu průvodce',
             retry: 'Zkusit odpovědět znovu',
             continueNext: 'Pokračovat na další kámen',
             timeUpFinal: '<p>Čas vypršel a druhý pokus už není možný. Pojďme dál.</p>',

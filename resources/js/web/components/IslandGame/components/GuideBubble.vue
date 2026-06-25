@@ -61,7 +61,15 @@
                 </button>
             </div>
         </transition>
-        <img :src="guideImage" :alt="$t('islandGame.guideAlt')" class="island-guide-img">
+        <!-- kliknutí na průvodce kdykoliv znovu vyvolá úvodní zprávu ostrova -->
+        <button
+            type="button"
+            class="island-guide-img-btn"
+            :aria-label="$t('islandGame.guide.replay')"
+            @click="$emit('replay-intro')"
+        >
+            <img :src="guideImage" :alt="$t('islandGame.guideAlt')" class="island-guide-img">
+        </button>
     </div>
 </template>
 
@@ -75,7 +83,7 @@ const props = defineProps({
     action: { type: Object, default: null },
     aboveModal: { type: Boolean, default: false },
 });
-const emit = defineEmits(['close', 'run-action']);
+const emit = defineEmits(['close', 'run-action', 'replay-intro']);
 
 // kliknutí kamkoliv mimo bublinu ji zavře
 const bubbleEl = ref(null);
@@ -122,13 +130,39 @@ onBeforeUnmount(() => {
     z-index: 60;
 }
 
+/* obal průvodce je tlačítko – klik znovu vyvolá úvodní zprávu ostrova */
+.island-guide-img-btn {
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.island-guide-img-btn:focus-visible {
+    outline: none;
+}
+
 .island-guide-img {
+    display: block;
     height: 14rem;
     width: auto;
-    flex-shrink: 0;
     filter: drop-shadow(0 6px 8px rgba(8, 38, 70, 0.45));
     user-select: none;
+    /* klik chytá obalující tlačítko */
     pointer-events: none;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* náznak, že je průvodce klikatelný */
+.island-guide-img-btn:hover .island-guide-img,
+.island-guide-img-btn:focus-visible .island-guide-img {
+    transform: translateY(-3px) scale(1.04);
+    filter:
+        drop-shadow(0 8px 10px rgba(8, 38, 70, 0.5))
+        drop-shadow(0 0 12px rgba(255, 238, 170, 0.65));
 }
 
 .island-guide-bubble {

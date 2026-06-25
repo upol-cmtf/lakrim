@@ -219,6 +219,17 @@ export function useIslands(props, { guideMessage, guideAction, hideSafetyCard })
         }
     };
 
+    // kliknutí na průvodce kdykoliv znovu vyvolá úvodní zprávu ostrova (i když už byla viděná)
+    const replayIntro = () => {
+        clearTimeout(introTimer);
+        const island = selectedIsland.value;
+        if (!island || !island.introMessage) {
+            return;
+        }
+        guideMessage.value = island.introMessage;
+        guideAction.value = startPlayingAction;
+    };
+
     const close = () => {
         clearTimeout(introTimer);
         selectedIsland.value = null;
@@ -243,5 +254,6 @@ export function useIslands(props, { guideMessage, guideAction, hideSafetyCard })
         shouldPulse,
         open,
         close,
+        replayIntro,
     };
 }
