@@ -20,7 +20,7 @@
 
             {{-- Hlavní cesta: Dobrodružná výprava (ostrovy) --}}
             <div class="max-w-3xl mx-auto mb-10">
-                <a href="{{ route('web.island-game.homepage') }}"
+                <div
                    class="group block bg-gradient-to-br from-cyan-500 to-blue-700 rounded-3xl p-10 shadow-2xl hover:shadow-cyan-300/50 hover:scale-[1.02] transition-all duration-300 text-white text-center relative overflow-hidden">
                     {{-- Dekorativní vlny na pozadí --}}
                     <div class="absolute inset-0 opacity-10 pointer-events-none">
@@ -43,13 +43,31 @@
                         To největší dobrodružství. Na herním poli budete prozkoumávat různé ostrovy, sbírat karty a přinášet světlo do temnot. Tato cesta je nejvíce hravá. Můžete se k ní kdykoliv vrátit a pokračovat tam, kde jste skončili.
                     </p>
 
-                    <span class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-blue-700 bg-white rounded-xl group-hover:bg-blue-50 transition-colors shadow-md">
-                        Vyrazit na výpravu
-                        <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
-                </a>
+                    @if (! empty($hasInProgressGame))
+                        {{-- Rozehraná výprava – nabídneme pokračování i restart --}}
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <a href="{{ route('web.island-game.homepage') }}"
+                               class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-[#3a2a05] bg-gradient-to-b from-amber-400 to-amber-500 rounded-xl hover:from-amber-300 hover:to-amber-400 transition-colors shadow-md">
+                                Pokračovat ve výpravě
+                                <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </a>
+                            <a href="{{ route('web.island-game.restart') }}"
+                               class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white border-2 border-white/80 rounded-xl hover:bg-white/10 transition-colors">
+                                Začít znovu
+                            </a>
+                        </div>
+                    @else
+                        <a href="{{ route('web.island-game.homepage') }}"
+                           class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-blue-700 bg-white rounded-xl hover:bg-blue-50 transition-colors shadow-md">
+                            Vyrazit na výpravu
+                            <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    @endif
+                </div>
             </div>
 
             {{-- Oddělující text --}}

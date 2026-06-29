@@ -11,7 +11,7 @@ return new class extends Migration {
         $description = <<<'HTML'
 <div class="ee-diff">
     <h3 class="ee-title">Hledej rozdíly</h3>
-    <p class="ee-diff__hint">My jsme našli 7 rozdílů, kolik jich najdete Vy?</p>
+    <p class="ee-diff__hint">Zastavte se na chvíli a najděte co nejvíce rozdílů mezi levým a pravým obrázkem. Rozdíly není potřeba označovat myší. Cílem je procvičit všímavost a pozornost k detailům. My jsme našli 7 rozdílů, kolik jich najdete Vy?</p>
     <div class="ee-diff__images">
         [[image:rozdily-1]]
         [[image:rozdily-2]]

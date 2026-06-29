@@ -10,7 +10,7 @@ return new class extends Migration {
         $description = <<<'HTML'
 <div class="ee-maze">
     <h3 class="ee-title">Kapitánova cesta</h3>
-    <p class="ee-maze__hint">Kapitán se potřebuje bezpečně dostat k majáku. Sledujte jednotlivé cesty očima nebo prstem a zkuste najít tu správnou.</p>
+    <p class="ee-maze__hint">Kapitán se potřebuje bezpečně dostat k majáku. <b>Sledujte jednotlivé cesty očima nebo prstem a zkuste najít tu správnou</b>.</p>
     <p class="ee-maze__hint">Když postupujeme pomalu a sledujeme cestu krok za krokem, snáz se vyhneme slepým uličkám. Stejně pomáhá postupovat i při rozhodování.</p>
     [[image:kapitanova-cesta]]
 </div>

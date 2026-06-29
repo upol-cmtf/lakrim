@@ -9,5 +9,7 @@
         :easter-eggs-count="{{ $easterEggsCount }}"
         easter-egg-url="{{ route('web.quiz.easter-egg') }}"
         respondent-easter-egg-url="{{ route('web.quiz.respondent.easter-egg') }}"
+        home-url="{{ url('/') }}"
+        completion-video-url="{{ asset('videos/policie.mp4') }}"
     ></island-scene>
 @endsection

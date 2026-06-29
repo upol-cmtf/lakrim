@@ -1,0 +1,132 @@
+// České texty ostrovní hry. Zprávy průvodce obsahují HTML (renderují se přes
+// v-html), interpolace používá zápis {name} dle vue-i18n.
+export default {
+    islandGame: {
+        common: {
+            close: 'Zavřít',
+            backToMap: 'Zpět na mapu ostrovů',
+            home: 'Zpět na úvodní stránku',
+            howToPlay: 'Jak hrát?',
+        },
+        tour: {
+            next: 'Další',
+            back: 'Zpět',
+            skip: 'Přeskočit',
+            start: 'Začít',
+            welcome: {
+                title: 'Vítej, kapitáne!',
+                text: 'Tahle výprava tě provede čtyřmi ostrovy plnými digitálních nástrah. Tvým úkolem je proplout je, rozpoznat podvody a sbírat karty bezpečí. Pojďme se rychle rozhlédnout.',
+            },
+            islands: {
+                title: 'Ostrovy',
+                text: 'Klikni na ostrov a postupně ťukej na jeho kameny. U každé situace vybereš, jak bys zareagoval – průvodce ti pak poradí, jestli to byla bezpečná volba.',
+            },
+            lighthouse: {
+                title: 'Maják',
+                text: 'Tady najdeš všechno důležité: získané karty bezpečí, důležitá telefonní čísla i koš s ulovenými rybkami. Stačí na maják kliknout.',
+            },
+            fish: {
+                title: 'Rybky = bonusy',
+                text: 'V moři plavou rybky – to jsou bonusové úkoly pro oddech. Když na rybku klikneš, chytíš ji a otevře se její úkol.',
+            },
+            go: {
+                title: 'A je to!',
+                text: 'Teď už víš, do čeho jdeš. Hodně štěstí a chladnou hlavu, kapitáne – vyraz na výpravu!',
+            },
+        },
+        sea: {
+            catchFishAria: 'Oddechněte si',
+            hint: 'Zkuste si chytnout nějakou rybku',
+        },
+        guideAlt: 'Průvodce',
+        zoom: {
+            aria: 'Zvětšený obrázek',
+        },
+        safetyCard: {
+            title: 'Karta bezpečí',
+        },
+        map: {
+            openLighthouse: 'Otevřít maják',
+            lighthouseAlt: 'Maják',
+            collectedCardsAria: 'Získané karty bezpečí',
+            enterLighthouse: 'Vstoupit do majáku',
+            openIsland: 'Otevřít ostrov: {name}',
+        },
+        detail: {
+            task: 'Úkol {n}',
+            taskReview: 'Úkol {n} – prohlédnout',
+        },
+        question: {
+            alreadyAnswered: 'Situace již byla zodpovězena.',
+            hurry: 'Pospěš si!',
+            timeLabel: 'Čas na odpověď',
+            prompt: 'Jak byste se zachovali?',
+            reviewHint: 'Tvoje tehdejší odpověď je zvýrazněná níže.',
+            chooseHint: 'Vyberte odpověď, která nejlépe odpovídá tomu, co byste v této situaci udělali.',
+        },
+        lighthouse: {
+            aria: 'Maják',
+            interiorAlt: 'Interiér majáku',
+            contacts: 'Důležité kontakty',
+            cards: 'Moje karty bezpečí',
+            basket: 'Moje ulovené ryby',
+        },
+        contacts: {
+            title: 'Důležité kontakty',
+            intro: 'Tady najdete ověřená čísla, která je dobré mít vždy po ruce. Pokud si nejste jistí, nebojte se o pomoc zavolat.',
+            police: { label: 'Policie ČR', note: 'Hlášení podvodů, krádeží a bezprostředního ohrožení.' },
+            seniors: { label: 'Linka seniorů (Elpida)', note: 'Bezplatná pomoc při obavách, nátlaku nebo pocitu osamění.' },
+            dtest: { label: 'Spotřebitelská poradna dTest', note: 'Právní rady při problémech s e-shopy, nákupy a smlouvami.' },
+            victims: { label: 'Linka pomoci obětem', note: 'Nonstop bezplatná podpora obětem trestných činů (Bílý kruh bezpečí).' },
+            ambulance: { label: 'Záchranná služba', note: 'Přivolání okamžité zdravotnické pomoci.' },
+            bank: { label: 'Infolinka vaší banky', phoneNote: 'Na zadní straně karty', note: 'Při podezření na podvod. Číslo najdete na zadní straně vaší platební karty.' },
+        },
+        cards: {
+            title: 'Moje karty bezpečí',
+            collected: 'Získané karty: {count} / {total}',
+            empty: 'Zatím nemáš žádnou kartu bezpečí. Získáš je správným vyřešením situací na ostrovech.',
+            zoom: 'Zobrazit kartu zvětšenou',
+        },
+        basket: {
+            title: 'Moje ulovené ryby',
+            caught: 'Ulovené ryby: {count} / {total}',
+            empty: 'Zatím nemáš uloveno nic. Rybky plavou v moři jako bonusové úkoly – chyť je a procvič si je.',
+        },
+        easterEgg: {
+            aria: 'Oddechněte si',
+            loading: 'Načítám…',
+            empty: 'Zatím tu na tebe nic nečeká. Zkus to později!',
+            showEvaluation: 'Zobrazit vyhodnocení',
+            backToTask: 'Zpět na zadání',
+            defaultTitle: 'Bonusový úkol',
+        },
+        complete: {
+            title: 'Výborně, zvládli jste to!',
+            subtitle: 'Úspěšně jste propluli celým souostrovím nástrah a bezpečně jste s lodí dorazili do cíle.',
+            p1: 'Na této plavbě jste ukázali tu nejdůležitější věc: zdravý selský rozum, rozvaha a klid jsou mnohem silnější než jakýkoliv podvodník.',
+            p2: 'Zjistili jste, že nepotřebujete znát dokonale všechny moderní technologie. Úplně stačí, když se nenecháte dotlačit k rychlým rozhodnutím, nikomu cizímu nedáte své údaje z karty a neuvěříte lidem, kteří vás chtějí izolovat od vašich blízkých.',
+            p3: 'Kdykoliv v reálném životě ucítíte tlak a strach, vzpomeňte si na náš maják. Zastavte se, nadechněte se a poraďte se s někým, komu věříte.',
+            p4: 'Zůstaňte i nadále takto ostražití a nenechte si nikým vzít svůj klid. A teď už pro vás mám jedno speciální překvapení ze skutečného světa…',
+            cards: 'karet bezpečí',
+            fish: 'ulovených ryb',
+            home: 'Na úvodní stránku',
+        },
+        guide: {
+            startPlaying: 'Začít hrát',
+            replay: 'Zobrazit úvodní zprávu průvodce',
+            retry: 'Zkusit odpovědět znovu',
+            continueNext: 'Pokračovat na další kámen',
+            timeUpFinal: '<p>Čas vypršel a druhý pokus už není možný. Pojďme dál.</p>',
+            timeUpRetry: '<p>Čas vypršel – odpověď ses nestihl/a poslat. Zkus situaci znovu.</p>',
+            successCard: '<p>Skvělá práce! Získal/a jsi kartu bezpečí.</p>',
+            success: '<p>Skvělá práce! Situaci jsi zvládl správně.</p>',
+            wrongFinalWithHint: '<p>{hint}</p><p>Druhý pokus už nevyšel – pojďme dál.</p>',
+            wrongFinal: '<p>Bohužel ani druhý pokus nevyšel. Pojďme dál.</p>',
+            wrongRetryWithHint: '<p>{hint}</p><p>Zkus tuhle situaci ještě jednou.</p>',
+            wrongRetry: '<p>Tentokrát to nevyšlo. Zkus tuhle situaci ještě jednou.</p>',
+            noMoreSituations: '<p>Pro tento úkol už nejsou žádné další situace.</p>',
+            loadError: '<p>Situaci se nepodařilo načíst. Zkuste to prosím za chvíli znovu.</p>',
+            answerError: '<p>Odpověď se nepodařilo odeslat. Zkuste to prosím za chvíli znovu.</p>',
+        },
+    },
+};
