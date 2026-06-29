@@ -2,6 +2,7 @@
 namespace Database\Factories;
 
 use App\Models\Island;
+use App\Models\Question;
 use App\Models\Situation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,6 +18,7 @@ class SituationFactory extends Factory
     {
         return [
             'island_id' => Island::factory(),
+            'question_id' => Question::factory(),
             'position' => $this->faker->numberBetween(1, 5),
             'title' => $this->faker->sentence,
             'safety_card' => null,
@@ -30,7 +32,7 @@ class SituationFactory extends Factory
      */
     public function withSafetyCard(?string $safetyCard = null): Factory
     {
-        return $this->state(fn(array $attributes): array => [
+        return $this->state(fn(): array => [
             'safety_card' => $safetyCard ?? $this->faker->paragraph,
         ]);
     }

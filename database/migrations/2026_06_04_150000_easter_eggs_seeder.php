@@ -10,7 +10,8 @@ return new class extends Migration {
         // ve vyhodnocení pak jeden obrázek s vyznačenými rozdíly.
         $description = <<<'HTML'
 <div class="ee-diff">
-    <p class="ee-diff__hint">Starý strážce majáku má ve svém pokoji nepořádek a něco se změnilo. Najdeš všechny rozdíly mezi obrázky?</p>
+    <h3 class="ee-title">Hledej rozdíly</h3>
+    <p class="ee-diff__hint">Zastavte se na chvíli a najděte co nejvíce rozdílů mezi levým a pravým obrázkem. Rozdíly není potřeba označovat myší. Cílem je procvičit všímavost a pozornost k detailům. My jsme našli 7 rozdílů, kolik jich najdete Vy?</p>
     <div class="ee-diff__images">
         [[image:rozdily-1]]
         [[image:rozdily-2]]
@@ -24,14 +25,16 @@ HTML;
 
         $evaluation = <<<'HTML'
 <div class="ee-diff ee-diff--result">
+    <h3 class="ee-title">Vyhodnocení</h3>
     <p class="ee-diff__hint">A tady jsou všechny rozdíly vyznačené:</p>
     <div class="ee-diff__images">
         [[image:vysledek]]
+        [[image:rozdily-2]]
     </div>
 </div>
 <style>
-.ee-diff--result .ee-diff__images { justify-content: center; }
-.ee-diff--result .easter-egg-image { max-width: 100%; height: auto; border-radius: 8px; }
+.ee-diff--result .ee-diff__images { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.ee-diff--result .easter-egg-image { flex: 1 1 320px; max-width: 100%; height: auto; border-radius: 8px; }
 </style>
 HTML;
 
@@ -64,10 +67,12 @@ HTML;
         // Dechové cvičení – v modalu se přehraje video, které vede dýchání.
         $breathingDescription = <<<'HTML'
 <div class="ee-breathing">
-    <p class="ee-breathing__hint">Zastav se na chvíli a nadechni se spolu se sasankou. Sleduj video a dýchej v jejím rytmu.</p>
-    <video class="ee-breathing__video" controls loop playsinline preload="metadata">
+    <h3 class="ee-title">Dechové cvičení</h3>
+    <p class="ee-breathing__hint">Jsem zlatá rybka. Hromady zlata vám nesplním, ale mám pro vás něco mnohem cennějšího – tři hluboké nádechy pro klidnou mysl.</p>
+    <p class="ee-breathing__hint">I ten nejzkušenější kapitán se může v bouři ztratit, když zpanikaří. Stejné je to u telefonu nebo na internetu. Když na vás někdo tlačí, nejlepší obranou je zastavit se a nadechnout. Tím vezmete kormidlo zpět do svých rukou. Pojďme si to vyzkoušet.</p>
+    <video class="ee-breathing__video" controls playsinline preload="metadata">
         <source src="/videos/easter-eggs/sasanka-dechove-cviceni.mp4" type="video/mp4">
-        Tvůj prohlížeč neumí přehrát video.
+        Váš prohlížeč neumí přehrát video.
     </video>
 </div>
 <style>
@@ -75,19 +80,26 @@ HTML;
 </style>
 HTML;
 
-        // U dechového cvičení se nic nevyhodnocuje – evaluation zůstává null.
+        $breathingEvaluation = <<<'HTML'
+<div class="ee-breathing ee-breathing--result">
+    <h3 class="ee-title">Vyhodnocení</h3>
+    <p class="ee-breathing__hint">Výborně. Teď máte čistou hlavu a pevnou ruku na kormidle. Kdykoliv v životě ucítíte tlak a nejistotu, vzpomeňte si na mě a prostě se na chvíli zastavte a v klidu nadechněte. Šťastnou plavbu.</p>
+</div>
+HTML;
+
         EasterEgg::create([
             'description' => $breathingDescription,
-            'evaluation' => null,
+            'evaluation' => $breathingEvaluation,
         ]);
 
         // Cvičení s rybkou – v modalu se přehraje video vedoucí cvičení.
         $fishDescription = <<<'HTML'
 <div class="ee-exercise">
-    <p class="ee-exercise__hint">Protáhni se a zacvič si spolu s rybkou. Pusť si video a opakuj pohyby.</p>
+    <h3 class="ee-title">Cvičení s rybkou</h3>
+    <p class="ee-exercise__hint">Tady v moři se hýbe úplně všechno, ale u obrazovky člověk ztuhne jako zkamenělý útes. Když se tělo nehýbe, i mozek pak pomaleji přemýšlí. Pojďme si na minutku protáhnout, ať máte čistou hlavu na další úkoly. Zůstaňte klidně sedět a zkuste to se mnou:</p>
     <video class="ee-exercise__video" controls loop playsinline preload="metadata">
         <source src="/videos/easter-eggs/cviceni-s-rybkou.mp4" type="video/mp4">
-        Tvůj prohlížeč neumí přehrát video.
+        Váš prohlížeč neumí přehrát video.
     </video>
 </div>
 <style>

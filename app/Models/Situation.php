@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property int $island_id
+ * @property int $question_id
  * @property int $position
  * @property string|null $title
  * @property string|null $safety_card
  * @property Island $island
+ * @property Question $question
  * @property Collection<RespondentSituation> $respondentSituations
  * @property DateTimeInterface|null $created_at
  * @property DateTimeInterface|null $updated_at
@@ -29,6 +31,7 @@ class Situation extends Model
 
     protected $fillable = [
         'island_id',
+        'question_id',
         'position',
         'title',
         'safety_card',
@@ -37,6 +40,11 @@ class Situation extends Model
     public function island(): BelongsTo
     {
         return $this->belongsTo(Island::class);
+    }
+
+    public function question(): BelongsTo
+    {
+        return $this->belongsTo(Question::class);
     }
 
     public function respondentSituations(): HasMany

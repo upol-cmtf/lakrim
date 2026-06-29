@@ -2,6 +2,8 @@ import {createApp} from 'vue';
 import {createPinia} from 'pinia';
 import mitt from 'mitt';
 
+import i18n from './i18n';
+
 import.meta.glob(['../../images/**']);
 
 import ButtonBlue from './components/ButtonBlue.vue';
@@ -15,6 +17,7 @@ const app = createApp({});
 const EventBus = mitt();
 
 app.use(pinia);
+app.use(i18n);
 
 app.provide('EventBus', EventBus);
 
