@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string $image
  * @property string|null $guide
+ * @property string|null $intro
  * @property array<string, mixed>|null $settings
  * @property Collection<Question> $questions
  * @property Collection<Situation> $situations
@@ -31,6 +32,7 @@ class Island extends Model
         'name',
         'image',
         'guide',
+        'intro',
         'settings',
     ];
 

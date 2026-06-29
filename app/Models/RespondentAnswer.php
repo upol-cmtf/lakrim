@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $seconds
  * @property float $weight
  * @property int $attempt
+ * @property int|null $island_id
+ * @property int|null $button
  * @property Respondent $respondent
  * @property QuestionOption $option
  * @property DateTimeInterface|null $created_at
@@ -39,6 +41,8 @@ class RespondentAnswer extends Model
         'weight',
         'respondent_id',
         'question_option_id',
+        'island_id',
+        'button',
     ];
 
     public function respondent(): BelongsTo

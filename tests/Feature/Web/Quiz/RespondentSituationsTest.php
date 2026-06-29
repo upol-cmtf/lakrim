@@ -12,6 +12,14 @@ class RespondentSituationsTest extends TestCase
 {
     private const ROUTE_NAME = 'web.quiz.respondent.situations';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seedované situace by interferovaly s testovacími – každý test si vytváří vlastní.
+        Situation::query()->delete();
+    }
+
     public function testRequiredParametersAreNotSet(): void
     {
         $this->postJson(route(self::ROUTE_NAME))
@@ -32,7 +40,7 @@ class RespondentSituationsTest extends TestCase
             ]);
     }
 
-    public function testReturnsSeededIslandsWithEmptySituationsByDefault(): void
+    public function testReturnsSeededIslandsWithNothingCompletedByDefault(): void
     {
         $respondent = Respondent::factory()->createOneQuietly([
             'version' => Version::Three->value,
@@ -52,7 +60,15 @@ class RespondentSituationsTest extends TestCase
             $this->assertArrayHasKey('id', $island);
             $this->assertArrayHasKey('name', $island);
             $this->assertArrayHasKey('image', $island);
-            $this->assertSame([], $island['situations']);
+
+            $situations = $island['situations'];
+            assert(is_array($situations));
+
+            // čerstvý respondent nemá splněnou žádnou situaci
+            foreach ($situations as $situation) {
+                assert(is_array($situation));
+                $this->assertFalse($situation['completed']);
+            }
         }
     }
 

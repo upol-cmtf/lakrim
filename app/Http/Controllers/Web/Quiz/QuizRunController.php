@@ -18,7 +18,7 @@ class QuizRunController extends Controller
         $difficulty = Difficulty::find($respondent->version->value);
         assert($difficulty instanceof Difficulty);
 
-        return view('web.quiz.run', [
+        return view('web.quiz.index', [
             'respondentToken' => $respondent->token,
             'settings' => array_merge(($difficulty->settings ?? []), [
                 'maxQuestions' => $difficulty->max_questions,
