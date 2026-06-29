@@ -19,6 +19,12 @@ class SituationTest extends TestCase
 
         // Seedované situace by interferovaly s testovacími – každý test si vytváří vlastní.
         Situation::query()->delete();
+
+        // Seedované bonusové otázky by spouštěly bonusovou odměnu v testech obtížnosti –
+        // odstraníme je, bonusové chování má vlastní testy.
+        $bonusIds = Question::query()->where('bonus', true)->pluck('id');
+        QuestionOption::query()->whereIn('question_id', $bonusIds)->delete();
+        Question::query()->whereIn('id', $bonusIds)->delete();
     }
 
     public function testRequiredParametersAreNotSet(): void
@@ -89,11 +95,11 @@ class SituationTest extends TestCase
             ->assertJsonPath('data.code', 'no_situation_available');
     }
 
-    public function testServesHarderQuestionAfterCorrectStreak(): void
+    public function testServesHarderQuestionAfterEnoughCorrectAnswers(): void
     {
         $respondent = $this->respondent();
 
-        // čtyři správné odpovědi v řadě → cílová obtížnost 3
+        // čtyři správné odpovědi → skóre 4 → cílová obtížnost 3
         for ($i = 0; $i < 4; $i++) {
             $this->answer($respondent, Question::factory()->create(), right: true);
         }
@@ -110,15 +116,61 @@ class SituationTest extends TestCase
             ->assertJsonPath('data.id', $hard->id);
     }
 
-    public function testWrongAnswerResetsDifficultyToEasy(): void
+    public function testSingleWrongAnswerDoesNotDropDifficultyToEasy(): void
     {
         $respondent = $this->respondent();
 
-        // tři správné, ale poslední odpověď špatná → série 0 → obtížnost 1
-        for ($i = 0; $i < 3; $i++) {
+        // pět správných a jedna špatná → skóre 4 → stále obtížnost 3
+        for ($i = 0; $i < 5; $i++) {
             $this->answer($respondent, Question::factory()->create(), right: true);
         }
         $this->answer($respondent, Question::factory()->create(), right: false);
+
+        $this->situation(button: 1, difficulty: 1);
+        $hard = $this->situation(button: 1, difficulty: 3);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $hard->id);
+    }
+
+    public function testRepeatedMistakesGraduallyLowerDifficulty(): void
+    {
+        $respondent = $this->respondent();
+
+        // čtyři správné a dvě špatné → skóre 2 → obtížnost 2 (ne rovnou nejlehčí)
+        for ($i = 0; $i < 4; $i++) {
+            $this->answer($respondent, Question::factory()->create(), right: true);
+        }
+        $this->answer($respondent, Question::factory()->create(), right: false);
+        $this->answer($respondent, Question::factory()->create(), right: false);
+
+        $this->situation(button: 1, difficulty: 1);
+        $medium = $this->situation(button: 1, difficulty: 2);
+        $this->situation(button: 1, difficulty: 3);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $medium->id);
+    }
+
+    public function testScoreNeverFallsBelowZero(): void
+    {
+        $respondent = $this->respondent();
+
+        // jedna správná a tři špatné → skóre se zarazí na 0 → obtížnost 1
+        $this->answer($respondent, Question::factory()->create(), right: true);
+        for ($i = 0; $i < 3; $i++) {
+            $this->answer($respondent, Question::factory()->create(), right: false);
+        }
 
         $easy = $this->situation(button: 1, difficulty: 1);
         $this->situation(button: 1, difficulty: 3);
@@ -132,6 +184,129 @@ class SituationTest extends TestCase
             ->assertJsonPath('data.id', $easy->id);
     }
 
+    public function testScoreCountsCorrectAnswersFromAllIslands(): void
+    {
+        $respondent = $this->respondent();
+
+        // čtyři správné odpovědi rozprostřené po jiném ostrově → skóre 4
+        for ($button = 1; $button <= 4; $button++) {
+            $otherIsland = $this->situation(button: $button, difficulty: 1, island: 2);
+            $this->answer($respondent, $otherIsland->question, right: true);
+        }
+
+        $this->situation(button: 1, difficulty: 1);
+        $hard = $this->situation(button: 1, difficulty: 3);
+
+        // ptáme se na ostrov 1, obtížnost ale vychází z odpovědí z ostrova 2
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $hard->id);
+    }
+
+    public function testFallsBackToNearestLowerDifficultyWhenTargetUnavailable(): void
+    {
+        $respondent = $this->respondent();
+
+        // skóre 4 → cílová obtížnost 3, ta ale na tlačítku není k dispozici
+        for ($i = 0; $i < 4; $i++) {
+            $this->answer($respondent, Question::factory()->create(), right: true);
+        }
+
+        $this->situation(button: 1, difficulty: 1);
+        $medium = $this->situation(button: 1, difficulty: 2);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $medium->id);
+    }
+
+    public function testServesBonusQuestionAfterCorrectStreak(): void
+    {
+        $respondent = $this->respondent();
+
+        // tři správné odpovědi v řadě → odemkne se bonusová otázka
+        for ($i = 0; $i < 3; $i++) {
+            $this->answer($respondent, Question::factory()->create(), right: true);
+        }
+
+        $bonus = $this->bonusQuestion();
+        // klasická situace by jinak byla k dispozici – bonus ji má nahradit
+        $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.question.id', $bonus->id);
+    }
+
+    public function testDoesNotServeBonusWithoutStreak(): void
+    {
+        $respondent = $this->respondent();
+
+        // jen jedna správná odpověď → série nestačí na bonus
+        $this->answer($respondent, Question::factory()->create(), right: true);
+
+        $this->bonusQuestion();
+        $classic = $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $classic->id);
+    }
+
+    public function testServesAtMostTwoBonusesPerGame(): void
+    {
+        $respondent = $this->respondent();
+
+        // dvě bonusové otázky už respondent zodpověděl (a byly správně → série pokračuje)
+        $this->answer($respondent, $this->bonusQuestion(), right: true);
+        $this->answer($respondent, $this->bonusQuestion(), right: true);
+        $this->answer($respondent, Question::factory()->create(), right: true);
+
+        // další nezodpovězený bonus existuje, ale limit 2 je vyčerpán
+        $this->bonusQuestion();
+        $classic = $this->situation(button: 1, difficulty: 1);
+
+        $this->postJson(route(self::ROUTE_NAME), [
+            'respondent_token' => $respondent->token,
+            'island_id' => 1,
+            'button' => 1,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $classic->id);
+    }
+
+    private function bonusQuestion(): Question
+    {
+        $question = Question::factory()->create([
+            'version' => Version::Three->value,
+            'bonus' => true,
+            'difficulty_id' => 1,
+        ]);
+
+        QuestionOption::factory()->create([
+            'question_id' => $question->id,
+            'right' => true,
+        ]);
+
+        return $question;
+    }
+
     private function respondent(): Respondent
     {
         return Respondent::factory()->createOneQuietly([
@@ -139,12 +314,12 @@ class SituationTest extends TestCase
         ]);
     }
 
-    private function situation(int $button, int $difficulty): Situation
+    private function situation(int $button, int $difficulty, int $island = 1): Situation
     {
         $question = Question::factory()->create(['difficulty_id' => $difficulty]);
 
         return Situation::factory()->create([
-            'island_id' => 1,
+            'island_id' => $island,
             'question_id' => $question->id,
             'position' => $button,
         ]);

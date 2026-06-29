@@ -5,12 +5,8 @@
         <div
             class="flex flex-col md:my-6 bg-white md:shadow-lg border border-slate-200 md:rounded-lg w-full md:h-min-[500px]">
 
-            <student-id-form
-                v-if="showStudentIdForm"
-            />
-
             <quiz
-                v-if="!showStudentIdForm && showQuiz"
+                v-if="showQuiz"
             />
 
             <respondent-identification
@@ -28,14 +24,13 @@
 </template>
 
 <script setup>
-import {computed, defineProps, inject, onMounted, ref} from 'vue';
+import {defineProps, inject, onMounted, ref} from 'vue';
 import {useRespondentTokenStore} from '../../stores/RespondentTokenStore.js';
 import {useQuizSettingsStore} from '../../stores/QuizSettingsStore.js';
 import ProgressBar from './ProgressBar.vue';
 import Quiz from './Quiz.vue';
 import QuizEnd from './QuizEnd.vue';
 import RespondentIdentification from './RespondentIdentification.vue';
-import StudentIdForm from './StudentIdForm.vue';
 
 const EventBus = inject('EventBus');
 
@@ -57,10 +52,16 @@ const props = defineProps({
 const quizSettingsStore = useQuizSettingsStore();
 const respondentTokenStore = useRespondentTokenStore();
 
+// token a nastavení musíme naplnit synchronně už v setupu – child Quiz se mountuje (a načítá první
+// otázku přes respondent token) dřív než onMounted rodiče, takže v onMounted by token ještě chyběl
+respondentTokenStore.token = props.token;
+quizSettingsStore.maxQuestions = props.settings.maxQuestions;
+quizSettingsStore.requireStudentId = props.settings.requireStudentId;
+quizSettingsStore.showEvaluationsForOtherOptions = props.settings.showEvaluationsForOtherOptions;
+
 const showQuiz = ref(true);
 const showQuizEnd = ref(false);
 const showRespondentIdentification = ref(false);
-const isFilledStudentId = ref(false);
 
 const onQuizFinished = () => {
     showQuiz.value = false;
@@ -72,19 +73,8 @@ const onRespondentIdentificationFinished = () => {
     showRespondentIdentification.value = false;
 };
 
-const showStudentIdForm = computed(() => {
-    return !isFilledStudentId.value;
-});
-
 onMounted(async () => {
-    respondentTokenStore.token = props.token;
-
-    quizSettingsStore.maxQuestions = props.settings.maxQuestions;
-    quizSettingsStore.requireStudentId = props.settings.requireStudentId;
-    quizSettingsStore.showEvaluationsForOtherOptions = props.settings.showEvaluationsForOtherOptions;
-
     EventBus.on('quiz:finished', () => onQuizFinished());
     EventBus.on('respondentIdentification:finished', () => onRespondentIdentificationFinished());
-    EventBus.on('studentId:stored', () => isFilledStudentId.value = true);
 });
 </script>
