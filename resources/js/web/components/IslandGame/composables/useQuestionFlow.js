@@ -368,6 +368,8 @@ export function useQuestionFlow(props, {
 
     return {
         activeQuestion,
+        loadingQuestion,
+        answerSubmitting,
         reviewMode,
         wrongOptionIds,
         correctOptionId,
