@@ -204,6 +204,24 @@
             @run-action="runGuideAction"
             @replay-intro="replayIntro"
         />
+
+        <!-- requesty na situaci / vyhodnocení odpovědi – ať je vidět, že se něco děje.
+             ukáže se až po krátké prodlevě, aby rychlý request neproblikl -->
+        <transition name="modal-fade">
+            <div
+                v-if="showSituationLoader || showAnswerLoader"
+                class="situation-loading"
+                role="status"
+                :aria-label="showAnswerLoader ? $t('islandGame.detail.evaluating') : $t('islandGame.detail.loading')"
+            >
+                <div class="situation-loading-card">
+                    <div class="situation-loading-spinner" aria-hidden="true"></div>
+                    <span class="situation-loading-text">
+                        {{ showAnswerLoader ? $t('islandGame.detail.evaluating') : $t('islandGame.detail.loading') }}
+                    </span>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -368,6 +386,8 @@ const {
 // rozehraná situace v modálu (otázka, odpočet, vyhodnocení, lightbox)
 const {
     activeQuestion,
+    loadingQuestion,
+    answerSubmitting,
     reviewMode,
     optionVariant,
     optionClass,
@@ -434,9 +454,31 @@ watch([lighthouseModalOpen, easterEggModalOpen, activeQuestion], ([lighthouse, e
     document.body.style.overflow = (lighthouse || easterEgg || question) ? 'hidden' : '';
 });
 
+// spinner u requestů (načítání situace, ukládání odpovědi) ukážeme až po krátké prodlevě –
+// rychlý request tak neprobliknе
+const loaderTimers = [];
+const delayedFlag = (source) => {
+    const shown = ref(false);
+    let timer = null;
+    watch(source, (active) => {
+        clearTimeout(timer);
+        if (active) {
+            timer = setTimeout(() => { shown.value = true; }, 250);
+        } else {
+            shown.value = false;
+        }
+    });
+    loaderTimers.push(() => clearTimeout(timer));
+    return shown;
+};
+
+const showSituationLoader = delayedFlag(loadingQuestion);
+const showAnswerLoader = delayedFlag(answerSubmitting);
+
 onBeforeUnmount(() => {
     // pojistka, ať po odpojení komponenty nezůstane stránka zamčená
     document.body.style.overflow = '';
+    loaderTimers.forEach((clear) => clear());
 });
 </script>
 
@@ -447,6 +489,51 @@ onBeforeUnmount(() => {
     min-height: 100vh;
     min-height: 100dvh;
     background: radial-gradient(ellipse at 50% 30%, #4ea6d8 0%, #2c79b0 55%, #144a78 100%);
+}
+
+/* načítání situace po kliknutí na kámen – decentní pilulka uprostřed, lehké ztmavení pozadí */
+.situation-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 38, 70, 0.25);
+}
+
+.situation-loading-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 1.1rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 6px 18px rgba(8, 38, 70, 0.3);
+}
+
+.situation-loading-spinner {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 3px solid rgba(20, 74, 120, 0.2);
+    border-top-color: #f59e0b;
+    animation: situation-spin 0.8s linear infinite;
+}
+
+@keyframes situation-spin {
+    to { transform: rotate(360deg); }
+}
+
+.situation-loading-text {
+    color: #11365e;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .situation-loading-spinner { animation-duration: 1.8s; }
 }
 
 /* scéna se centruje podle reálně viditelné výšky (dvh) – jinak na mobilu naležato

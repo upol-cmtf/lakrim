@@ -55,6 +55,8 @@ export default {
         detail: {
             task: 'Úkol {n}',
             taskReview: 'Úkol {n} – prohlédnout',
+            loading: 'Načítám situaci…',
+            evaluating: 'Vyhodnocuji odpověď…',
         },
         question: {
             alreadyAnswered: 'Situace již byla zodpovězena.',
