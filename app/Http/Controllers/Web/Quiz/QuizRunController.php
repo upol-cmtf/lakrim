@@ -27,16 +27,6 @@ class QuizRunController extends Controller
         ]);
     }
 
-    public function runTiles(?QuizEvent $quizEvent = null): View
-    {
-        $respondent = $this->createRespondent(Version::Two, $quizEvent);
-
-        return view('web.quiz-grid.index', [
-            'respondentToken' => $respondent->token,
-            'maxTiles' => 16,
-        ]);
-    }
-
     private function createRespondent(Version $version, ?QuizEvent $quizEvent = null): Respondent
     {
         return Respondent::create([
