@@ -43,9 +43,6 @@ Route::prefix('kviz')->group(function () {
 
     Route::post('/respondent/easter-egg', [Web\Quiz\RespondentEasterEggController::class, 'store'])
         ->name('web.quiz.respondent.easter-egg');
-
-    Route::get('{quizEvent:hash?}', [Web\Quiz\QuizRunController::class, 'runTiles'])
-        ->name('web.quiz-grid.index');
 });
 
 ### Version 1
