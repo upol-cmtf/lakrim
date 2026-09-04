@@ -1,8 +1,8 @@
 {
-    "name": "laravel/laravel",
+    "name": "upol-cmtf/lakrim",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Labyrinty kritického myšlení – vzdělávací hra o digitální bezpečnosti pro seniory (CMTF UP Olomouc, AU3V, TA ČR).",
+    "keywords": ["education", "digital-safety", "seniors", "quiz", "serious-game", "laravel", "vue"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
