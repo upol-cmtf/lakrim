@@ -1,66 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Labyrinty kritického myšlení (Lakrim)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Webová vzdělávací hra, která učí seniory rozpoznávat podvody, manipulaci a dezinformace
+v digitálním prostředí a bezpečně na ně reagovat. Hráč prochází modelové situace z běžného
+života (e-mail od banky, „vnuk v nesnázích“, falešný e-shop, hoax, romantický podvod…),
+volí reakci a dostává okamžitou zpětnou vazbu s vysvětlením.
 
-## About Laravel
+Software vznikl na Cyrilometodějské teologické fakultě Univerzity Palackého v Olomouci
+ve spolupráci s Asociací univerzit třetího věku ČR (AU3V) s podporou Technologické agentury
+České republiky (TA ČR).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> Hra je vzdělávacím dílem. Situace, osoby, organizace, značky a weby ve hře jsou fiktivní
+> nebo upravené pro vzdělávací účely. Podrobné prohlášení je v patičce aplikace.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Herní režimy
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplikace nabízí tři způsoby hraní nad společnou bankou otázek a společným sběrem dat:
 
-## Learning Laravel
+| Režim | URL | Popis |
+|---|---|---|
+| **Dobrodružná výprava** (doporučená) | `/ostrov` | Herní mapa se čtyřmi ostrovy (digitální pasti, klamavé zprávy, zneužité city, falešné bohatství). Každý ostrov má 5 kamenů, pod každým kamenem baterie situací ve třech obtížnostech. Obtížnost se přizpůsobuje hráči, správné odpovědi přinášejí karty bezpečí, série správných odpovědí odemyká bonusové otázky. Hru lze přerušit a vrátit se k ní. |
+| **Znalostní kvíz** | `/kviz` | Lineární kvíz s 15 otázkami popořadě, průběžný ukazatel témat a závěrečné shrnutí. |
+| **Pexeso** | `/pexeso` | 16 herních políček, odkrývání výsledného obrazu za správné odpovědi. Otázky mohou mít i více správných odpovědí. |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Ke každému režimu lze přidat identifikátor akce (`/ostrov/{hash}`, `/kviz/{hash}`, `/pexeso/{hash}`),
+podle kterého se respondenti z jedné přednášky či kurzu seskupí ve výstupech.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Dokumentace
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Dokument | Soubor |
+|---|---|
+| Analýza funkčních požadavků | [docs/analyza-funkcnich-pozadavku.md](docs/analyza-funkcnich-pozadavku.md) |
+| Technická dokumentace (architektura, datový model, algoritmy, rozhraní) | [docs/technicka-dokumentace.md](docs/technicka-dokumentace.md) |
 
-## Laravel Sponsors
+Programátorskou dokumentaci tvoří tento repozitář: zdrojový kód s komentáři (česky),
+typové anotace kontrolované PHPStanem na úrovni `max` a sada automatizovaných testů.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Technologie
 
-### Premium Partners
+- **Backend:** PHP 8.2+, Laravel 12, Livewire 3, MySQL 8, Sentry (monitoring chyb)
+- **Frontend:** Vue 3, Pinia, vue-i18n, Tailwind CSS 3, Sass, Vite 5
+- **Kvalita:** PHPUnit 11, PHPStan/Larastan (level max), PHP_CodeSniffer se Slevomat standardem, GitHub Actions CI
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Instalace pro vývoj
 
-## Contributing
+Požadavky: PHP 8.2+, Composer, Node.js 18+, MySQL 8 (nebo Docker s Laravel Sail).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone git@github.com:upol-cmtf/lakrim.git
+cd lakrim
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+# v .env nastavte DB_* a APP_URL, VITE_QUIZ_API_URL="${APP_URL}/kviz"
+php artisan migrate        # vytvoří schéma a naplní veškerý herní obsah
+npm run build              # nebo `npm run dev` pro vývoj s HMR
+php artisan serve
+```
 
-## Code of Conduct
+Alternativně přes Docker: `./vendor/bin/sail up -d && ./vendor/bin/sail artisan migrate`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Herní obsah (ostrovy, situace, otázky, karty bezpečí, bonusové úkoly, události kvízu) je
+verzován jako datové migrace v `database/migrations`, takže čistá instalace obsahuje kompletní hru.
 
-## Security Vulnerabilities
+## Testy a kontrola kódu
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+vendor/bin/phpunit          # jednotkové, feature a integrační testy (vyžadují MySQL databázi `testing`)
+composer check-all          # phpcs + phpstan
+```
 
-## License
+CI (`.github/workflows/ci.yml`) spouští všechny tři kontroly nad každým pull requestem
+a po jejich úspěchu slučuje feature větve do větve `staging`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Struktura repozitáře
+
+```
+app/
+  Http/Controllers/Web/Quiz        endpointy znalostního kvízu a společné endpointy respondenta
+  Http/Controllers/Web/QuizGrid    vstup do pexesa
+  Http/Controllers/Web/IslandGame  vstup do výpravy, výběr situace, uložení odpovědi
+  Services/IslandGame              adaptivní výběr situací (SituationSelector)
+  Services/Quiz                    výběr otázek lineárního kvízu
+  Services/Respondent              statistiky a přehled postupu respondenta
+  Models                           Eloquent modely (Island, Situation, Question, Respondent, …)
+database/migrations                schéma i herní obsah
+resources/js/web                   Vue aplikace (Quiz, QuizGrid, IslandGame), Pinia stores, i18n
+resources/views                    Blade šablony (web, Livewire)
+tests                              PHPUnit testy
+docs                               projektová dokumentace
+```
+
+## Verze
+
+Vydání jsou označena git tagy: řada `1.x` (znalostní kvíz), `2.x` (pexeso), aktuální vývoj
+přidává režim Dobrodružná výprava (verze 3). Změny procházejí pull requesty do větve `master`.
+
+## Autoři a licence
+
+Zadavatel a odborný obsah: Cyrilometodějská teologická fakulta UP v Olomouci, AU3V ČR.
+Vývoj softwaru: Tomáš Pavlík. Licence: MIT.
