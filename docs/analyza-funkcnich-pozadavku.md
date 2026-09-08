@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Software | Labyrinty kritického myšlení (Lakrim) |
-| Verze dokumentu | 1.0, září 2026 |
-| Odpovídá stavu kódu | větev `master`, commit `4d77d2e` (13. 8. 2026) |
-| Související dokumenty | Technická dokumentace (`docs/technicka-dokumentace.md`), uživatelská příručka, popis ověření funkčnosti |
+| Verze dokumentu | 1.1, září 2026 (doplněn technický problém, zvažované varianty, původ parametrů a doklady vývoje) |
+| Odpovídá stavu kódu | větev `master`, commit `4d77d2e` (13. 8. 2026); doklady vývoje odkazují na git historii repozitáře |
+| Související dokumenty | Technická dokumentace (`docs/technicka-dokumentace.md`), Programátorská dokumentace (`docs/programatorska-dokumentace.md`), uživatelská příručka, popis ověření funkčnosti |
 
 ## 1. Úvod
 
@@ -29,15 +29,166 @@ Cílem softwaru je:
 3. **udržet pozornost** cílové skupiny herními prvky přiměřenými věku (příběh, sbírání,
    odměny, oddechové úkoly), bez stresu z chyby.
 
-### 1.3 Vývoj požadavků
+### 1.3 Vývoj požadavků a technického řešení
 
-Požadavky vznikaly iterativně ve třech etapách, což odpovídá třem režimům hry:
+Požadavky i technické řešení vznikaly iterativně. Tři etapy odpovídají třem režimům hry;
+třetí etapa má navíc několik vývojových kroků, ve kterých se měnil adaptivní algoritmus
+a pravidla zpětné vazby. Sloupec *Doklad* odkazuje na git historii repozitáře (commit, tag,
+pull request) a na automatizované testy. Údaje o testování s cílovou skupinou nejsou
+v repozitáři zaznamenány a jsou uvedeny obecně podle sdělení řešitelského týmu (kap. 1.7).
 
-| Etapa | Období | Výstup | Poznatek, který vedl k další etapě |
+| Etapa | Období | Výchozí stav | Zjištěný problém | Provedená změna | Doklad |
+|---|---|---|---|---|---|
+| 1 – Kvíz (verze 1) | 08/2024 – 01/2025, vydání 1.0 (10. 1. 2025) až 1.6.1 (07/2025) | Lineární kvíz 15 otázek v pevném pořadí, jednotná obtížnost, jeden pokus, vyhodnocení zvolené možnosti. | Po nasazení v kurzech AU3V (identifikace studijním číslem, export výsledků pro výzkumný tým) řešitelský tým vyhodnotil, že kvíz měří znalosti, ale nevytváří motivaci pokračovat, nabízí všem stejně těžké otázky a po chybě nedává možnost odpověď opravit. Vyplněné dotazníky byly výzkumnému týmu předány exportem podle studijního čísla; podrobné výsledky vyhodnocení dat verze 1 nejsou součástí tohoto repozitáře a eviduje je odborný tým projektu. | Zadání režimu s vizuální odměnou (pexeso) a s druhým pokusem. | tagy `1.0`–`1.6.1`; commity `d9cb1bb` (studijní číslo, 26. 1. 2025), `5b8837c` a `7101329` (export výsledků, 6.–7. 4. 2025) |
+| 2 – Pexeso (verze 2) | 05/2025 – 04/2026, vydání 2.0 (18. 11. 2025) až 2.6.1 (04/2026) | 16 políček, odkrývaný obraz, jeden pokus, jedna správná možnost. | Během vývoje: jeden pokus neumožňoval chybu opravit a zpětná vazba nerozlišovala první a druhý omyl. Po nasazení: podle zpětné vazby odborného týmu vizuální odměna funguje, ale chybí příběh, přizpůsobení obtížnosti a možnost hru přerušit a vrátit se. Připomínky byly předávány průběžně a neformálně, bez písemného protokolu. | Otázky s více správnými možnostmi; druhý pokus a dvě samostatná vysvětlení (`first_/second_wrong_answer_evaluation`, sloupec `attempt`). Zadání dobrodružné výpravy. | commity `51c4bab` (ukládání více zvolených možností, 21. 7. 2025), `14b5ffd` (druhý pokus a dvojí vysvětlení, 28. 8. 2025); tagy `2.0`–`2.6.1` |
+| 3a – Výprava, prototyp | 01/2026 – 05/2026 | Mapa moře s ostrovy (29. 1. 2026). Prvních 7 testů a první výběr situace: cílová obtížnost podle **série** správných odpovědí v řadě (prahy 2 a 4), chyba sérii nuluje. Jeden pokus na kámen. Odpověď správná jen při výběru **všech** správných možností. | Po importu skutečných scénářů odborného týmu (17. 5. 2026) se ukázalo, že situace mají více přijatelných reakcí. Při hraní prototypu jediná chyba shodila hráče z obtížnosti 3 rovnou na 1; toto chování bylo zachyceno i testem `testWrongAnswerResetsDifficultyToEasy`. | Pravidlo správnosti změněno na „zvoleny pouze správné možnosti“. Série ponechána jako prozatímní varianta k dalšímu ověření. | commity `c376daa` (29. 1. 2026), `cf7fbd7` (17. 5. 2026, `SituationSelector` varianta A), `9d504e1` (17. 5. 2026) |
+| 3b – Výprava, zpětná vazba | 26. 5. 2026 | Situace se po odpovědi uzavřela; špatná odpověď neměla pokračování. | Požadavek řešitelského týmu: cílová skupina potřebuje bezpečné prostředí pro chybu, tedy druhý pokus, vysvětlení po každém pokusu a průchod, který se při neúspěchu nezablokuje. | Dvoupokusový průběh: kámen oranžový po 1. chybě (druhý pokus), červený po 2. chybě s odemčením dalšího kamene; průvodce se stavy úspěch / zkus znovu / neúspěch; karta bezpečí jako sběratelský prvek. | commit `4491ef9` (26. 5. 2026) |
+| 3c – Výprava, adaptivita | 18. 6. 2026 | Varianta A (série). | Série trestá jednu chybu stejně jako řadu chyb a při volném pořadí ostrovů dává nestabilní průchod (rozbor a simulace v technické dokumentaci, kap. 12.2). | **Varianta B:** globální kumulativní skóre ze všech prvních pokusů napříč ostrovy, +1 / −1, dolní mez 0, prahy 2 a 4 ponechány. Test opačného chování nahrazen testem `testSingleWrongAnswerDoesNotDropDifficultyToEasy`; přidány testy postupného snižování, dolní meze a započítání všech ostrovů. Současně obnovení rozehrané hry ze session. | commity `22ab993`, `ac6c073` (18. 6. 2026); `SituationTest` rozšířen ze 7 na 11 scénářů |
+| 3d – Výprava, bonusy a obsah | 22. – 25. 6. 2026 | Bonusové („bezpečné“) otázky byly součástí baterie kamenů. | Bonusové otázky nemají kartu bezpečí ani místo v příběhu ostrova a jejich neřízené nabízení by narušovalo srovnatelnost průchodů. Podle pilotního odehrání zástupci cílové skupiny (kap. 1.7) hráči postupují plynule; řešitelský tým proto rozhodl, že bonusy mají přicházet až po sérii úspěchů. Finální scénáře odborného týmu vyžadovaly kompletní reimport obsahu. | Bonus jako odměna za sérii 3 a 6 správných odpovědí, nejvýše 2× za hru; univerzální karta bezpečí za bonus; smazání a reimport všech otázek verze 3 ze scénářů. | commity `208e1db`, `13241ce` až `0e05514` (22. 6. 2026), `ce231bc` (25. 6. 2026); PR #73 `feature/v3-final` |
+| 3e – Nasazení | 07/2026 – 08/2026 | Hotová výprava. | Připomínky z pilotního testování (kap. 1.7) zapracovány a ověřeny; příprava kurzů AU3V (20 událostí), výměna videa bonusového úkolu. | – | commity `9681f45` (2. 7. 2026), `d3992dd` (13. 8. 2026) |
+
+### 1.4 Technický problém a výchozí nejistota
+
+Vývoj softwaru řešil technický problém, jak v jedné webové aplikaci propojit adaptivní
+výběr vzdělávacích situací, volný průchod nelineárním herním prostředím a výzkumně
+využitelný sběr dat. Hráč si může samostatně volit tematické ostrovy, a proto nelze
+obtížnost určovat pouze podle pevného pořadí úloh ani podle výsledků dosažených v jednom
+tematickém okruhu.
+
+Technická nejistota spočívala v tom, zda lze na základě krátké a proměnlivé historie
+anonymního hráče (nejvýše 20 kamenů, žádný účet, žádná předchozí data o hráči) průběžně
+odhadovat vhodnou obtížnost dalších situací tak, aby jedna chybná odpověď nevedla
+k nepřiměřenému snížení obtížnosti, opakované chyby však vyvolaly postupné zjednodušení
+úloh. Současně bylo nutné zachovat reprodukovatelné ukládání odpovědí napříč třemi
+odlišnými herními režimy a vytvořit prostředí, které hráče z cílové skupiny nebude
+penalizovat ani blokovat při neúspěchu.
+
+Tento soubor požadavků nebylo možné naplnit pouhým použitím standardního lineárního
+kvízu (etapa 1) ani jeho vizuálním obohacením (etapa 2). Vyžadoval návrh vlastního
+mechanismu výběru situací, společného událostního datového modelu odpovědí a pravidel
+pro propojení adaptivity, zpětné vazby a herního postupu. Že první navržený mechanismus
+(varianta A, kap. 1.5) nebyl vhodný a musel být nahrazen, je samo dokladem této nejistoty.
+
+### 1.5 Zvažované varianty řešení
+
+Tabulka uvádí varianty, které byly při vývoji realizovány, prototypovány nebo posouzeny.
+Sloupec *Stav ověření* rozlišuje, co je doloženo kódem a testy a co bylo posouzeno pouze
+analyticky; analytické posouzení potvrdil vývojář při zpracování dokumentace (září 2026).
+
+| Varianta | Výhoda | Důvod nevhodnosti nebo opuštění | Stav ověření |
 |---|---|---|---|
-| 1 | 08/2024 – 01/2025 (vydání 1.0) | Lineární znalostní kvíz (verze 1) | Kvíz měří znalosti, ale nevytváří motivaci pokračovat a všem dává stejně těžké otázky. |
-| 2 | 05/2025 – 04/2026 (vydání 2.0–2.6.1) | Pexeso s odkrývaným obrazem (verze 2), otázky s více správnými odpověďmi, druhý pokus, události kvízu | Vizuální odměna funguje; chybí příběh, přizpůsobení obtížnosti a možnost hru přerušit a vrátit se. |
-| 3 | 05/2026 – 08/2026 | Dobrodružná výprava (verze 3): mapa ostrovů, adaptivní obtížnost, karty bezpečí, průvodce, bonusy, obnovení hry | Příprava nasazení v kurzech AU3V (události založeny 07/2026). |
+| Pevné pořadí a jednotná obtížnost | Jednoduchá implementace, přímá srovnatelnost výsledků respondentů. | Nepřizpůsobuje se rozdílům mezi hráči; pro část hráčů je příliš lehké, pro část příliš těžké; nemotivuje pokračovat. | **Realizováno a nasazeno** jako verze 1 (tagy `1.0`–`1.6.1`); ponecháno jako samostatný režim pro srovnání. |
+| Obtížnost podle série správných odpovědí v řadě (chyba sérii nuluje) | Rychlá reakce na výkon, jednoduchý výpočet, žádný stav navíc. | Jediná chyba shodí hráče z nejvyšší obtížnosti rovnou na nejnižší; řada chyb není odlišena od jedné chyby; průchod je nestabilní (simulace: cca 1 propad 3→1 na hru u hráče s úspěšností 70–90 %). | **Realizováno jako prototyp** výpravy (`cf7fbd7`, 17. 5. 2026), opuštěno commitem `22ab993` (18. 6. 2026). |
+| Globální kumulativní skóre s dolní mezí 0 (+1 / −1) | Stabilní adaptace napříč ostrovy, jedna chyba sníží skóre jen o jeden stupeň, srozumitelná a auditovatelná pravidla, žádná kalibrační data. | Jde o hrubší model než psychometrické přístupy; parametry jsou stanoveny heuristicky, resp. pilotáží (kap. 1.6). | **Zvoleno** (`22ab993`), ověřeno 11 scénářovými testy a simulací (technická dokumentace, kap. 12.2). |
+| Náhodný výběr úloh bez ohledu na výkon | Variabilita průchodu, jednoduchá implementace. | Nezohledňuje předchozí výkon a nezajišťuje přiměřenou obtížnost. | **Realizováno ve verzi 1** jako volitelné míchání otázek (`difficulty.shuffle_questions`, `QuizQuestionService`); pro výpravu opuštěno, náhodnost ponechána **pouze uvnitř** zvolené obtížnosti (`pickByDifficulty`). |
+| Samostatné hodnocení na každém ostrově | Reaguje na výkon v konkrétním tématu. | Při 5 kamenech na ostrov a volném pořadí ostrovů vzniká na každém ostrově příliš krátká historie (0–4 odpovědi) pro spolehlivé přizpůsobení. | Zvažováno při návrhu a zamítnuto; globální výpočet je výslovně uveden v popisu commitu `22ab993` a ověřen testem `testScoreCountsCorrectAnswersFromAllIslands`. |
+| Psychometrický model (IRT) nebo strojové učení | Přesnější individuální model při dostatku dat. | Vyžaduje rozsáhlá kalibrační data položek i respondentů; LAKRIM pracuje s anonymním během o nejvýše 20 odpovědích a s obsahem, který se během vývoje měnil (reimport 22. 6. 2026). | Posouzeno analyticky při návrhu výpravy, neprototypováno. |
+
+### 1.6 Původ parametrů adaptivního algoritmu
+
+Parametry algoritmu jsou konfigurační hodnoty jednoduchého pravidlového mechanismu
+(konstanty třídy `SituationSelector`). Nejsou hlavním prvkem technického přínosu; ten spočívá
+v celkovém způsobu adaptace napříč volně volenými ostrovy (technická dokumentace, kap. 12.3).
+Původ jednotlivých hodnot je následující.
+
+**Prahy skóre 2 a 4** byly v prototypové fázi stanoveny heuristicky, expertním odhadem
+vývojáře, jako výchozí parametry pravidlového algoritmu pro rozdělení hráčů mezi tři úrovně
+obtížnosti. Jejich účelem bylo zajistit postupné zvyšování obtížnosti bez výrazné reakce
+na jedinou správnou nebo chybnou odpověď. Při přechodu z prototypové varianty (série)
+na finální variantu (kumulativní skóre) byly převzaty beze změny. Tyto hodnoty nebyly
+odvozeny statistickou optimalizací ani experimentálním porovnáním více číselných variant.
+Správné fungování algoritmu při zvolených hodnotách bylo ověřeno automatizovanými
+scénářovými testy (po dostatečném počtu správných odpovědí přichází těžší úloha, jednotlivá
+chyba nezpůsobí přechod na nejlehčí úroveň, opakované chyby obtížnost postupně snižují)
+a simulací porovnávající obě varianty algoritmu. Optimálnost hodnot dosud nebyla
+empiricky prokázána; představují funkční výchozí nastavení.
+
+**Prahy série 3 a 6 správných odpovědí a limit dvou bonusů** byly stanoveny na základě
+neformálního pilotního odehrání hry jednotlivými zástupci cílové skupiny (kap. 1.7).
+Při pilotáži bylo sledováno, aby se bonusové otázky neobjevovaly příliš brzy ani příliš
+často a současně sloužily jako motivační prvek. Výsledné nastavení zařadí první bonus
+po třech a druhý po šesti správných odpovědích v řadě, nejvýše však dva bonusy během
+jednoho průchodu; bonusy tak nahradí nejvýše desetinu z 20 kamenů. Jiné číselné varianty
+nebyly systematicky porovnávány. Také toto nastavení je třeba chápat jako předběžnou
+uživatelskou kalibraci, nikoli jako statisticky potvrzené optimum.
+
+Kalibrace parametrů podle dat z nasazení v kurzech AU3V je otevřeným bodem (kap. 10);
+podklady pro ni poskytuje příkaz `stats:island-game` (úspěšnost po obtížnostech,
+odpadávání hráčů).
+
+| Parametr | Hodnota | Původ | Zdůvodnění | Ověření | Doklad |
+|---|---|---|---|---|---|
+| Prahy skóre pro obtížnost 2 a 3 | 2 a 4 | Heuristicky, expertním odhadem v prototypu (`cf7fbd7`); beze změny převzaty do finální varianty (`22ab993`). | Hráč bez chyby dosáhne obtížnosti 2 na 3. kameni a obtížnosti 3 na 5. kameni. Z obtížnosti 3 na 2 jsou potřeba 2 čisté chyby, na 1 celkem 4; jedna chyba úroveň nemění. | 5 scénářů obtížnosti v `SituationTest`; simulace `docs/simulace/adaptivita.py` | commity, testy |
+| Dolní mez skóre | 0 | Návrhové rozhodnutí při přechodu na finální variantu (`22ab993`). | Bez dolní meze by řada chyb na začátku vytvořila „dluh“, který by hráč musel nejdříve splatit; byl by trestán za úvodní neúspěch. | `testScoreNeverFallsBelowZero` | commit `22ab993` |
+| Preference nižší obtížnosti při nedostupnosti cílové | pořadí `t, t−1, …, 1, t+1, …, 3` | Součást prototypu (`cf7fbd7`), beze změny. | Cílová skupina nemá být přetěžována; vyčerpá-li hráč situace své úrovně, dostane raději lehčí než těžší. | `testFallsBackToNearestLowerDifficultyWhenTargetUnavailable` | commit `cf7fbd7` |
+| Prahy série pro 1. a 2. bonus | 3 a 6 | Neformální pilotní odehrání zástupci cílové skupiny (kap. 1.7); implementováno commitem `208e1db`. | Bonus nemůže přijít dříve než na 4. kameni; druhý až po dalších třech správných odpovědích, takže se bonusy rozprostřou. | `testServesBonusQuestionAfterCorrectStreak`, `testDoesNotServeBonusWithoutStreak` | commit `208e1db` (22. 6. 2026) |
+| Maximum bonusů za hru | 2 | Tamtéž. | Obsah má 4 bonusové otázky (jednu na ostrov); limit 2 drží bonusy pod desetinou z 20 kamenů, průchody zůstávají srovnatelné a bonus nenarušuje hlavní vzdělávací linii. | `testServesAtMostTwoBonusesPerGame` | commit `208e1db` |
+| Započítávají se jen první pokusy | `attempt = 1` | Součást prototypu, beze změny. | Druhý pokus je pomůcka pro učení, ne měření znalosti; kdyby se počítal, hráč by si skóre „opravil“ hádáním. | všechny scénáře `SituationTest` používají `attempt: 1` | commit `cf7fbd7` |
+| Časový limit vybraných situací | 59 s | Scénáře odborného týmu („časomíra“ u těžší varianty situace). | Časový tlak je součástí obtížnosti 3 u vybraných kamenů; vypršení se počítá jako neúspěšný pokus. | `useQuestionFlow.handleTimeUp` | reimport obsahu `9eb5dae`–`0e05514` (22. 6. 2026), 9 situací |
+
+### 1.7 Pilotní uživatelské testování
+
+Údaje o změnách softwaru jsou ověřeny proti git historii a jsou u nich uvedeny commity.
+Údaje o průběhu testování vycházejí ze sdělení řešitelského týmu; testování nebylo
+protokolováno, proto jsou uvedeny jen v míře, kterou lze doložit.
+
+Pilotní uživatelské testování bylo provedeno na vývojové verzi výpravy ve větvi
+`feature/v3`. Podle doby testování a zapracovaných připomínek šlo o stav mezi commity
+`4491ef9` z 26. 5. 2026 (dvoupokusová zpětná vazba) a `208e1db` z 22. 6. 2026 (bonusy
+za sérii); přesný commit testované verze nebyl zaznamenán. Testování proběhlo v květnu
+a červnu 2026 za účasti pěti osob ve věku 65 let a více, tedy zástupců cílové skupiny.
+Účastníci procházeli výpravu samostatně na vlastních nebo zapůjčených zařízeních; typy
+zařízení a prohlížečů nebyly evidovány, připomínky k ovládání na mobilu naležato však
+dokládají, že součástí byla i mobilní zařízení. Členové řešitelského týmu sledovali průběh
+hry, zaznamenávali místa, ve kterých účastníci potřebovali doplňující vysvětlení, a po
+dokončení získávali jejich slovní zpětnou vazbu. Sledovala se zejména plynulost průchodu
+hrou, srozumitelnost instrukcí a odpovědí, přiměřenost časových limitů a reakce hráčů
+na zpětnou vazbu a odměnové prvky. Hráči postupovali hrou bez větších obtíží a jednotlivé
+úlohy zpravidla řešili plynule; na základě toho byly nastaveny prahy bonusů 3 a 6 a limit
+dvou bonusů (kap. 1.6). O konečné podobě parametrů rozhodl řešitelský tým projektu
+v návaznosti na tuto zpětnou vazbu. Šlo o neformální pilotní odehrání bez písemného
+protokolu; zaznamenané výstupy představují zapracované změny uvedené v tabulce níže
+a jejich commity.
+
+Pilotní testování a navazující interní kontrola vedly k úpravám rozhraní a obsahu uvedeným
+v tabulce. Podněty v prvním sloupci nejsou převzaty z protokolu, ale rekonstruovány ze
+sdělení řešitelského týmu a z povahy provedených změn; doložitelné jsou změny samotné.
+
+| Podnět | Úprava | Doklad v repozitáři |
+|---|---|---|
+| Instrukce úkolu s hledáním rozdílů nebyla jednoznačná (hráči se pokoušeli rozdíly označovat). | Instrukce doplněna: rozdíly není nutné označovat, cílem je pozorně sledovat oba obrázky a procvičit všímavost. | commit `e740227` (25. 6. 2026), text úkolu v migraci `2026_06_04_150000_easter_eggs_seeder` |
+| Úkol „Kapitánova cesta“ potřeboval jasnější zadání a vyhodnocení. | Instrukce sledovat cesty očima nebo prstem je součástí úkolu od jeho zavedení a byla doplněna o vyhodnocení (řešení) úkolu. | commity `55d1773` (14. 6. 2026), `9b034eb` (15. 6. 2026) |
+| Potřeba vrátit se k úvodním instrukcím ostrova během hry. | Kliknutí na postavu průvodce znovu zobrazí úvod ostrova. | commit `a702349` (25. 6. 2026) |
+| Chybějící karta bezpečí u bonusové (bezpečné) situace mohla působit jako známka chyby. | Univerzální karta bezpečí za správně vyřešenou bonusovou otázku. | commit `ce231bc` (25. 6. 2026) |
+| Po závěrečném videu s Policií ČR chyběly kontakty pro případ nouze. | Důležitá telefonní čísla zobrazena po videu (stejná jako v majáku, sdílená komponenta `ContactsList`). | commit `a702349` (25. 6. 2026); video `public/videos/policie.mp4` |
+| Finální scénáře odborného týmu předepisují u těžší varianty vybraných situací časomíru. | Časový limit 59 s u 9 situací. Mechanismus odpočtu byl ve frontendu připraven od 18. 5. 2026 (`4f92acb`), hodnotu limitu však žádná situace neměla až do reimportu obsahu; nešlo tedy o zkrácení dříve zvolené hodnoty, ale o první nastavení. | commity `4f92acb` (18. 5. 2026), `9eb5dae`–`0e05514` (22. 6. 2026) |
+| Ovládání na mobilu naležato, velikost tlačítek. | Rozložení pro mobil naležato, větší tlačítka domů a „Jak hrát“. | commity `24e35ff` (24. 6. 2026), `b769ab6` (25. 6. 2026) |
+| Zpřesnění textů možností, instrukcí a karet bezpečí. | Reimport všech otázek verze 3 z finálních scénářů odborného týmu. | commity `13241ce`–`0e05514` (22. 6. 2026) |
+
+Po zapracování připomínek byla upravená verze před sloučením funkčně ověřena řešitelským
+týmem na vývojovém prostředí (bez písemného záznamu) a sloučena do větve `master`
+(PR #73 `feature/v3-final`, 29. 6. 2026).
+Logická správnost adaptivního výběru situací a zařazování bonusových úloh je průběžně
+ověřována automatizovanými scénářovými testy (kap. 9), které běží v CI nad každým pull
+requestem.
+
+### 1.8 Inovativní přínos
+
+Inovace LAKRIM spočívá v mechanismu adaptivního vzdělávacího průchodu pro krátký anonymní
+běh v nelineárním prostředí. Hráč bez účtu a bez předchozích dat volí libovolně mezi
+tematickými ostrovy; systém průběžně odhaduje jeho úroveň z jediného globálního skóre ze
+všech prvních pokusů napříč tématy, tlumeného dolní mezí a preferencí nižší obtížnosti,
+a tímto skóre řídí výběr situace, zařazení bonusů i zpětnou vazbu. Mechanismus je spojen
+s dvoupokusovým průchodem, který chybu vysvětlí, ale nepenalizuje ani neblokuje, a se
+společným datovým modelem, ve kterém výprava sdílí banku otázek i záznam odpovědí se dvěma
+referenčními režimy (kvíz, pexeso). Stejný software tak slouží k výuce i k výzkumnému
+srovnání účinnosti herních režimů.
+
+Jednotlivé prvky (adaptivita, herní odměny, druhý pokus, sběr odpovědí) jsou známé;
+přínosem je jejich propojení a pravidla, která adaptivitu umožňují v krátkém anonymním
+běhu bez kalibračních dat. Hodnoty parametrů nejsou součástí přínosu (kap. 1.6).
+Podrobné vymezení, doložení a srovnání s existujícími řešeními obsahuje technická
+dokumentace, kap. 12.
 
 ## 2. Zainteresované strany a aktéři
 
@@ -180,7 +331,7 @@ automatizované testy, kde existují.
 | FR-40 | Herní mapa se 4 tematickými ostrovy, každý s 5 kameny (situacemi) a vlastním průvodcem. | M | ✅ | `islands`, `situations`, `IslandMap.vue` |
 | FR-41 | Kameny ostrova se odemykají postupně; odemčení dalšího nezávisí na správnosti. | M | ✅ | `assets.js` stavy kamenů |
 | FR-42 | Na každý kámen připadá baterie situací ve třech obtížnostech. | M | ✅ | seedy situací, 15 situací na ostrov |
-| FR-43 | Systém volí obtížnost situace adaptivně podle dosavadních výsledků hráče napříč ostrovy; jedna chyba nesmí srazit hráče na nejlehčí úroveň, opakované chyby úroveň snižují. | M | ✅ | `SituationSelector`, `SituationTest` (7 scénářů) |
+| FR-43 | Systém volí obtížnost situace adaptivně podle dosavadních výsledků hráče napříč ostrovy; jedna chyba nesmí srazit hráče na nejlehčí úroveň, opakované chyby úroveň snižují. | M | ✅ | `SituationSelector`, `SituationTest` (6 scénářů obtížnosti a fallbacku) |
 | FR-44 | Není-li situace v cílové obtížnosti k dispozici, použije se nejbližší (přednostně nižší). | M | ✅ | `SituationTest::testFallsBackToNearestLowerDifficultyWhenTargetUnavailable` |
 | FR-45 | Za sérii správných odpovědí systém nabídne bonusovou otázku, nejvýše dvakrát za hru, rozloženě. | S | ✅ | `SituationTest::testServesBonusQuestionAfterCorrectStreak`, `…AtMostTwoBonusesPerGame` |
 | FR-46 | Správně vyřešená situace udělí kartu bezpečí; karty jsou dostupné na nástěnce v majáku. | M | ✅ | `situations.safety_card`, `IslandGame\AnswerTest::testCorrectAnswerCompletesSituationAndReturnsSafetyCard` |
@@ -253,13 +404,14 @@ s časy. Všechny tyto položky jsou v datovém modelu (viz technická dokumenta
 
 | Oblast | Testy |
 |---|---|
-| Adaptivní výběr, bonusy | `tests/Feature/Web/IslandGame/SituationTest.php` (11 testů) |
+| Adaptivní výběr, bonusy | `tests/Feature/Web/IslandGame/SituationTest.php` (14 testů) |
 | Odpověď ve výpravě, karty bezpečí | `tests/Feature/Web/IslandGame/AnswerTest.php` (6) |
 | Kvíz: otázky, odpovědi, shrnutí, identifikace, věk | `tests/Feature/Web/Quiz/{QuestionTest,AnswerTest,RespondentSummaryTest,RespondentIdentificationTest,AgeListTest,RunTest}.php` |
 | Postup respondenta | `tests/Feature/Web/Quiz/RespondentSituationsTest.php` (6) |
 | Bonusové úkoly | `tests/Feature/Web/Quiz/{EasterEggTest,RespondentEasterEggTest}.php` (12) |
 | Obrázky v textu | `tests/Feature/Web/Quiz/QuestionImageTest.php` (10) |
 | Výčty | `tests/Unit/Enums/*` |
+| Porovnání variant adaptivity (mimo testovou sadu) | `docs/simulace/adaptivita.py` – reprodukovatelná simulace variant A a B |
 
 Celkem 99 automatizovaných testů; spouštějí se v CI nad každým pull requestem.
 
@@ -270,3 +422,5 @@ Celkem 99 automatizovaných testů; spouštějí se v CI nad každým pull reque
 3. Audit přístupnosti podle WCAG 2.1 AA a jeho zapracování (NFR-03).
 4. Sjednotit lokalizaci kvízu a pexesa do vue-i18n (NFR-12).
 5. Označit vydání verze 3 git tagem pro jednoznačnou identifikaci výsledku.
+6. Při dalším uživatelském testování vést písemný protokol (testovaná verze, účastníci, zařízení, pozorování), aby bylo možné zjištění doložit přesněji než u pilotáže v kap. 1.7.
+7. Kalibrovat parametry adaptivity (prahy 2 a 4, série 3 a 6) podle dat z nasazení v kurzech AU3V; podklady dává `stats:island-game`.
