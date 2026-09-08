@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Software | Labyrinty kritického myšlení (Lakrim) |
-| Verze dokumentu | 1.0, září 2026 |
+| Verze dokumentu | 1.1, září 2026 (přepracována kap. 12: vývojové varianty, přínos, srovnání s existujícími řešeními) |
 | Odpovídá stavu kódu | větev `master`, commit `4d77d2e` (13. 8. 2026) |
 | Repozitář | https://github.com/upol-cmtf/lakrim |
 | Řešitel | Cyrilometodějská teologická fakulta UP v Olomouci, ve spolupráci s AU3V ČR, podpora TA ČR |
@@ -274,6 +274,8 @@ cílové obtížnosti se sáhne po nejbližší nižší; bonus přijde po séri
 Parametry (prahy skóre 2 a 4, prahy série 3 a 6, maximum 2 bonusy) jsou konstanty třídy
 a lze je měnit bez zásahu do zbytku systému. Složitost je lineární v počtu odpovědí
 respondenta (desítky řádků), dotazy jsou omezené na jednoho respondenta a jeden kámen.
+Původ hodnot parametrů a varianta algoritmu, která této podobě předcházela, jsou popsány
+v kap. 12.2 a v Analýze funkčních požadavků, kap. 1.5 a 1.6.
 
 ### 5.3 Dvoupokusové vyhodnocení, karty bezpečí a průvodce
 
@@ -461,18 +463,199 @@ pull request a po úspěchu slučuje `feature/*` a `bugfix/*` větve do `staging
   easter eggy, obrázky v textu a shrnutí.
 - **Verzování:** git tagy `1.x` (kvíz) a `2.x` (pexeso); vývoj přes pull requesty.
 
-## 12. Prvky, které odlišují návrh od běžné kvízové aplikace
+## 12. Softwarový přínos, novost a odlišení od existujících řešení
 
-1. **Adaptivní obtížnost napříč nelineární mapou.** Skóre znalostí se počítá globálně,
-   ne po ostrovech, s asymetrickým tlumením (nikdy pod nulu, preference nižší obtížnosti
-   při fallbacku). Hráč tak může volit ostrovy libovolně a přesto dostává úlohy na míru.
-2. **Odměna za sérii jako pedagogický nástroj.** Bonusové otázky nejsou obsah kamene,
-   ale přerušení rutiny při úspěchu; jejich rozložení (po 3 a 6 správných) je řízené
-   a omezené, aby nenarušovalo výzkumnou srovnatelnost.
-3. **Dvoupokusová zpětná vazba s odděleným vysvětlením** po prvním a druhém neúspěchu
-   a s blokací už zvolené možnosti, navržená pro cílovou skupinu, která potřebuje
-   bezpečné prostředí pro chybu.
-4. **Karta bezpečí jako jednotka učení.** Každá situace končí krátkou přenositelnou
-   zásadou, sbírky karet tvoří „nástěnku“ a jsou zároveň měřitelným ukazatelem postupu.
-5. **Sběr dat na úrovni pokusu** (čas, pokus, kontext kamene, váha) v jedné tabulce pro tři
-   odlišné herní režimy nad jednou bankou otázek, což umožňuje srovnávat účinnost režimů.
+### 12.1 Řešený technický problém
+
+Software řešil, jak v jedné webové aplikaci propojit adaptivní výběr vzdělávacích situací,
+volný (nelineární) průchod herním prostředím a výzkumně využitelný sběr dat, a to pro
+anonymního hráče s krátkou historií (nejvýše 20 kamenů) a bez jakýchkoli kalibračních dat.
+Výchozí nejistotou bylo, zda lze z takto krátké historie průběžně odhadovat vhodnou
+obtížnost tak, aby jedna chyba nevedla k nepřiměřenému snížení obtížnosti, ale opakované
+chyby úlohy postupně zjednodušily. Podrobně viz Analýza funkčních požadavků, kap. 1.4.
+
+### 12.2 Vývojové varianty adaptivního algoritmu
+
+Adaptivní výběr situace prošel dvěma implementovanými variantami. Obě jsou zachyceny
+v git historii souboru `app/Services/IslandGame/SituationSelector.php` a v testech
+`tests/Feature/Web/IslandGame/SituationTest.php`.
+
+| Vlastnost | Varianta A – série (prototyp) | Varianta B – kumulativní skóre (finální) |
+|---|---|---|
+| Commit, datum | `cf7fbd7`, 17. 5. 2026 | `22ab993`, 18. 6. 2026 |
+| Stavová veličina | počet po sobě jdoucích správných odpovědí na první pokus, počítáno od poslední odpovědi zpět | součet +1 za správnou a −1 za špatnou odpověď na první pokus přes celou historii, po každém kroku `max(0, score)` |
+| Reakce na správnou odpověď | série +1 | skóre +1 |
+| Reakce na chybu | série = 0 | skóre −1 (nikdy pod 0) |
+| Prahy pro obtížnost 2 / 3 | 2 / 4 | 2 / 4 (převzato beze změny) |
+| Jedna chyba na obtížnosti 3 | okamžitý propad na obtížnost 1 | obtížnost 3 zůstává (skóre 4 → 3) |
+| Počet čistých chyb pro pokles 3 → 1 | 1 | 4 |
+| Rozlišení jedné chyby od řady chyb | ne | ano |
+| Závislost na pořadí ostrovů | vysoká: rozhoduje jen konec historie | nízká: rozhoduje celková bilance |
+| Fallback při nedostupné obtížnosti | `t, t−1, …, 1, t+1, …, 3` | beze změny |
+| Testy chování | `testServesHarderQuestionAfterCorrectStreak`, `testWrongAnswerResetsDifficultyToEasy` | `testServesHarderQuestionAfterEnoughCorrectAnswers`, `testSingleWrongAnswerDoesNotDropDifficultyToEasy`, `testRepeatedMistakesGraduallyLowerDifficulty`, `testScoreNeverFallsBelowZero`, `testScoreCountsCorrectAnswersFromAllIslands`, `testFallsBackToNearestLowerDifficultyWhenTargetUnavailable` |
+
+Změna byla vyvolána chováním prototypu při hraní: test `testWrongAnswerResetsDifficultyToEasy`
+zachycoval jako správné právě to chování (propad po jediné chybě), které se ukázalo pro
+cílovou skupinu nevhodné, a byl commitem `22ab993` nahrazen testem opačného tvrzení.
+
+**Porovnání variant simulací.** Rozdíl obou variant je kvantifikován reprodukovatelnou
+simulací `docs/simulace/adaptivita.py` (20 kamenů, 20 000 běhů na scénář, hráč odpovídá
+správně na první pokus s pevnou pravděpodobností *p*, cílová obtížnost se počítá stejně
+jako v kódu):
+
+| p | Varianta | Podíl kamenů s obtížností 1 / 2 / 3 [%] | Změn úrovně za hru | Propadů 3 → 1 za hru | Hráčů, kteří dosáhli obt. 3 [%] |
+|---|---|---|---|---|---|
+| 0,5 | A | 77,4 / 17,5 / 5,1 | 5,0 | 0,47 | 45,9 |
+| 0,5 | B | 54,0 / 27,4 / 18,6 | 5,5 | 0 | 62,0 |
+| 0,7 | A | 55,8 / 24,9 / 19,3 | 6,8 | 1,08 | 88,6 |
+| 0,7 | B | 24,1 / 22,5 / 53,4 | 4,4 | 0 | 97,1 |
+| 0,9 | A | 27,0 / 20,3 / 52,7 | 5,2 | 0,98 | 99,9 |
+| 0,9 | B | 12,5 / 12,5 / 75,0 | 2,5 | 0 | 100,0 |
+
+Interpretace: u varianty A dostane i velmi úspěšný hráč (p = 0,9) přibližně jednou za hru
+propad ze 3 na 1 a téměř polovinu kamenů řeší pod svou úrovní; u varianty B propad ze 3 na 1
+v jednom kroku nenastává nikdy, počet změn úrovně za hru je u silných hráčů poloviční
+a podíl těžkých situací odpovídá úspěšnosti hráče. Průměrný hráč (p = 0,5) přitom u obou
+variant tráví většinu hry na obtížnosti 1, tedy varianta B nezvyšuje obtížnost slabším
+hráčům. Simulace pracuje s konstantním *p* nezávislým na obtížnosti a neuvažuje učení
+během hry; slouží k porovnání mechanismů, nikoli k predikci reálných výsledků.
+Kalibrace parametrů na datech respondentů je otevřeným bodem (Analýza, kap. 10).
+
+Hodnoty parametrů jsou konfigurační konstanty pravidlového algoritmu, nikoli prvek
+novosti. Prahy skóre 2 a 4 byly v prototypové fázi stanoveny heuristicky, expertním
+odhadem, a nebyly odvozeny statistickou optimalizací ani porovnáním více číselných variant;
+jejich funkčnost potvrzují scénářové testy, optimálnost dosud empiricky prokázána nebyla.
+Prahy série 3 a 6 a limit dvou bonusů vycházejí z neformálního pilotního odehrání hry
+zástupci cílové skupiny a jsou předběžnou uživatelskou kalibrací. Podrobně Analýza
+funkčních požadavků, kap. 1.6 a 1.7.
+
+### 12.3 Softwarový přínos a inovace
+
+**Inovace LAKRIM spočívá v mechanismu adaptivního vzdělávacího průchodu pro krátký
+anonymní běh v nelineárním prostředí.** Hráč bez účtu, bez předchozích dat a s nejvýše
+20 rozhodnutími volí libovolně mezi tematickými ostrovy. Systém přitom průběžně odhaduje
+jeho úroveň z jediného globálního skóre, které vzniká ze všech prvních pokusů napříč
+tématy, je tlumeno dolní mezí a preferencí nižší obtížnosti, a řídí současně tři věci:
+výběr další situace, zařazení bonusových úloh a podobu zpětné vazby. Tento mechanismus
+je spojen s dvoupokusovým průchodem, který chybu vysvětlí, ale nepenalizuje ani neblokuje,
+a s událostním datovým modelem, ve kterém výprava sdílí banku otázek i záznam odpovědí
+se dvěma referenčními režimy (lineární kvíz, pexeso). Stejný software tak slouží
+k výuce i k výzkumnému srovnání účinnosti herních režimů na stejném obsahu.
+
+Přínos má čtyři složky, které jsou každá zvlášť známé, ale v této kombinaci a pro tyto
+podmínky nebyly ve srovnávaných řešeních (kap. 12.5) nalezeny:
+
+1. **Globální adaptace nad nelineární mapou.** Výkon se nevyhodnocuje po ostrovech, ale
+   jedním skóre ze všech prvních pokusů. Dolní mez nula tlumí reakci na jednotlivou chybu,
+   opakované chyby úroveň snižují postupně, při nedostupnosti cílové obtížnosti se volí
+   nejbližší nižší. Mechanismus nepotřebuje kalibrační data ani účet hráče, tedy funguje
+   v podmínkách, ve kterých psychometrické modely nelze použít.
+2. **Řízené zařazování bonusových úloh.** Bonus není obsahem kamene, ale odměnou za sérii
+   správných odpovědí, s omezeným počtem za hru, aby nenarušoval srovnatelnost průchodů
+   mezi respondenty.
+3. **Dvoustupňová zpětná vazba a karty bezpečí.** Odlišné vysvětlení po prvním a druhém
+   neúspěchu, blokace již zvolené možnosti, odemčení dalšího kamene i po neúspěchu
+   a karta bezpečí jako přenositelná jednotka učení tvoří prostředí, ve kterém chyba
+   nepenalizuje ani neblokuje.
+4. **Společný událostní datový model tří režimů.** Každá volba se ukládá s časem, pořadím
+   pokusu, kontextem ostrova a kamene a zvolenou možností, ve stejné tabulce pro lineární
+   kvíz, pexeso i výpravu nad jednou bankou otázek.
+
+**Čím inovace není.** Přínosem není adaptivita jako taková, herní rámec s odměnami,
+dvoupokusový kvíz ani sběr odpovědí do databáze; každý z těchto prvků je znám (kap. 12.6).
+Přínosem nejsou ani konkrétní hodnoty parametrů (prahy skóre 2 a 4, prahy série 3 a 6,
+limit dvou bonusů); jde o konfiguraci, která se může po kalibraci na datech změnit, aniž
+by se změnil princip.
+
+**Jak je inovace doložena.** Git historie zachycuje dvě implementované varianty adaptivního
+mechanismu a důvod přechodu mezi nimi (kap. 12.2); chování finální varianty ověřuje
+11 scénářových testů a reprodukovatelná simulace, která kvantifikuje rozdíl proti prototypu.
+Spojení adaptivity, bonusů a zpětné vazby je čitelné v jedné službě (`SituationSelector`)
+a jednom kontroleru (`AnswerController`), sdílený datový model v tabulce `answers`.
+Co doloženo není, je optimálnost parametrů a účinnost na cílovou skupinu; to jsou otevřené
+body pro nasazení v kurzech AU3V (Analýza funkčních požadavků, kap. 10).
+
+### 12.4 Návaznost evaluace na technický vývoj
+
+Tabulka spojuje zjištění z vývoje a evaluace s konkrétní změnou softwaru a jejím dokladem.
+Pilotní testování s cílovou skupinou nebylo systematicky protokolováno; jeho průběh
+shrnuje Analýza funkčních požadavků, kap. 1.7.
+
+| Zjištění | Úprava softwaru | Technická realizace | Ověření | Doklad |
+|---|---|---|---|---|
+| Lineární kvíz (verze 1) dává všem stejně těžké otázky a nemotivuje pokračovat. | Nový režim s vizuální odměnou (pexeso), poté výprava s adaptivní obtížností. | verze 2 a 3 nad společnou bankou otázek | funkční testy kvízu a pexesa | tagy `1.0`–`1.6.1`, `2.0`; export dat verze 1 pro výzkumný tým (`7101329`, 7. 4. 2025); vyhodnocení dat eviduje odborný tým mimo repozitář. |
+| Hráč potřebuje možnost chybu opravit a odlišné vysvětlení po prvním a druhém omylu. | Druhý pokus; dvě samostatná pole vyhodnocení. | sloupec `attempt`, `first_/second_wrong_answer_evaluation`, `AnswerController` (kvíz i výprava) | `Quiz\AnswerTest`, `IslandGame\AnswerTest` | `14b5ffd` (28. 8. 2025), `4491ef9` (26. 5. 2026) |
+| Modelové situace mají více přijatelných reakcí. | Odpověď je správná, pokud hráč zvolil pouze správné možnosti. | `AnswerController::isCorrect` | `testAnswerWithOneOfMultipleRightOptionsIsCorrect` | `9d504e1` (17. 5. 2026), import scénářů odborného týmu |
+| Jedna chyba nemá hráče výrazně penalizovat; opakované chyby mají úlohy zjednodušit. | Kumulativní skóre s dolní mezí 0 místo série. | `SituationSelector::knowledgeScore`, `targetDifficulty` | 5 scénářů obtížnosti v `SituationTest`; simulace variant (kap. 12.2) | `22ab993` (18. 6. 2026) |
+| Neúspěch nesmí hráče zablokovat. | Po druhé chybě se kámen uzavře červeně a další kámen se odemkne. | stavy kamenů v `useIslands` / `assets.js` | funkční ověření průchodu | `4491ef9` (26. 5. 2026) |
+| Delší průchod není vždy možné dokončit najednou. | Obnovení rozehrané hry, volba pokračovat / začít znovu. | session token, `respondent_situations`, `localStorage` | `RespondentSituationsTest`, `HomepageController` | `ac6c073`, `99d856a` (18. 6. 2026) |
+| Vzdělávací zásady mají zůstat dostupné i po vyřešení situace. | Karty bezpečí na nástěnce v majáku; univerzální karta za bonus. | `situations.safety_card`, `AnswerController::BONUS_SAFETY_CARD`, `useSafetyCard` | `testCorrectAnswerCompletesSituationAndReturnsSafetyCard` | `ed87e56` (17. 5. 2026), `ce231bc` (25. 6. 2026) |
+| Bonusové otázky nemají narušovat srovnatelnost průchodů. | Bonus jen po sérii, nejvýše 2× za hru. | `SituationSelector::maybeBonusSituation` | 3 bonusové scénáře v `SituationTest` | `208e1db` (22. 6. 2026) |
+| Pilotáž (05–06/2026, 5 seniorů, Analýza kap. 1.7): hráči postupují plynule; bonusy nemají přicházet příliš brzy ani často. | Bonus po sérii 3 a 6, nejvýše 2× za hru (předběžná uživatelská kalibrace). | konstanty `SituationSelector` | bonusové scénáře v `SituationTest` | `208e1db` (22. 6. 2026) |
+| Pilotáž: hráči se chtěli vracet k úvodním instrukcím ostrova; ovládání na mobilu naležato. | Klik na průvodce opakuje úvod; rozložení pro mobil naležato, větší tlačítka; interaktivní prohlídka. | `useGuide`, `GuideBubble.vue`, `IntroTour.vue` | funkční ověření řešitelským týmem | `1f7d85e` (22. 6. 2026), `24e35ff` (24. 6.), `a702349`, `b769ab6` (25. 6. 2026) |
+| Pilotáž: chybějící karta u bezpečné situace působila jako chyba; po závěrečném videu chyběly kontakty. | Univerzální karta bezpečí za bonus; telefonní čísla po videu. | `AnswerController::BONUS_SAFETY_CARD`, `ContactsList.vue` | `IslandGame\AnswerTest`; funkční ověření | `ce231bc`, `a702349` (25. 6. 2026) |
+| Pilotáž: u bonusových úkolů hráči klikali do obrázků. | Zpřesněné instrukce úkolů (rozdíly se neoznačují; cesty se sledují očima nebo prstem) a doplněné řešení. | texty v migracích easter eggů | funkční ověření | `9b034eb` (15. 6. 2026), `e740227` (25. 6. 2026) |
+| Pilotáž a finální scénáře: zpřesnění textů, časový limit u vybraných situací. | Reimport otázek verze 3; limit 59 s u 9 situací. | datové migrace, `settings.time_limit` | `useQuestionFlow.handleTimeUp`; funkční ověření | `13241ce`–`0e05514` (22. 6. 2026) |
+
+### 12.5 Srovnání s existujícími řešeními
+
+Jako přímé komparátory byly zvoleny zavedené digitální hry proti dezinformacím
+s publikovanou evaluací. U vlastností, které veřejná dokumentace nebo odborný článek
+daného systému nepopisují, je uvedeno „ve veřejné dokumentaci nezjištěno“, nikoli
+tvrzení, že systém funkci nemá.
+
+| Řešení | Veřejně popsaný princip | Cílová skupina, délka | Adaptivní obtížnost | Rozdíl LAKRIM |
+|---|---|---|---|---|
+| **Bad News** (Cambridge Social Decision-Making Lab, DROG, 2018) | Hráč vstupuje do role tvůrce dezinformací, prochází scénáři a získává odznaky za zvládnutí šesti manipulačních technik; založeno na inokulační teorii. | Široká veřejnost, cca 15 minut, lineární scénář. | Ve veřejné dokumentaci nezjištěno. | LAKRIM staví hráče do role příjemce a rozhodující osoby, používá modelové situace z běžného života seniorů (banka, e-shop, „vnuk v nesnázích“), nabízí volný výběr témat a adaptivní obtížnost. |
+| **Harmony Square** (Cambridge, DROG, 2020) | Krátká narativní hra založená na psychologické inokulaci proti politickým dezinformacím; hráč rozděluje fiktivní město. | Široká veřejnost, cca 10 minut, 4 úrovně v pevném pořadí. | Ve veřejné dokumentaci nezjištěno. | LAKRIM se zaměřuje na bezpečné reakce seniorů na podvody a manipulaci, nikoli na politickou polarizaci, a propojuje obsah s adaptivním výběrem obtížnosti a dvoupokusovou zpětnou vazbou. |
+| **GO VIRAL!** (Cambridge, UK Cabinet Office, WHO, 2020) | Přibližně pětiminutová hra o technikách šíření covidových dezinformací (strach, falešní experti, konspirace). | Široká veřejnost, cca 5 minut. | Ve veřejné dokumentaci nezjištěno. | LAKRIM má čtyři tematické oblasti, 20 kamenů se třemi úrovněmi obtížnosti, možnost hru přerušit a vrátit se a výzkumný sběr dat na úrovni pokusu. |
+| **Fakey** (Indiana University OSoMe, 2018) | Simulace sociální sítě; hráč u příspěvků volí sdílení, označení „To se mi líbí“ nebo ověření zprávy; skóre za správné zacházení s věrohodným a nevěrohodným obsahem. | Široká veřejnost, opakovatelná kola. | Ve veřejné dokumentaci nezjištěno. | LAKRIM pokrývá širší typy digitálních rizik (podvodné platby, falešné e-shopy, telefonáty, romantické podvody), používá vysvětlující dvoupokusovou zpětnou vazbu a adaptivní volbu situací místo jednotného kanálu. |
+| **The (Mis)Information Game** (Butler a kol., 2023) | Otevřený konfigurovatelný simulátor sociální sítě pro behaviorální výzkum; výzkumník nastavuje příspěvky, zdroje, reakce a sleduje chování účastníků. | Výzkumní účastníci, délka podle konfigurace. | Konfigurace je na straně výzkumníka; přizpůsobení hráči během hry ve veřejné dokumentaci nezjištěno. | LAKRIM propojuje výzkumný sběr dat s individuálním vzdělávacím průchodem pro seniory: adaptace probíhá za běhu podle výkonu hráče a data se sbírají jako vedlejší produkt vzdělávání, nikoli v laboratorním uspořádání. |
+
+Žádný z uvedených systémů podle veřejně dostupných zdrojů necílí primárně na seniory
+a nekombinuje nelineární volbu témat s adaptací obtížnosti za běhu. To nedokazuje, že
+taková kombinace nikde neexistuje; rešerše pokryla zavedené hry proti dezinformacím
+s publikovanou evaluací, ne celý trh vzdělávacích aplikací. Srovnání v této kapitole
+vzniklo při zpracování dokumentace (září 2026) nad veřejně dostupnými zdroji; případná
+rešerše z přípravy projektu je součástí projektové dokumentace mimo tento repozitář.
+
+Zdroje ke komparátorům:
+Roozenbeek a van der Linden, *Fake news game confers psychological resistance against
+online misinformation*, Palgrave Communications 2019
+(https://www.nature.com/articles/s41599-019-0279-9);
+Roozenbeek a van der Linden, *Breaking Harmony Square*, HKS Misinformation Review 2020
+(https://misinforeview.hks.harvard.edu/wp-content/uploads/2020/11/roozenbeek_harmony_square_game_misinformation_20201106.pdf);
+Basol a kol., *Towards psychological herd immunity*, Big Data & Society 2021
+(https://journals.sagepub.com/doi/full/10.1177/20539517211013868);
+Micallef a kol., *Fakey: A Game Intervention to Improve News Literacy on Social Media*,
+Proc. ACM HCI (CSCW) 2021 (https://dl.acm.org/doi/10.1145/3449080);
+Butler a kol., *The (Mis)Information Game: A social media simulator*, Behavior Research
+Methods 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10991066/,
+zdrojový kód https://github.com/TheMisinformationGame/MisinformationGame).
+
+### 12.6 Vymezení novosti vůči stavu poznání
+
+Dynamické přizpůsobování obtížnosti (dynamic difficulty adjustment, DDA) v serious games
+je popsaným oborem; přehledové studie rozlišují přístupy založené na pravidlech, na
+modelování hráče z výkonu či fyziologických dat a na strojovém učení (například Streicher
+a Smeddinck, *Personalized and Adaptive Serious Games*, 2016; přehled DDA metod pro
+serious games, Springer 2023, https://link.springer.com/chapter/10.1007/978-3-031-23236-7_11;
+*Dynamic Difficulty Adjustment in Serious Games: A Literature Review*, Information 2026,
+https://doi.org/10.3390/info17010096). LAKRIM proto **netvrdí novost adaptivity jako
+takové**. V této taxonomii je jeho mechanismus pravidlový model hráče z výkonu.
+
+Novost, kterou dokumentace dokládá, spočívá v konkrétním řešení pro podmínky, pro které
+běžné DDA přístupy nejsou navrženy: krátký anonymní běh (nejvýše 20 rozhodnutí), žádná
+kalibrační data položek, cílová skupina citlivá na neúspěch a volný průchod tematickými
+okruhy. Pro tyto podmínky byl navržen a proti prototypové variantě ověřen mechanismus
+globálního kumulativního skóre s asymetrickým tlumením (dolní mez, preference nižší
+obtížnosti, započítání pouze prvních pokusů), propojený s řízeným zařazováním bonusů,
+dvoustupňovou zpětnou vazbou a událostním sběrem dat společným pro tři režimy.
+
+Nejlépe obhajitelným prvkem je způsob propojení nelineárního průchodu, globální adaptace
+obtížnosti, odstupňované zpětné vazby a výzkumného sběru dat, nikoli hodnoty parametrů.
+
+Pro označení výsledku za nový poznatek v oblasti programování bude v dalším kroku nutné:
+(a) doplnit chybějící údaje o pilotním testování a při dalším testování vést protokol,
+(b) kalibrovat parametry na datech z nasazení v kurzech AU3V a
+(c) rozšířit rešerši o adaptivní vzdělávací systémy pro seniory mimo oblast dezinformací.
