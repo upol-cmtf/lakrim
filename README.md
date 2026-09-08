@@ -25,15 +25,28 @@ Aplikace nabízí tři způsoby hraní nad společnou bankou otázek a společn�
 Ke každému režimu lze přidat identifikátor akce (`/ostrov/{hash}`, `/kviz/{hash}`, `/pexeso/{hash}`),
 podle kterého se respondenti z jedné přednášky či kurzu seskupí ve výstupech.
 
+## V čem je Lakrim nový
+
+Lakrim přizpůsobuje obtížnost situací hráči, který nemá účet, o kterém nejsou žádná
+předchozí data a který si sám volí, jaké téma bude hrát. Jedno globální skóre ze všech
+prvních pokusů napříč ostrovy, tlumené tak, aby jedna chyba hráče nesrazila a opakované
+chyby úlohy postupně zjednodušily, řídí výběr situace, zařazování bonusů i zpětnou vazbu.
+Chyba se vysvětlí ve dvou krocích, ale hráče nepenalizuje ani nezablokuje. Výprava, kvíz
+a pexeso sdílejí jednu banku otázek a jeden záznam odpovědí, takže stejný software slouží
+k výuce i k výzkumnému srovnání herních režimů. Podrobně v technické dokumentaci, kap. 12.
+
 ## Dokumentace
 
 | Dokument | Soubor |
 |---|---|
 | Analýza funkčních požadavků | [docs/analyza-funkcnich-pozadavku.md](docs/analyza-funkcnich-pozadavku.md) |
 | Technická dokumentace (architektura, datový model, algoritmy, rozhraní) | [docs/technicka-dokumentace.md](docs/technicka-dokumentace.md) |
+| Programátorská dokumentace (členění kódu, konvence, ukázky zdrojového kódu, sestavení a testy) | [docs/programatorska-dokumentace.md](docs/programatorska-dokumentace.md) |
+| Simulace variant adaptivního algoritmu (porovnání prototypu a finální verze) | [docs/simulace/adaptivita.py](docs/simulace/adaptivita.py) |
 
-Programátorskou dokumentaci tvoří tento repozitář: zdrojový kód s komentáři (česky),
-typové anotace kontrolované PHPStanem na úrovni `max` a sada automatizovaných testů.
+Úplným zdrojovým kódem je tento repozitář: kód s komentáři (česky), typové anotace
+kontrolované PHPStanem na úrovni `max` a sada automatizovaných testů. Programátorská
+dokumentace je průvodcem po tomto kódu s jeho ukázkami.
 
 ## Technologie
 
