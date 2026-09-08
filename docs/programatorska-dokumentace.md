@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (Lakrim) |
 | Verze dokumentu | 1.0, září 2026 |
-| Odpovídá stavu kódu | větev `master`, commit `4d77d2e` (13. 8. 2026) |
+| Odpovídá stavu kódu | větev `master`, stav ze srpna 2026 |
 | Repozitář | https://github.com/upol-cmtf/lakrim (veřejný, licence MIT) |
 | Související dokumenty | Analýza funkčních požadavků (`docs/analyza-funkcnich-pozadavku.md`), Technická dokumentace (`docs/technicka-dokumentace.md`) |
 
@@ -17,8 +17,8 @@ Popisuje, jak je kód členěn, jakými pravidly se řídí, jak se sestavuje, t
 a kde hledat implementaci jednotlivých funkcí. Architekturu, datový model a algoritmy
 popisuje Technická dokumentace; zde jsou uvedeny v míře potřebné k orientaci v kódu.
 
-Ukázky zdrojového kódu v kap. 5 jsou převzaty doslovně ze souborů v repozitáři ke commitu
-`4d77d2e`; u každé ukázky je uvedena cesta k souboru.
+Ukázky zdrojového kódu v kap. 5 jsou převzaty doslovně ze souborů v repozitáři ve stavu
+uvedeném v hlavičce; u každé ukázky je uvedena cesta k souboru.
 
 ## 2. Rozsah a členění zdrojového kódu
 
@@ -655,19 +655,19 @@ testovacímu prostředí. Sloučení do `master` provádí vývojář ručně p�
 Repozitář obsahuje úplnou historii vývoje od srpna 2024 (275 commitů ve větvi `master`).
 Klíčové milníky, které lze v historii dohledat:
 
-| Datum | Commit nebo tag | Milník |
+| Období | Doklad | Milník |
 |---|---|---|
-| 10. 1. 2025 | tag `1.0` | první vydání lineárního kvízu |
-| 26. 1. 2025 | `d9cb1bb` | identifikace studijním číslem pro kurzy AU3V |
-| 28. 8. 2025 | `14b5ffd` | druhý pokus a dvojí vysvětlení chybné odpovědi |
-| 18. 11. 2025 | tag `2.0` | první vydání pexesa |
-| 29. 1. 2026 | `c376daa` | mapa moře s ostrovy, začátek výpravy |
-| 17. 5. 2026 | `cf7fbd7` | první verze výběru situace (prototypová varianta podle série) |
-| 26. 5. 2026 | `4491ef9` | dvoupokusový průběh, průvodce, karty bezpečí |
-| 18. 6. 2026 | `22ab993` | finální adaptivní algoritmus (kumulativní skóre) |
-| 22. 6. 2026 | `208e1db`, `13241ce`–`0e05514` | bonus za sérii, reimport obsahu z finálních scénářů |
-| 29. 6. 2026 | PR #73 `feature/v3-final` | sloučení výpravy do `master` |
-| 2. 7. 2026 | `9681f45` | události kurzů AU3V pro nasazení |
+| 01/2025 | tag `1.0` | první vydání lineárního kvízu |
+| 01/2025 | git historie | identifikace studijním číslem pro kurzy AU3V |
+| 08/2025 | git historie | druhý pokus a dvojí vysvětlení chybné odpovědi |
+| 11/2025 | tag `2.0` | první vydání pexesa |
+| 01/2026 | git historie | mapa moře s ostrovy, začátek výpravy |
+| 05/2026 | historie `SituationSelector` | první verze výběru situace (prototypová varianta podle série) |
+| 05/2026 | git historie | dvoupokusový průběh, průvodce, karty bezpečí |
+| 06/2026 | historie `SituationSelector` | finální adaptivní algoritmus (kumulativní skóre) |
+| 06/2026 | historie `SituationSelector`, datové migrace | bonus za sérii, reimport obsahu z finálních scénářů |
+| 06/2026 | pull request `feature/v3-final` | sloučení výpravy do `master` |
+| 07/2026 | datová migrace | události kurzů AU3V pro nasazení |
 
 Srovnání prototypové a finální varianty adaptivního algoritmu, včetně simulace, je
 v Technické dokumentaci, kap. 12.2, a ve skriptu `docs/simulace/adaptivita.py`.

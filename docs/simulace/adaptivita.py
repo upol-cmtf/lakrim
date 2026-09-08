@@ -2,10 +2,10 @@
 """
 Simulace dvou variant adaptivního výběru obtížnosti v Dobrodružné výpravě.
 
-Varianta A – „série“ (prototyp, commit cf7fbd7, 17. 5. 2026):
+Varianta A – „série“ (prototyp, květen 2026):
     cílová obtížnost podle počtu po sobě jdoucích správných odpovědí;
     chyba sérii nuluje (prahy 2 a 4).
-Varianta B – „kumulativní skóre“ (finální, commit 22ab993, 18. 6. 2026):
+Varianta B – „kumulativní skóre“ (finální, červen 2026):
     skóre +1 za správnou, −1 za špatnou odpověď na první pokus, nikdy pod 0
     (prahy 2 a 4).
 

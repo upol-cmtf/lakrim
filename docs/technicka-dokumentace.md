@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (Lakrim) |
 | Verze dokumentu | 1.1, září 2026 (přepracována kap. 12: vývojové varianty, přínos, srovnání s existujícími řešeními) |
-| Odpovídá stavu kódu | větev `master`, commit `4d77d2e` (13. 8. 2026) |
+| Odpovídá stavu kódu | větev `master`, stav ze srpna 2026 |
 | Repozitář | https://github.com/upol-cmtf/lakrim |
 | Řešitel | Cyrilometodějská teologická fakulta UP v Olomouci, ve spolupráci s AU3V ČR, podpora TA ČR |
 
@@ -482,7 +482,7 @@ v git historii souboru `app/Services/IslandGame/SituationSelector.php` a v teste
 
 | Vlastnost | Varianta A – série (prototyp) | Varianta B – kumulativní skóre (finální) |
 |---|---|---|
-| Commit, datum | `cf7fbd7`, 17. 5. 2026 | `22ab993`, 18. 6. 2026 |
+| Období | květen 2026 | červen 2026 |
 | Stavová veličina | počet po sobě jdoucích správných odpovědí na první pokus, počítáno od poslední odpovědi zpět | součet +1 za správnou a −1 za špatnou odpověď na první pokus přes celou historii, po každém kroku `max(0, score)` |
 | Reakce na správnou odpověď | série +1 | skóre +1 |
 | Reakce na chybu | série = 0 | skóre −1 (nikdy pod 0) |
@@ -496,7 +496,7 @@ v git historii souboru `app/Services/IslandGame/SituationSelector.php` a v teste
 
 Změna byla vyvolána chováním prototypu při hraní: test `testWrongAnswerResetsDifficultyToEasy`
 zachycoval jako správné právě to chování (propad po jediné chybě), které se ukázalo pro
-cílovou skupinu nevhodné, a byl commitem `22ab993` nahrazen testem opačného tvrzení.
+cílovou skupinu nevhodné, a byl při přechodu na variantu B nahrazen testem opačného tvrzení.
 
 **Porovnání variant simulací.** Rozdíl obou variant je kvantifikován reprodukovatelnou
 simulací `docs/simulace/adaptivita.py` (20 kamenů, 20 000 běhů na scénář, hráč odpovídá
@@ -583,19 +583,19 @@ shrnuje Analýza funkčních požadavků, kap. 1.7.
 
 | Zjištění | Úprava softwaru | Technická realizace | Ověření | Doklad |
 |---|---|---|---|---|
-| Lineární kvíz (verze 1) dává všem stejně těžké otázky a nemotivuje pokračovat. | Nový režim s vizuální odměnou (pexeso), poté výprava s adaptivní obtížností. | verze 2 a 3 nad společnou bankou otázek | funkční testy kvízu a pexesa | tagy `1.0`–`1.6.1`, `2.0`; export dat verze 1 pro výzkumný tým (`7101329`, 7. 4. 2025); vyhodnocení dat eviduje odborný tým mimo repozitář. |
-| Hráč potřebuje možnost chybu opravit a odlišné vysvětlení po prvním a druhém omylu. | Druhý pokus; dvě samostatná pole vyhodnocení. | sloupec `attempt`, `first_/second_wrong_answer_evaluation`, `AnswerController` (kvíz i výprava) | `Quiz\AnswerTest`, `IslandGame\AnswerTest` | `14b5ffd` (28. 8. 2025), `4491ef9` (26. 5. 2026) |
-| Modelové situace mají více přijatelných reakcí. | Odpověď je správná, pokud hráč zvolil pouze správné možnosti. | `AnswerController::isCorrect` | `testAnswerWithOneOfMultipleRightOptionsIsCorrect` | `9d504e1` (17. 5. 2026), import scénářů odborného týmu |
-| Jedna chyba nemá hráče výrazně penalizovat; opakované chyby mají úlohy zjednodušit. | Kumulativní skóre s dolní mezí 0 místo série. | `SituationSelector::knowledgeScore`, `targetDifficulty` | 5 scénářů obtížnosti v `SituationTest`; simulace variant (kap. 12.2) | `22ab993` (18. 6. 2026) |
-| Neúspěch nesmí hráče zablokovat. | Po druhé chybě se kámen uzavře červeně a další kámen se odemkne. | stavy kamenů v `useIslands` / `assets.js` | funkční ověření průchodu | `4491ef9` (26. 5. 2026) |
-| Delší průchod není vždy možné dokončit najednou. | Obnovení rozehrané hry, volba pokračovat / začít znovu. | session token, `respondent_situations`, `localStorage` | `RespondentSituationsTest`, `HomepageController` | `ac6c073`, `99d856a` (18. 6. 2026) |
-| Vzdělávací zásady mají zůstat dostupné i po vyřešení situace. | Karty bezpečí na nástěnce v majáku; univerzální karta za bonus. | `situations.safety_card`, `AnswerController::BONUS_SAFETY_CARD`, `useSafetyCard` | `testCorrectAnswerCompletesSituationAndReturnsSafetyCard` | `ed87e56` (17. 5. 2026), `ce231bc` (25. 6. 2026) |
-| Bonusové otázky nemají narušovat srovnatelnost průchodů. | Bonus jen po sérii, nejvýše 2× za hru. | `SituationSelector::maybeBonusSituation` | 3 bonusové scénáře v `SituationTest` | `208e1db` (22. 6. 2026) |
-| Pilotáž (05–06/2026, 5 seniorů, Analýza kap. 1.7): hráči postupují plynule; bonusy nemají přicházet příliš brzy ani často. | Bonus po sérii 3 a 6, nejvýše 2× za hru (předběžná uživatelská kalibrace). | konstanty `SituationSelector` | bonusové scénáře v `SituationTest` | `208e1db` (22. 6. 2026) |
-| Pilotáž: hráči se chtěli vracet k úvodním instrukcím ostrova; ovládání na mobilu naležato. | Klik na průvodce opakuje úvod; rozložení pro mobil naležato, větší tlačítka; interaktivní prohlídka. | `useGuide`, `GuideBubble.vue`, `IntroTour.vue` | funkční ověření řešitelským týmem | `1f7d85e` (22. 6. 2026), `24e35ff` (24. 6.), `a702349`, `b769ab6` (25. 6. 2026) |
-| Pilotáž: chybějící karta u bezpečné situace působila jako chyba; po závěrečném videu chyběly kontakty. | Univerzální karta bezpečí za bonus; telefonní čísla po videu. | `AnswerController::BONUS_SAFETY_CARD`, `ContactsList.vue` | `IslandGame\AnswerTest`; funkční ověření | `ce231bc`, `a702349` (25. 6. 2026) |
-| Pilotáž: u bonusových úkolů hráči klikali do obrázků. | Zpřesněné instrukce úkolů (rozdíly se neoznačují; cesty se sledují očima nebo prstem) a doplněné řešení. | texty v migracích easter eggů | funkční ověření | `9b034eb` (15. 6. 2026), `e740227` (25. 6. 2026) |
-| Pilotáž a finální scénáře: zpřesnění textů, časový limit u vybraných situací. | Reimport otázek verze 3; limit 59 s u 9 situací. | datové migrace, `settings.time_limit` | `useQuestionFlow.handleTimeUp`; funkční ověření | `13241ce`–`0e05514` (22. 6. 2026) |
+| Lineární kvíz (verze 1) dává všem stejně těžké otázky a nemotivuje pokračovat. | Nový režim s vizuální odměnou (pexeso), poté výprava s adaptivní obtížností. | verze 2 a 3 nad společnou bankou otázek | funkční testy kvízu a pexesa | tagy `1.0`–`1.6.1`, `2.0`; export dat verze 1 pro výzkumný tým (04/2025); vyhodnocení dat eviduje odborný tým mimo repozitář. |
+| Hráč potřebuje možnost chybu opravit a odlišné vysvětlení po prvním a druhém omylu. | Druhý pokus; dvě samostatná pole vyhodnocení. | sloupec `attempt`, `first_/second_wrong_answer_evaluation`, `AnswerController` (kvíz i výprava) | `Quiz\AnswerTest`, `IslandGame\AnswerTest` | git historie (08/2025 kvíz, 05/2026 výprava) |
+| Modelové situace mají více přijatelných reakcí. | Odpověď je správná, pokud hráč zvolil pouze správné možnosti. | `AnswerController::isCorrect` | `testAnswerWithOneOfMultipleRightOptionsIsCorrect` | import scénářů odborného týmu (05/2026) |
+| Jedna chyba nemá hráče výrazně penalizovat; opakované chyby mají úlohy zjednodušit. | Kumulativní skóre s dolní mezí 0 místo série. | `SituationSelector::knowledgeScore`, `targetDifficulty` | 5 scénářů obtížnosti v `SituationTest`; simulace variant (kap. 12.2) | git historie `SituationSelector` (06/2026) |
+| Neúspěch nesmí hráče zablokovat. | Po druhé chybě se kámen uzavře červeně a další kámen se odemkne. | stavy kamenů v `useIslands` / `assets.js` | funkční ověření průchodu | git historie frontendu výpravy (05/2026) |
+| Delší průchod není vždy možné dokončit najednou. | Obnovení rozehrané hry, volba pokračovat / začít znovu. | session token, `respondent_situations`, `localStorage` | `RespondentSituationsTest`, `HomepageController` | git historie (06/2026) |
+| Vzdělávací zásady mají zůstat dostupné i po vyřešení situace. | Karty bezpečí na nástěnce v majáku; univerzální karta za bonus. | `situations.safety_card`, `AnswerController::BONUS_SAFETY_CARD`, `useSafetyCard` | `testCorrectAnswerCompletesSituationAndReturnsSafetyCard` | git historie (05/2026 karta situace, 06/2026 karta za bonus) |
+| Bonusové otázky nemají narušovat srovnatelnost průchodů. | Bonus jen po sérii, nejvýše 2× za hru. | `SituationSelector::maybeBonusSituation` | 3 bonusové scénáře v `SituationTest` | git historie `SituationSelector` (06/2026) |
+| Pilotáž (05–06/2026, 5 seniorů, Analýza kap. 1.7): hráči postupují plynule; bonusy nemají přicházet příliš brzy ani často. | Bonus po sérii 3 a 6, nejvýše 2× za hru (předběžná uživatelská kalibrace). | konstanty `SituationSelector` | bonusové scénáře v `SituationTest` | tamtéž |
+| Pilotáž: hráči se chtěli vracet k úvodním instrukcím ostrova; ovládání na mobilu naležato. | Klik na průvodce opakuje úvod; rozložení pro mobil naležato, větší tlačítka; interaktivní prohlídka. | `useGuide`, `GuideBubble.vue`, `IntroTour.vue` | funkční ověření řešitelským týmem | git historie frontendu výpravy (06/2026) |
+| Pilotáž: chybějící karta u bezpečné situace působila jako chyba; po závěrečném videu chyběly kontakty. | Univerzální karta bezpečí za bonus; telefonní čísla po videu. | `AnswerController::BONUS_SAFETY_CARD`, `ContactsList.vue` | `IslandGame\AnswerTest`; funkční ověření | git historie (06/2026) |
+| Pilotáž: u bonusových úkolů hráči klikali do obrázků. | Zpřesněné instrukce úkolů (rozdíly se neoznačují; cesty se sledují očima nebo prstem) a doplněné řešení. | texty v migracích easter eggů | funkční ověření | migrace bonusových úkolů (06/2026) |
+| Pilotáž a finální scénáře: zpřesnění textů, časový limit u vybraných situací. | Reimport otázek verze 3; limit 59 s u 9 situací. | datové migrace, `settings.time_limit` | `useQuestionFlow.handleTimeUp`; funkční ověření | datové migrace reimportu otázek verze 3 (06/2026) |
 
 ### 12.5 Srovnání s existujícími řešeními
 
