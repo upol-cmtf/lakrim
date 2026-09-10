@@ -17,7 +17,7 @@
                     Pokračujte ve vzdělávání s Univerzitami třetího věku tzv. U3V:
                 </h2>
                 <p>Kurzy a přednášky pro seniory – nové znalosti, noví lidé, aktivní mysl.</p>
-                <p><a href="https://au3v.cz/najdete-u3v-v-okoli-seznam-clenu" target="_blank" class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">Klikněte a najděte Univerzity třetího věku ve vašem okolí.</a></p>
+                <p><a href="https://au3v.cz/najdete-si-u3v" target="_blank" class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">Klikněte a najděte Univerzity třetího věku ve vašem okolí.</a></p>
             </div>
 
             <div class="mt-10">
