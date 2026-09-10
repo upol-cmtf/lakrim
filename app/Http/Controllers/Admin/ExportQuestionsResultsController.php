@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Sex;
 use App\Http\XlsxHeaders;
 use App\Models\Question;
+use App\Models\QuizEvent;
 use App\Models\Respondent;
 use App\Services\SpreadSheetFactory;
 use App\Services\XlsxWriterFactory;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -29,8 +32,19 @@ final class ExportQuestionsResultsController
     ) {
     }
 
-    public function index(): StreamedResponse
+    /**
+     * Export všech výsledků, nebo jen respondentů z událostí (kurzů) daného názvu,
+     * je-li v query předán parametr `event` (např. ?event=Studenti+2026/2027).
+     * Události se stejným názvem (různé hashe) se exportují dohromady.
+     */
+    public function index(Request $request): StreamedResponse
     {
+        $request->validate([
+            'event' => ['nullable', 'string', 'exists:' . QuizEvent::class . ',name'],
+        ]);
+
+        $eventName = $request->filled('event') ? $request->string('event')->toString() : null;
+
         $questions = Question::get();
 
         $spreadSheet = $this->spreadSheetFactory->create();
@@ -40,14 +54,26 @@ final class ExportQuestionsResultsController
         $this->writeHeaders($sheet, $questions);
         $sheet->freezePane('A3');
 
-        $this->writeData(Respondent::get(), $sheet);
+        $respondents = Respondent::query()
+            ->when(
+                $eventName !== null,
+                fn($query) => $query->whereHas('event', fn($eventQuery) => $eventQuery->where('name', $eventName)),
+            )
+            ->get();
+
+        $this->writeData($respondents, $sheet);
 
         $writer = $this->xlsxWriterFactory->create($spreadSheet);
+
+        // lomítko v názvu ("2026/2027") nahradíme pomlčkou, slug by ho jinak vypustil
+        $fileName = $eventName === null
+            ? 'export.xlsx'
+            : 'export-' . Str::slug(str_replace('/', '-', $eventName)) . '.xlsx';
 
         return response()->stream(
             fn() => $writer->save('php://output'),
             Response::HTTP_OK,
-            $this->getXlsxHeaders('export.xlsx'),
+            $this->getXlsxHeaders($fileName),
         );
     }
 
