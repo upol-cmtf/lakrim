@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Software | Labyrinty kritického myšlení (Lakrim) |
-| Verze dokumentu | 1.0, září 2026 |
-| Odpovídá stavu kódu | větev `master`, stav ze srpna 2026 |
-| Repozitář | https://github.com/upol-cmtf/lakrim (veřejný, licence MIT) |
+| Software | Labyrinty kritického myšlení (LAKRIM) |
+| Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
+| Verze dokumentu | 1.1, září 2026 (doplněna verze výsledku, rozsah licence, statistika adaptivity a exporty) |
+| Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; zdrojový kód pod licencí MIT) |
 | Související dokumenty | Analýza funkčních požadavků (`docs/analyza-funkcnich-pozadavku.md`), Technická dokumentace (`docs/technicka-dokumentace.md`) |
 
 ## 1. Účel dokumentu
@@ -17,6 +17,13 @@ Popisuje, jak je kód členěn, jakými pravidly se řídí, jak se sestavuje, t
 a kde hledat implementaci jednotlivých funkcí. Architekturu, datový model a algoritmy
 popisuje Technická dokumentace; zde jsou uvedeny v míře potřebné k orientaci v kódu.
 
+Licence MIT (soubor `LICENSE`) se vztahuje na zdrojový kód softwaru. Původní vzdělávací
+obsah aplikace (scénáře, otázky, zpětná vazba, karty bezpečí, původní grafika) je poskytován
+pod licencí CC BY 4.0 (soubor `CONTENT-LICENSE.md`), není-li u konkrétního materiálu
+uvedeno jinak; licence se nevztahuje na loga institucí a video Policie ČR. Podrobné
+licenční podmínky jsou uvedeny v Technické dokumentaci (kap. 13) a na adrese
+https://www.lakrim.cz/licencni-podminky/.
+
 Ukázky zdrojového kódu v kap. 5 jsou převzaty doslovně ze souborů v repozitáři ve stavu
 uvedeném v hlavičce; u každé ukázky je uvedena cesta k souboru.
 
@@ -26,12 +33,12 @@ uvedeném v hlavičce; u každé ukázky je uvedena cesta k souboru.
 
 | Část | Soubory | Řádky | Poznámka |
 |---|---|---|---|
-| Aplikační kód PHP (`app/`) | 70 | 3 759 | kontrolery, služby, modely, výčty, příkazy |
-| Datové migrace (`database/migrations/`) | 56 | 6 492 | schéma databáze i kompletní herní obsah |
+| Aplikační kód PHP (`app/`) | 71 | 4 040 | kontrolery, služby, modely, výčty, příkazy |
+| Datové migrace (`database/migrations/`) | 57 | 6 538 | schéma databáze i kompletní herní obsah |
 | Frontend (`resources/js/`) | 44 komponent Vue, 21 souborů JS | 7 310 | tři herní režimy, composables, Pinia stores, i18n |
 | Blade šablony (`resources/views/`) | 15 | – | vstupní stránky, Livewire pexeso, administrace |
-| Automatizované testy (`tests/`) | 19 | 2 210 | 99 testů PHPUnit |
-| Git historie | 275 commitů, 16 tagů | – | 08/2024 – 08/2026, vývoj přes pull requesty |
+| Automatizované testy (`tests/`) | 21 | 2 470 | 107 testů PHPUnit |
+| Git historie | přes 290 commitů, 30 tagů (`1.0`–`3.9`) | – | 08/2024 – 09/2026, vývoj přes pull requesty |
 
 ### 2.2 Technologie
 
@@ -58,6 +65,8 @@ app/
                                Respondent, RespondentAnswer, RespondentSituation, EasterEgg, …)
   Observers/                   RespondentAnswerObserver – označení dokončeného kvízu
   Services/IslandGame/         SituationSelector (adaptivní výběr), GameStatistics
+                               (provozní statistiky, přehrání adaptivity), FirstAttemptAnswer
+  Services/Export/             QuestionsResultsExporter (XLSX export výsledků kvízu)
   Services/Quiz/               QuizQuestionService (výběr otázek lineárního kvízu)
   Services/Respondent/         Statistics, SituationsResolver (shrnutí pro respondenta)
 database/migrations/           schéma + datové migrace s herním obsahem
@@ -72,6 +81,7 @@ resources/views/               Blade šablony
 routes/web.php, admin.php      veřejné a administrační routy
 tests/Unit, Feature, Integration  PHPUnit testy
 docs/                          projektová dokumentace, simulace adaptivity
+LICENSE, CONTENT-LICENSE.md    licence zdrojového kódu (MIT) a vzdělávacího obsahu (CC BY 4.0)
 .github/workflows/ci.yml       CI: phpstan, phpcs, testy, merge do staging
 ```
 
@@ -106,7 +116,7 @@ zobrazení karty bezpečí. Soubory jsou uvedeny v pořadí, v jakém se uplatn�
 
 | Krok | Co se děje | Soubor |
 |---|---|---|
-| 1 | Hráč vstoupí na `/ostrov`. Server najde nebo založí anonymního respondenta s UUID tokenem uloženým v session, aby se šlo k rozehrané hře vrátit. | `app/Http/Controllers/Web/IslandGame/HomepageController.php` |
+| 1 | Hráč vstoupí na `/ostrov`. Server najde nebo založí respondenta bez registrace s UUID tokenem uloženým v session, aby se šlo k rozehrané hře vrátit. | `app/Http/Controllers/Web/IslandGame/HomepageController.php` |
 | 2 | Blade předá token, ostrovy a počet bonusových úkolů Vue aplikaci. | `resources/views/web/island-game/index.blade.php`, `resources/js/web/app.js` |
 | 3 | Vue scéna drží stav ostrovů a kamenů (barvy, pokusy, uložené situace). | `resources/js/web/components/IslandGame/IslandScene.vue`, `composables/useIslands.js` |
 | 4 | Kliknutí na kámen pošle `POST /ostrov/situace` s tokenem, ostrovem a číslem kamene. | `composables/useQuestionFlow.js` |
@@ -363,7 +373,7 @@ final class AnswerController extends ApiController
 }
 ```
 
-### 5.3 Anonymní respondent a obnovení rozehrané hry
+### 5.3 Respondent bez registrace a obnovení rozehrané hry
 
 Soubor `app/Http/Controllers/Web/IslandGame/HomepageController.php`. Hráč nemá účet;
 identitou je UUID token uložený v session a předaný frontendu. Návrat na úvodní stránku
@@ -521,7 +531,8 @@ return new class extends Migration {
 
 ### 5.6 Scénářový test adaptivity
 
-Soubor `tests/Feature/Web/IslandGame/SituationTest.php` (jeden ze 14 scénářů). Test
+Soubor `tests/Feature/Web/IslandGame/SituationTest.php` (jeden ze 14 testů: 6 scénářů
+obtížnosti a fallbacku, 3 scénáře bonusů, 5 testů základního výběru a validace). Test
 sestaví historii odpovědí, připraví situace v různých obtížnostech a ověří přes skutečný
 HTTP endpoint, kterou situaci server vrátí.
 
@@ -610,19 +621,28 @@ Kontrola kvality a testy:
 composer phpstan            # statická analýza, úroveň max
 composer phpcs              # kódovací standard
 composer check-all          # obojí
-vendor/bin/phpunit          # 99 testů; vyžaduje MySQL databázi `testing` (phpunit.xml)
+vendor/bin/phpunit          # 107 testů; vyžaduje MySQL databázi `testing` (phpunit.xml)
 ```
 
 Nástroje pro výzkumný tým:
 
 ```bash
-php artisan stats:island-game                 # statistiky výpravy: úspěšnost po obtížnostech, odpadávání
+php artisan stats:island-game                 # statistiky výpravy: úspěšnost po obtížnostech, odpadávání,
+                                              # délka hry, adaptivita (přechody mezi obtížnostmi, reakce na chybu)
 php artisan stats:island-game --event=HASH    # jen jedna akce (kurz)
 php artisan stats:island-game --json          # strojově čitelný výstup
+php artisan export:questions-results          # XLSX export výsledků kvízu na disk (--event="Název události")
 python3 docs/simulace/adaptivita.py           # simulace variant adaptivního algoritmu
 ```
 
-Exporty odpovědí (CSV, XLSX) jsou v administraci (`/admin`), přihlášení uživatelem
+Sekce *Adaptivita* ve výstupu `stats:island-game` zpětně přehrává první pokusy každého
+respondenta stejným pravidlem jako `SituationSelector` (skóre +1 / −1, dolní mez 0, prahy
+2 a 4) a vykazuje počet změn obtížnosti na hráče, přechody 1 → 2, 2 → 3, 3 → 2, 2 → 1,
+přímé propady 3 → 1, změnu obtížnosti po ojedinělé a po opakované chybě, podíl hráčů, kteří
+dosáhli obtížnosti 2 a 3, a podíl situací podaných v jiné než cílové obtížnosti (fallback).
+Implementace: `GameStatistics::adaptivity`, `difficultyTransitions`, `difficultyAfterMistake`.
+
+Exporty odpovědí (XLSX, CSV) jsou také v administraci (`/admin`), přihlášení uživatelem
 z tabulky `users`.
 
 ## 8. Kontinuální integrace
@@ -647,13 +667,15 @@ testovacímu prostředí. Sloučení do `master` provádí vývojář ručně p�
 | Lineární kvíz | `Quiz/QuestionController.php`, `Services/Quiz/QuizQuestionService.php` | `components/Quiz/` | `Quiz/QuestionTest.php`, `AnswerTest.php`, `RunTest.php` |
 | Pexeso | `QuizGrid/HomepageController.php`, `Livewire/Web/RevealingImage*.php` | `components/QuizGrid/` | – (Livewire, ověřováno funkčně) |
 | Identifikace studijním číslem, shrnutí | `Quiz/RespondentIdentificationController.php`, `RespondentSummaryController.php` | `StudentIdForm.vue`, `RespondentIdentification.vue` | `RespondentIdentificationTest.php`, `RespondentSummaryTest.php` |
-| Statistiky a exporty | `Console/Commands/IslandGameStatsCommand.php`, `Services/IslandGame/GameStatistics.php`, `Admin/Export*Controller.php` | – | `Console/IslandGameStatsCommandTest.php` |
+| Statistiky provozu a adaptivity | `Console/Commands/IslandGameStatsCommand.php`, `Services/IslandGame/GameStatistics.php` (`adaptivity`, `difficultyTransitions`, `difficultyAfterMistake`), `FirstAttemptAnswer.php` | – | `Console/IslandGameStatsCommandTest.php` (8) |
+| Exporty výsledků | `Services/Export/QuestionsResultsExporter.php`, `Console/Commands/ExportQuestionsResultsCommand.php`, `Admin/Export*Controller.php` | – | `Admin/ExportQuestionsResultsTest.php`, `Console/ExportQuestionsResultsCommandTest.php` |
 | Herní obsah | `database/migrations/2026_05_13_*` až `2026_07_02_*` | `i18n/locales/cs.js` | – |
 
 ## 10. Historie vývoje v repozitáři
 
-Repozitář obsahuje úplnou historii vývoje od srpna 2024 (275 commitů ve větvi `master`).
-Klíčové milníky, které lze v historii dohledat:
+Repozitář obsahuje úplnou historii vývoje od srpna 2024 (přes 290 commitů ve větvi
+`master`, 30 tagů vydání). Hodnocený výsledek odpovídá tagu `3.9`. Klíčové milníky, které
+lze v historii dohledat:
 
 | Období | Doklad | Milník |
 |---|---|---|
@@ -666,8 +688,10 @@ Klíčové milníky, které lze v historii dohledat:
 | 05/2026 | git historie | dvoupokusový průběh, průvodce, karty bezpečí |
 | 06/2026 | historie `SituationSelector` | finální adaptivní algoritmus (kumulativní skóre) |
 | 06/2026 | historie `SituationSelector`, datové migrace | bonus za sérii, reimport obsahu z finálních scénářů |
-| 06/2026 | pull request `feature/v3-final` | sloučení výpravy do `master` |
-| 07/2026 | datová migrace | události kurzů AU3V pro nasazení |
+| 06/2026 | pull request `feature/v3-final`, tag `3.0` | sloučení výpravy do `master`; první vydání se všemi třemi režimy |
+| 07/2026 | datová migrace, tagy `3.1`–`3.3` | události kurzů AU3V pro nasazení; provozní ověření v kurzech U3V (07–08/2026) |
+| 08/2026 | tag `3.4` | úpravy po provozním ověření, výměna videa bonusového úkolu |
+| 09/2026 | tagy `3.5`–`3.9` | export výsledků podle událostí, statistika adaptivity (přechody mezi obtížnostmi), licenční soubory, dokumentace výsledku |
 
 Srovnání prototypové a finální varianty adaptivního algoritmu, včetně simulace, je
 v Technické dokumentaci, kap. 12.2, a ve skriptu `docs/simulace/adaptivita.py`.

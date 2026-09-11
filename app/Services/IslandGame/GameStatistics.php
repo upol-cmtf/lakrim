@@ -21,11 +21,31 @@ final class GameStatistics
     /** Minimální počet hráčů, aby se otázka objevila v žebříčku nejtěžších. */
     public const DEFAULT_MIN_PLAYERS = 5;
 
+    /** Chyba, před kterou byla předchozí odpověď správná (nebo žádná). */
+    public const MISTAKE_SINGLE = 'ojedinělá chyba';
+
+    /** Chyba, před kterou byla předchozí odpověď také chybná. */
+    public const MISTAKE_REPEATED = 'opakovaná chyba';
+
     private ?QuizEvent $event = null;
+
+    /**
+     * @var array{
+     *     players: int,
+     *     reached: array<int, int>,
+     *     changes: int,
+     *     transitions: array<string, int>,
+     *     mistakes: array<string, array<int, int>>,
+     *     served: int,
+     *     fallbacks: int,
+     * }|null
+     */
+    private ?array $adaptivityReplay = null;
 
     public function forEvent(?QuizEvent $event): self
     {
         $this->event = $event;
+        $this->adaptivityReplay = null;
 
         return $this;
     }
@@ -329,6 +349,204 @@ final class GameStatistics
             'ulovenych_rybek' => self::int($row?->total),
             'prumerny_cas_v_ukolu_s' => round(self::float($row?->avg_seconds), 0),
         ];
+    }
+
+    /**
+     * Chování adaptivního mechanismu v reálném provozu: cílová obtížnost se pro každou
+     * odpověď zpětně přepočítá z uložených prvních pokusů stejným pravidlem jako
+     * v SituationSelector (skóre +1 / −1, dolní mez 0, prahy SCORE_FOR_MEDIUM
+     * a SCORE_FOR_HARD). Dokládá, zda vlastnosti ověřené simulací (žádný přímý
+     * propad 3 → 1, postupné snižování) nastaly také u skutečných hráčů.
+     *
+     * @return array{
+     *     hracu_s_odpovedi: int,
+     *     hracu_dosahlo_obtiznosti_2_pct: float,
+     *     hracu_dosahlo_obtiznosti_3_pct: float,
+     *     zmen_obtiznosti_celkem: int,
+     *     prumer_zmen_obtiznosti_na_hrace: float,
+     *     propadu_3_na_1: int,
+     *     podana_obtiznost_odlisna_od_cilove_pct: float,
+     * }
+     */
+    public function adaptivity(): array
+    {
+        $replay = $this->replayAdaptivity();
+        $players = $replay['players'];
+
+        return [
+            'hracu_s_odpovedi' => $players,
+            'hracu_dosahlo_obtiznosti_2_pct' => self::pct($replay['reached'][2], $players),
+            'hracu_dosahlo_obtiznosti_3_pct' => self::pct($replay['reached'][3], $players),
+            'zmen_obtiznosti_celkem' => $replay['changes'],
+            'prumer_zmen_obtiznosti_na_hrace' => $players > 0 ? round($replay['changes'] / $players, 1) : 0.0,
+            'propadu_3_na_1' => $replay['transitions']['3 → 1'],
+            'podana_obtiznost_odlisna_od_cilove_pct' => self::pct($replay['fallbacks'], $replay['served']),
+        ];
+    }
+
+    /**
+     * Počty přechodů mezi cílovými obtížnostmi (změna po jedné odpovědi na první pokus).
+     *
+     * @return list<array{prechod: string, pocet: int}>
+     */
+    public function difficultyTransitions(): array
+    {
+        $rows = [];
+        foreach ($this->replayAdaptivity()['transitions'] as $transition => $count) {
+            $rows[] = ['prechod' => $transition, 'pocet' => $count];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Co udělala cílová obtížnost po chybné odpovědi na první pokus, zvlášť pro
+     * ojedinělou chybu (předchozí odpověď správná) a opakovanou chybu (předchozí
+     * odpověď také chybná).
+     *
+     * @return list<array{
+     *     chyba: string,
+     *     chyb: int,
+     *     beze_zmeny_pct: float,
+     *     pokles_o_1_pct: float,
+     *     pokles_o_2_pct: float,
+     * }>
+     */
+    public function difficultyAfterMistake(): array
+    {
+        $rows = [];
+        foreach ($this->replayAdaptivity()['mistakes'] as $kind => $drops) {
+            $total = array_sum($drops);
+            $rows[] = [
+                'chyba' => $kind,
+                'chyb' => $total,
+                'beze_zmeny_pct' => self::pct($drops[0], $total),
+                'pokles_o_1_pct' => self::pct($drops[1], $total),
+                'pokles_o_2_pct' => self::pct($drops[2], $total),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Přehraje první pokusy všech respondentů v pořadí vzniku a spočítá průběh
+     * cílové obtížnosti. Řádky jedné odpovědi (více zvolených možností) mají stejného
+     * respondenta i otázku a jdou za sebou; skóre se mění po každé zvolené možnosti
+     * stejně jako v SituationSelector::knowledgeScore.
+     *
+     * @return array{
+     *     players: int,
+     *     reached: array<int, int>,
+     *     changes: int,
+     *     transitions: array<string, int>,
+     *     mistakes: array<string, array<int, int>>,
+     *     served: int,
+     *     fallbacks: int,
+     * }
+     */
+    private function replayAdaptivity(): array
+    {
+        if ($this->adaptivityReplay !== null) {
+            return $this->adaptivityReplay;
+        }
+
+        $rows = $this->answersQuery()
+            ->where('ra.attempt', 1)
+            ->select('ra.respondent_id', 'qo.question_id', 'qo.right', 'q.bonus', 'q.difficulty_id')
+            ->orderBy('ra.respondent_id')
+            ->orderBy('ra.id')
+            ->get();
+
+        /** @var array<int, list<FirstAttemptAnswer>> $answersByRespondent */
+        $answersByRespondent = [];
+        $current = null;
+        $lastKey = null;
+
+        foreach ($rows as $row) {
+            $respondentId = self::int($row->respondent_id);
+            $key = $respondentId . ':' . self::int($row->question_id);
+
+            if ($current === null || $key !== $lastKey) {
+                $current = new FirstAttemptAnswer(
+                    respondentId: $respondentId,
+                    bonus: self::int($row->bonus) === 1,
+                    difficulty: self::int($row->difficulty_id),
+                );
+                $answersByRespondent[$respondentId][] = $current;
+                $lastKey = $key;
+            }
+
+            $current->rights[] = self::int($row->right) === 1;
+        }
+
+        $transitions = ['1 → 2' => 0, '2 → 3' => 0, '1 → 3' => 0, '3 → 2' => 0, '2 → 1' => 0, '3 → 1' => 0];
+        $mistakes = [self::MISTAKE_SINGLE => [0, 0, 0], self::MISTAKE_REPEATED => [0, 0, 0]];
+        $reached = [2 => 0, 3 => 0];
+        $changes = 0;
+        $served = 0;
+        $fallbacks = 0;
+
+        foreach ($answersByRespondent as $answers) {
+            $score = 0;
+            $maxLevel = 1;
+            $previousWrong = false;
+
+            foreach ($answers as $answer) {
+                $before = self::targetDifficulty($score);
+
+                if (!$answer->bonus) {
+                    $served++;
+                    $fallbacks += $answer->difficulty !== $before ? 1 : 0;
+                }
+
+                foreach ($answer->rights as $right) {
+                    $score = max(0, $score + ($right ? 1 : -1));
+                }
+
+                $after = self::targetDifficulty($score);
+                $maxLevel = max($maxLevel, $before, $after);
+
+                if ($after !== $before) {
+                    $changes++;
+                    $transitions[$before . ' → ' . $after]++;
+                }
+
+                $wrong = $answer->isWrong();
+
+                if ($wrong) {
+                    $kind = $previousWrong ? self::MISTAKE_REPEATED : self::MISTAKE_SINGLE;
+                    $mistakes[$kind][min(2, max(0, $before - $after))]++;
+                }
+
+                $previousWrong = $wrong;
+            }
+
+            $reached[2] += $maxLevel >= 2 ? 1 : 0;
+            $reached[3] += $maxLevel >= 3 ? 1 : 0;
+        }
+
+        return $this->adaptivityReplay = [
+            'players' => count($answersByRespondent),
+            'reached' => $reached,
+            'changes' => $changes,
+            'transitions' => $transitions,
+            'mistakes' => $mistakes,
+            'served' => $served,
+            'fallbacks' => $fallbacks,
+        ];
+    }
+
+    /**
+     * Cílová obtížnost (1–3) ze skóre – stejné prahy jako SituationSelector::targetDifficulty.
+     */
+    private static function targetDifficulty(int $score): int
+    {
+        return match (true) {
+            $score >= SituationSelector::SCORE_FOR_HARD => 3,
+            $score >= SituationSelector::SCORE_FOR_MEDIUM => 2,
+            default => 1,
+        };
     }
 
     /**
