@@ -7,6 +7,9 @@ Route::get('/', fn() => view('web.homepage', [
     'hasInProgressGame' => Web\IslandGame\HomepageController::hasInProgressGame(),
 ]));
 
+Route::get('/licencni-podminky', fn() => view('web.license'))
+    ->name('web.license');
+
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
         ->name('web.quiz.finish');
