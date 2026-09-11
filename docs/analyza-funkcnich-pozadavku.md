@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (LAKRIM) |
 | Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
-| Verze dokumentu | 1.2, září 2026 (zapracováno posouzení dokumentace: upřesnění popisu algoritmu, pilotní testování a provozní ověření, licenční podmínky, možnosti dalšího rozvoje) |
+| Verze dokumentu | 1.3, září 2026 (1.2: zapracováno posouzení dokumentace; 1.3: doplněny výsledky statistiky adaptivity z provozních dat) |
 | Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; kód pod licencí MIT, vzdělávací obsah pod CC BY 4.0) |
 | Související dokumenty | Technická dokumentace (`docs/technicka-dokumentace.md`), Programátorská dokumentace (`docs/programatorska-dokumentace.md`), uživatelská příručka, popis ověření funkčnosti |
 
@@ -256,10 +256,36 @@ situace, ale také dobrovolné aktivizační prvky hry.
 prokázané simulací (technická dokumentace, kap. 12.2) nastaly také v reálném provozu,
 byl příkaz `stats:island-game` doplněn o statistiku adaptivity (09/2026): z uložených
 prvních pokusů zpětně přepočítá cílovou obtížnost stejným pravidlem jako `SituationSelector`
-a vykazuje počet změn obtížnosti na hráče, počty přechodů 1 → 2, 2 → 3, 3 → 2 a 2 → 1,
-počet přímých propadů 3 → 1, změnu obtížnosti po ojedinělé a po opakované chybě, podíl
-hráčů, kteří dosáhli obtížnosti 2 a 3, a podíl situací podaných v jiné než cílové
-obtížnosti (fallback). Výstup nad provozní databází je součástí přílohy 5 v ISTA.
+a vykazuje přechody mezi obtížnostmi, reakci na chybu a podíl situací podaných v jiné než
+cílové obtížnosti (fallback). Výsledky nad provozní databází k 10. 9. 2026 (6 538 spuštění,
+1 308 aktivních herních běhů; rozdíl proti tabulce výše tvoří běhy po 31. 8. 2026):
+
+| Ukazatel | Hodnota |
+|---|---|
+| Hráči, kteří alespoň jednou dosáhli obtížnosti 2 | 96,3 % |
+| Hráči, kteří alespoň jednou dosáhli obtížnosti 3 | 85,4 % |
+| Změn cílové obtížnosti celkem / průměr na hráče | 2 927 / 2,2 |
+| Přechody nahoru 1 → 2 / 2 → 3 | 1 388 / 1 247 |
+| Přechody dolů 3 → 2 / 2 → 1 | 148 / 144 |
+| Přímé propady 3 → 1 | 0 |
+| Chybných odpovědí na první pokus celkem | 2 010 |
+| Ojedinělá chyba (n = 1 794): beze změny / pokles o 1 / pokles o 2 | 87,3 % / 12,7 % / 0 % |
+| Opakovaná chyba (n = 216): beze změny / pokles o 1 / pokles o 2 | 69,9 % / 30,1 % / 0 % |
+| Situace podané v jiné než cílové obtížnosti (fallback) | 4,7 % |
+
+Z 2 010 chybných odpovědí na první pokus žádná nevedla k přímému propadu z obtížnosti 3
+na obtížnost 1; ojedinělá chyba v 87 % případů cílovou obtížnost nezměnila a nikdy ji
+nesnížila o více než jeden stupeň, zatímco opakovaná chyba vedla ke snížení obtížnosti
+častěji (30 %). Mechanismus tedy v provozu rozlišuje jednu chybu od řady chyb, což byl
+hlavní důvod přechodu od prototypové varianty (kap. 1.5). Přechody nahoru (2 635) výrazně
+převažují nad přechody dolů (292), což odpovídá 90 % úspěšnosti skupiny. Průměrně 2,2 změny
+obtížnosti na hráče odpovídá hodnotě 2,5 ze simulace finální varianty pro hráče
+s úspěšností 0,9; u prototypové varianty simulace pro stejnou úspěšnost předpokládá
+5,2 změny a přibližně jeden propad 3 → 1 na hru (technická dokumentace, kap. 12.2).
+Podíl 85,4 % hráčů, kteří dosáhli obtížnosti 3, zahrnuje i nedokončené běhy; hráč bez
+chyby dosáhne obtížnosti 3 na pátém kameni. Nízký podíl fallbacku (4,7 %) ukazuje, že
+obsah (tři obtížnosti na každém kameni) v naprosté většině případů umožnil podat situaci
+v cílové obtížnosti. Úplný výstup je součástí přílohy 5 v ISTA.
 
 **Omezení zobecnitelnosti.** Provozní ověření proběhlo mezi účastníky univerzit třetího
 věku, tedy aktivně se vzdělávajícími seniory se středoškolským nebo vysokoškolským
