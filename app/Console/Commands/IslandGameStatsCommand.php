@@ -8,7 +8,8 @@ use Illuminate\Console\Command;
 /**
  * Vypíše statistiky Dobrodružné výpravy (verze 3): spuštění, dokončení, úspěšnost,
  * kvalitu odpovědí po ostrovech a obtížnostech, nejtěžší otázky, odpadávání hráčů,
- * délku hry, rozpad podle akcí a dnů a bonusové úkoly.
+ * délku hry, rozpad podle akcí a dnů, bonusové úkoly a chování adaptivního
+ * mechanismu (přechody mezi obtížnostmi, reakce na chybu).
  */
 class IslandGameStatsCommand extends Command
 {
@@ -54,6 +55,9 @@ class IslandGameStatsCommand extends Command
             'po_akcich' => $stats->byEvent(),
             'po_dnech' => $stats->byDay(),
             'bonusove_ukoly' => $stats->easterEggs(),
+            'adaptivita' => $stats->adaptivity(),
+            'prechody_obtiznosti' => $stats->difficultyTransitions(),
+            'obtiznost_po_chybe' => $stats->difficultyAfterMistake(),
         ];
 
         if ($this->option('json')) {
@@ -76,6 +80,12 @@ class IslandGameStatsCommand extends Command
         $this->section('Po akcích', $data['po_akcich']);
         $this->section('Po dnech', $data['po_dnech']);
         $this->section('Bonusové úkoly', $this->keyValueRows($data['bonusove_ukoly']));
+        $this->section(
+            'Adaptivita (cílová obtížnost přepočtená z prvních pokusů)',
+            $this->keyValueRows($data['adaptivita']),
+        );
+        $this->section('Přechody mezi obtížnostmi', $data['prechody_obtiznosti']);
+        $this->section('Cílová obtížnost po chybě', $data['obtiznost_po_chybe']);
 
         return self::SUCCESS;
     }

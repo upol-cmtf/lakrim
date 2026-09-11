@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature\Console;
 
+use App\Enums\Difficulty;
 use App\Enums\Version;
 use App\Models\EasterEgg;
 use App\Models\Question;
@@ -181,6 +182,67 @@ class IslandGameStatsCommandTest extends TestCase
         );
     }
 
+    public function testAdaptivityReplaysDifficultyTransitions(): void
+    {
+        // hráč A: 4× správně (1 → 2 → 3), pak 3× špatně (3 → 2, beze změny, 2 → 1)
+        $climber = $this->respondent();
+        $this->answer($climber, island: 1, button: 1, right: true, difficulty: 1);   // skóre 1, obt. 1
+        $this->answer($climber, island: 1, button: 2, right: true, difficulty: 2);   // skóre 2, obt. 2; podána 2, cíl 1
+        $this->answer($climber, island: 1, button: 3, right: true, difficulty: 2);   // skóre 3, obt. 2
+        $this->answer($climber, island: 1, button: 4, right: true, difficulty: 2);   // skóre 4, obt. 3
+        $this->answer($climber, island: 1, button: 5, right: false, difficulty: 3);  // skóre 3, obt. 2; ojedinělá, −1
+        $this->answer($climber, island: 2, button: 1, right: false, difficulty: 2);  // skóre 2, obt. 2; opakovaná, 0
+        $this->answer($climber, island: 2, button: 2, right: false, difficulty: 2);  // skóre 1, obt. 1; opakovaná, −1
+        // druhý pokus se do skóre nepočítá
+        $this->answer($climber, island: 2, button: 2, right: true, difficulty: 2, attempt: 2);
+
+        // hráč B: hned chyba na dolní mezi (beze změny), pak správně zodpovězený bonus (skóre 1, obt. 1)
+        $struggler = $this->respondent();
+        $this->answer($struggler, island: 1, button: 1, right: false, difficulty: 1);
+        $bonus = Question::factory()->withoutGroup()->create(['version' => Version::Three, 'bonus' => true]);
+        $this->answer($struggler, island: 1, button: 2, right: true, question: $bonus);
+
+        // hráč bez odpovědí se do adaptivity nepočítá
+        $this->respondent();
+
+        $this->assertSame([
+            'hracu_s_odpovedi' => 2,
+            'hracu_dosahlo_obtiznosti_2_pct' => 50.0,
+            'hracu_dosahlo_obtiznosti_3_pct' => 50.0,
+            'zmen_obtiznosti_celkem' => 4,
+            'prumer_zmen_obtiznosti_na_hrace' => 2.0,
+            'propadu_3_na_1' => 0,
+            // 8 podaných nebonusových situací, 1 s jinou než cílovou obtížností
+            'podana_obtiznost_odlisna_od_cilove_pct' => 12.5,
+        ], $this->statistics->adaptivity());
+
+        $this->assertSame([
+            ['prechod' => '1 → 2', 'pocet' => 1],
+            ['prechod' => '2 → 3', 'pocet' => 1],
+            ['prechod' => '1 → 3', 'pocet' => 0],
+            ['prechod' => '3 → 2', 'pocet' => 1],
+            ['prechod' => '2 → 1', 'pocet' => 1],
+            ['prechod' => '3 → 1', 'pocet' => 0],
+        ], $this->statistics->difficultyTransitions());
+
+        $this->assertSame([
+            [
+                'chyba' => GameStatistics::MISTAKE_SINGLE,
+                'chyb' => 2,
+                'beze_zmeny_pct' => 50.0,
+                'pokles_o_1_pct' => 50.0,
+                'pokles_o_2_pct' => 0.0,
+            ],
+            [
+                'chyba' => GameStatistics::MISTAKE_REPEATED,
+                'chyb' => 2,
+                'beze_zmeny_pct' => 50.0,
+                'pokles_o_1_pct' => 50.0,
+                'pokles_o_2_pct' => 0.0,
+            ],
+        ], $this->statistics->difficultyAfterMistake());
+    }
+
     public function testCommandPrintsTablesAndJson(): void
     {
         $respondent = $this->respondent();
@@ -245,8 +307,12 @@ class IslandGameStatsCommandTest extends TestCase
         int $seconds = 5,
         ?Question $question = null,
         ?string $createdAt = null,
+        int $difficulty = Difficulty::Easy->value,
     ): void {
-        $question ??= Question::factory()->withoutGroup()->create(['version' => Version::Three]);
+        $question ??= Question::factory()->withoutGroup()->create([
+            'version' => Version::Three,
+            'difficulty_id' => $difficulty,
+        ]);
 
         $option = QuestionOption::factory()->create([
             'question_id' => $question->id,

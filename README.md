@@ -1,4 +1,4 @@
-# Labyrinty kritického myšlení (Lakrim)
+# Labyrinty kritického myšlení (LAKRIM)
 
 Webová vzdělávací hra, která učí seniory rozpoznávat podvody, manipulaci a dezinformace
 v digitálním prostředí a bezpečně na ně reagovat. Hráč prochází modelové situace z běžného
@@ -25,13 +25,14 @@ Aplikace nabízí tři způsoby hraní nad společnou bankou otázek a společn�
 Ke každému režimu lze přidat identifikátor akce (`/ostrov/{hash}`, `/kviz/{hash}`, `/pexeso/{hash}`),
 podle kterého se respondenti z jedné přednášky či kurzu seskupí ve výstupech.
 
-## V čem je Lakrim nový
+## V čem je LAKRIM nový
 
-Lakrim přizpůsobuje obtížnost situací hráči, který nemá účet, o kterém nejsou žádná
+LAKRIM přizpůsobuje obtížnost situací hráči, který nemá účet, o kterém nejsou žádná
 předchozí data a který si sám volí, jaké téma bude hrát. Jedno globální skóre ze všech
 prvních pokusů napříč ostrovy, tlumené tak, aby jedna chyba hráče nesrazila a opakované
-chyby úlohy postupně zjednodušily, řídí výběr situace, zařazování bonusů i zpětnou vazbu.
-Chyba se vysvětlí ve dvou krocích, ale hráče nepenalizuje ani nezablokuje. Výprava, kvíz
+chyby úlohy postupně zjednodušily, určuje obtížnost další situace. Bonusové otázky se
+zařazují samostatně podle série správných odpovědí a zpětná vazba vychází ze správnosti
+a pořadí pokusu. Chyba se vysvětlí ve dvou krocích, ale hráče nepenalizuje ani nezablokuje. Výprava, kvíz
 a pexeso sdílejí jednu banku otázek a jeden záznam odpovědí, takže stejný software slouží
 k výuce i k výzkumnému srovnání herních režimů. Podrobně v technické dokumentaci, kap. 12.
 
@@ -106,10 +107,17 @@ docs                               projektová dokumentace
 
 ## Verze
 
-Vydání jsou označena git tagy: řada `1.x` (znalostní kvíz), `2.x` (pexeso), aktuální vývoj
-přidává režim Dobrodružná výprava (verze 3). Změny procházejí pull requesty do větve `master`.
+Vydání jsou označena git tagy: řada `1.x` (znalostní kvíz), `2.x` (pexeso) a `3.x`
+(Dobrodružná výprava; `3.0` z června 2026 je první vydání se všemi třemi režimy). Změny
+procházejí pull requesty do větve `master`.
 
 ## Autoři a licence
 
 Zadavatel a odborný obsah: Cyrilometodějská teologická fakulta UP v Olomouci, AU3V ČR.
-Vývoj softwaru: Tomáš Pavlík. Licence: MIT.
+Vývoj softwaru: Tomáš Pavlík.
+
+Zdrojový kód je poskytován pod licencí MIT (soubor [LICENSE](LICENSE)). Původní vzdělávací
+obsah (scénáře, otázky, zpětná vazba, karty bezpečí, původní grafika) je poskytován pod
+licencí CC BY 4.0 (soubor [CONTENT-LICENSE.md](CONTENT-LICENSE.md)), není-li u konkrétního
+materiálu uvedeno jinak; licence se nevztahuje na loga institucí a video Policie ČR.
+Licenční podmínky jsou také na https://www.lakrim.cz/licencni-podminky/.

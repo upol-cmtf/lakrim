@@ -4,7 +4,7 @@
             Už jste téměř v cíli – po zadání pohlaví a věku vám hned ukážeme výsledky.
         </p>
         <p class="text-xl text-center mb-5">
-            Vaše odpověď je anonymní a v budoucnu nám pomůže lépe zacílit prevenci a varování před podvody.
+            Údaje jsou dobrovolné, nejsou spojeny s vaším jménem ani kontaktem a v budoucnu nám pomohou lépe zacílit prevenci a varování před podvody.
         </p>
 
         <div class="md:text-lg lg:text-xl">
