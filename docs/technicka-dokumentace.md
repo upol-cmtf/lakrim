@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (LAKRIM) |
 | Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
-| Verze dokumentu | 1.2, září 2026 (zapracováno posouzení dokumentace: upřesnění popisu algoritmu a variant, ochrana dat, rozšířené srovnání s existujícími řešeními, vymezení novosti, licenční podmínky) |
+| Verze dokumentu | 1.3, září 2026 (1.2: zapracováno posouzení dokumentace; 1.3: doplněno ověření adaptivního mechanismu na provozních datech) |
 | Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; kód pod licencí MIT, vzdělávací obsah pod CC BY 4.0, kap. 13) |
 | Řešitel | Cyrilometodějská teologická fakulta UP v Olomouci, ve spolupráci s AU3V ČR, podpora TA ČR |
 
@@ -530,9 +530,21 @@ v jednom kroku nenastává nikdy, počet změn úrovně za hru je u silných hr�
 a podíl těžkých situací odpovídá úspěšnosti hráče. Průměrný hráč (p = 0,5) přitom u obou
 variant tráví většinu hry na obtížnosti 1, tedy varianta B nezvyšuje obtížnost slabším
 hráčům. Simulace pracuje s konstantním *p* nezávislým na obtížnosti a neuvažuje učení
-během hry; slouží k porovnání mechanismů, nikoli k predikci reálných výsledků. Zda
-simulované vlastnosti nastaly také v reálném provozu, dokládá statistika adaptivity
-přepočtená z uložených odpovědí (kap. 12.4 a Analýza, kap. 1.7).
+během hry; slouží k porovnání mechanismů, nikoli k predikci reálných výsledků.
+
+**Ověření na provozních datech.** Statistika adaptivity v `stats:island-game` (kap. 12.4)
+přepočítává cílovou obtížnost z uložených prvních pokusů stejným pravidlem jako
+`SituationSelector`. Nad provozní databází k 10. 9. 2026 (1 308 aktivních herních běhů
+z kurzů U3V, úspěšnost na první pokus 90 %) dala tyto výsledky: 0 přímých propadů 3 → 1
+z 2 010 chybných odpovědí; ojedinělá chyba v 87,3 % případů obtížnost nezměnila a ve 12,7 %
+ji snížila o jeden stupeň, opakovaná chyba ji snížila ve 30,1 % případů; 2 927 změn cílové
+obtížnosti, tedy 2,2 na hráče (přechody 1 → 2: 1 388, 2 → 3: 1 247, 3 → 2: 148,
+2 → 1: 144); obtížnosti 3 dosáhlo 85,4 % hráčů (včetně nedokončených běhů); 4,7 % situací
+bylo podáno v jiné než cílové obtížnosti (fallback). Hodnoty odpovídají simulaci varianty B
+pro p = 0,9 (2,5 změny na hru, žádný propad 3 → 1), zatímco varianta A by pro stejnou
+úspěšnost dávala 5,2 změny a přibližně jeden propad 3 → 1 na hru. Vlastnosti ověřené
+scénářovými testy a simulací tak nastaly také v reálném provozu (podrobně Analýza,
+kap. 1.7.2).
 
 Hodnoty parametrů jsou konfigurační konstanty pravidlového algoritmu, nikoli prvek
 novosti. Prahy skóre 2 a 4 byly v prototypové fázi stanoveny heuristicky, expertním
@@ -726,9 +738,11 @@ sledovaný scénář. Výsledky potvrdily, že konečný algoritmus odstraňuje 
 krajními úrovněmi a zajišťuje stabilnější průběh hry. Pilotní uživatelské testování se
 seniory ověřilo srozumitelnost a použitelnost řešení a provozní ověření v kurzech U3V
 (1 304 aktivních herních běhů, 65,9 % dokončení) doložilo, že adaptivní mechanismus
-převáděl úspěšné hráče k náročnějším úlohám; statistika přechodů mezi obtížnostmi
-přepočtená z uložených odpovědí umožňuje tato zjištění ověřit na úrovni jednotlivých
-kroků (kap. 12.4, Analýza kap. 1.7).
+převáděl úspěšné hráče k náročnějším úlohám. Statistika přechodů mezi obtížnostmi
+přepočtená z uložených odpovědí to potvrdila na úrovni jednotlivých kroků: z 2 010
+chybných odpovědí žádná nevedla k přímému propadu 3 → 1, ojedinělá chyba obtížnost
+většinou nezměnila a opakované chyby ji snižovaly postupně (kap. 12.2 a 12.4, Analýza
+kap. 1.7.2).
 
 Srovnávací rešerše (kap. 12.5) ukázala, že jednotlivé principy adaptivního vzdělávání jsou
 známé. V posuzovaných zdrojích však nebylo nalezeno řešení, které by stejným způsobem
