@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Software | Labyrinty kritického myšlení (Lakrim) |
-| Verze dokumentu | 1.1, září 2026 (přepracována kap. 12: vývojové varianty, přínos, srovnání s existujícími řešeními) |
-| Odpovídá stavu kódu | větev `master`, stav ze srpna 2026 |
-| Repozitář | https://github.com/upol-cmtf/lakrim |
+| Software | Labyrinty kritického myšlení (LAKRIM) |
+| Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
+| Verze dokumentu | 1.2, září 2026 (zapracováno posouzení dokumentace: upřesnění popisu algoritmu a variant, ochrana dat, rozšířené srovnání s existujícími řešeními, vymezení novosti, licenční podmínky) |
+| Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; kód pod licencí MIT, vzdělávací obsah pod CC BY 4.0, kap. 13) |
 | Řešitel | Cyrilometodějská teologická fakulta UP v Olomouci, ve spolupráci s AU3V ČR, podpora TA ČR |
 
 ## 1. Účel dokumentu
@@ -18,7 +18,7 @@ funkčnosti (samostatné dokumenty).
 
 ## 2. Přehled systému
 
-Lakrim je webová vzdělávací hra (serious game) pro seniory zaměřená na rozpoznávání
+LAKRIM je webová vzdělávací hra (serious game) pro seniory zaměřená na rozpoznávání
 podvodných, manipulačních a dezinformačních praktik v digitálním prostředí. Hráč řeší
 modelové situace, volí reakci a dostává okamžitou, situaci šitou zpětnou vazbu. Aplikace
 zároveň slouží jako výzkumný nástroj: každou odpověď ukládá s časem, pořadím pokusu
@@ -28,7 +28,7 @@ a kontextem, ve kterém padla, pro následné výzkumné vyhodnocení.
 
 | Aktér | Popis |
 |---|---|
-| Hráč (respondent) | Anonymní návštěvník, typicky senior. Nemá účet, identifikuje ho náhodný token. |
+| Hráč (respondent) | Návštěvník bez registrace, typicky senior. Nemá účet; jeho herní běh identifikuje náhodný token. |
 | Lektor / organizátor akce | Rozdává hráčům odkaz s identifikátorem akce (`hash`), aby šly výsledky skupiny seskupit. |
 | Výzkumník | Vyhodnocuje uložená data o odpovědích respondentů (mimo veřejnou část aplikace). |
 | Správce obsahu (vývojář) | Přidává a upravuje herní obsah formou datových migrací. |
@@ -227,13 +227,13 @@ erDiagram
 
 ## 5. Herní principy a algoritmy
 
-### 5.1 Anonymní respondent a token
+### 5.1 Respondent bez registrace a token
 
 Při vstupu do režimu vytvoří kontroler nového respondenta s náhodným UUID tokenem, uloží
 identifikátor akce z URL a předá token frontendové komponentě. Každý další požadavek
 token nese v těle a server jím respondenta dohledá (validace `exists:respondents,token`).
-Nepoužívají se účty, e-maily ani cookies s osobními údaji; ukládá se IP adresa
-a identifikátor session. Ve výpravě se token navíc drží v serverové session pod klíčem
+Nepoužívají se účty, e-maily ani cookies s osobními údaji; pro technické a výzkumné
+účely se ukládá IP adresa a identifikátor session (kap. 9). Ve výpravě se token navíc drží v serverové session pod klíčem
 `island_game_respondent_token`, aby se hráč po návratu na úvodní stránku vrátil ke svému
 postupu (viz 5.6).
 
@@ -432,8 +432,16 @@ WebP, videa v `public/videos`.
 
 ## 9. Bezpečnost a ochrana dat
 
-- Hra nevyžaduje registraci ani osobní údaje; identifikace pohlavím, věkovou skupinou
-  a studijním číslem je dobrovolná. Ukládá se IP adresa a identifikátor session.
+- Hra nevyžaduje registraci ani uvedení přímých identifikačních údajů. Herní běh je
+  identifikován náhodným tokenem (pseudonymizovaný běh). Pro technické a výzkumné účely
+  systém zpracovává IP adresu, identifikátor relace a údaje o průběhu hry (odpovědi, časy,
+  pořadí pokusu); demografické údaje (pohlaví, věková skupina) jsou uváděny dobrovolně
+  a studijní číslo jen u kurzů, u kterých to organizátor zapne.
+- Účelem zpracování je provoz hry (obnovení rozehrané hry ve stejné relaci, ochrana proti
+  zneužití) a výzkumné vyhodnocení projektu. Přístup k uloženým datům má pouze řešitelský
+  tým přes administraci vyžadující přihlášení a přes konzolové příkazy na serveru; data se
+  uchovávají po dobu řešení a vyhodnocení projektu podle pravidel projektu pro výzkumná
+  data. Stejné informace jsou uvedeny na webu projektu.
 - Respondenta autorizuje pouze náhodný UUID token; endpointy nikdy nevrací data jiného
   respondenta.
 - Všechny vstupy procházejí validací (typ, existence v DB, vazba možnosti na otázku,
@@ -458,10 +466,14 @@ pull request a po úspěchu slučuje `feature/*` a `bugfix/*` větve do `staging
 
 - **Statická analýza:** PHPStan (Larastan) na úrovni `max`, generika povolena bez anotace.
 - **Styl:** PHP_CodeSniffer s vlastním standardem (`phpcs-standard.xml`, Slevomat).
-- **Testy:** PHPUnit, tři sady (Unit, Feature, Integration), 99 testů. Pokrývají
-  všechny JSON endpointy včetně validace, adaptivní výběr situací (11 scénářů), bonusy,
-  easter eggy, obrázky v textu a shrnutí.
-- **Verzování:** git tagy `1.x` (kvíz) a `2.x` (pexeso); vývoj přes pull requesty.
+- **Testy:** PHPUnit, tři sady (Unit, Feature, Integration), 107 testů. Pokrývají
+  všechny JSON endpointy včetně validace, adaptivní výběr situací a bonusy (`SituationTest`,
+  14 testů: 6 scénářů obtížnosti a fallbacku, 3 scénáře bonusů, 5 testů základního výběru
+  a validace), provozní statistiky včetně přehrání adaptivity, exporty, easter eggy, obrázky
+  v textu a shrnutí.
+- **Verzování:** git tagy `1.x` (kvíz), `2.x` (pexeso) a `3.x` (výprava, od `3.0`
+  v červnu 2026 všechny tři režimy); hodnocený výsledek odpovídá tagu `3.9`. Vývoj přes
+  pull requesty do větve `master`.
 
 ## 12. Softwarový přínos, novost a odlišení od existujících řešení
 
@@ -469,7 +481,7 @@ pull request a po úspěchu slučuje `feature/*` a `bugfix/*` větve do `staging
 
 Software řešil, jak v jedné webové aplikaci propojit adaptivní výběr vzdělávacích situací,
 volný (nelineární) průchod herním prostředím a výzkumně využitelný sběr dat, a to pro
-anonymního hráče s krátkou historií (nejvýše 20 kamenů) a bez jakýchkoli kalibračních dat.
+hráče bez registrace s krátkou historií (nejvýše 20 kamenů) a bez jakýchkoli kalibračních dat.
 Výchozí nejistotou bylo, zda lze z takto krátké historie průběžně odhadovat vhodnou
 obtížnost tak, aby jedna chyba nevedla k nepřiměřenému snížení obtížnosti, ale opakované
 chyby úlohy postupně zjednodušily. Podrobně viz Analýza funkčních požadavků, kap. 1.4.
@@ -487,8 +499,8 @@ v git historii souboru `app/Services/IslandGame/SituationSelector.php` a v teste
 | Reakce na správnou odpověď | série +1 | skóre +1 |
 | Reakce na chybu | série = 0 | skóre −1 (nikdy pod 0) |
 | Prahy pro obtížnost 2 / 3 | 2 / 4 | 2 / 4 (převzato beze změny) |
-| Jedna chyba na obtížnosti 3 | okamžitý propad na obtížnost 1 | obtížnost 3 zůstává (skóre 4 → 3) |
-| Počet čistých chyb pro pokles 3 → 1 | 1 | 4 |
+| Jedna chyba na obtížnosti 3 | okamžitý propad na obtížnost 1 | pokles nejvýše o jednu úroveň: při skóre 5 a více obtížnost 3 zůstává, při skóre 4 přechod na obtížnost 2 (skóre 3); přímý propad na obtížnost 1 není možný |
+| Počet chyb v řadě pro pokles 3 → 1 | 1 | nejméně 3 (z nejnižšího skóre 4 pro obtížnost 3), obecně skóre − 1 |
 | Rozlišení jedné chyby od řady chyb | ne | ano |
 | Závislost na pořadí ostrovů | vysoká: rozhoduje jen konec historie | nízká: rozhoduje celková bilance |
 | Fallback při nedostupné obtížnosti | `t, t−1, …, 1, t+1, …, 3` | beze změny |
@@ -518,26 +530,30 @@ v jednom kroku nenastává nikdy, počet změn úrovně za hru je u silných hr�
 a podíl těžkých situací odpovídá úspěšnosti hráče. Průměrný hráč (p = 0,5) přitom u obou
 variant tráví většinu hry na obtížnosti 1, tedy varianta B nezvyšuje obtížnost slabším
 hráčům. Simulace pracuje s konstantním *p* nezávislým na obtížnosti a neuvažuje učení
-během hry; slouží k porovnání mechanismů, nikoli k predikci reálných výsledků.
-Kalibrace parametrů na datech respondentů je otevřeným bodem (Analýza, kap. 10).
+během hry; slouží k porovnání mechanismů, nikoli k predikci reálných výsledků. Zda
+simulované vlastnosti nastaly také v reálném provozu, dokládá statistika adaptivity
+přepočtená z uložených odpovědí (kap. 12.4 a Analýza, kap. 1.7).
 
 Hodnoty parametrů jsou konfigurační konstanty pravidlového algoritmu, nikoli prvek
 novosti. Prahy skóre 2 a 4 byly v prototypové fázi stanoveny heuristicky, expertním
 odhadem, a nebyly odvozeny statistickou optimalizací ani porovnáním více číselných variant;
-jejich funkčnost potvrzují scénářové testy, optimálnost dosud empiricky prokázána nebyla.
-Prahy série 3 a 6 a limit dvou bonusů vycházejí z neformálního pilotního odehrání hry
-zástupci cílové skupiny a jsou předběžnou uživatelskou kalibrací. Podrobně Analýza
-funkčních požadavků, kap. 1.6 a 1.7.
+jejich funkčnost potvrzují scénářové testy a provozní data. Prahy série 3 a 6 a limit
+dvou bonusů zvolil řešitelský tým po pilotním odehrání hry zástupci cílové skupiny jako
+výchozí nastavení; jejich funkčnost ověřují scénářové testy. Statistické optimum hodnot
+nebylo zjišťováno a není podmínkou funkčnosti; případné zpřesnění podle dalších provozních
+dat je možností dalšího rozvoje. Podrobně Analýza funkčních požadavků, kap. 1.6 a 1.7.
 
 ### 12.3 Softwarový přínos a inovace
 
 **Inovace LAKRIM spočívá v mechanismu adaptivního vzdělávacího průchodu pro krátký
-anonymní běh v nelineárním prostředí.** Hráč bez účtu, bez předchozích dat a s nejvýše
+běh bez registrace v nelineárním prostředí.** Hráč bez účtu, bez předchozích dat a s nejvýše
 20 rozhodnutími volí libovolně mezi tematickými ostrovy. Systém přitom průběžně odhaduje
 jeho úroveň z jediného globálního skóre, které vzniká ze všech prvních pokusů napříč
-tématy, je tlumeno dolní mezí a preferencí nižší obtížnosti, a řídí současně tři věci:
-výběr další situace, zařazení bonusových úloh a podobu zpětné vazby. Tento mechanismus
-je spojen s dvoupokusovým průchodem, který chybu vysvětlí, ale nepenalizuje ani neblokuje,
+tématy a je tlumeno dolní mezí a preferencí nižší obtížnosti. Globální kumulativní skóre
+určuje cílovou obtížnost následující situace; samostatný mechanismus založený na sérii
+správných odpovědí řídí zařazování bonusových úloh a správnost odpovědi spolu s pořadím
+pokusu určuje podobu poskytované zpětné vazby. Tento mechanismus je spojen s dvoupokusovým
+průchodem, který chybu vysvětlí, ale nepenalizuje ani neblokuje,
 a s událostním datovým modelem, ve kterém výprava sdílí banku otázek i záznam odpovědí
 se dvěma referenčními režimy (lineární kvíz, pexeso). Stejný software tak slouží
 k výuce i k výzkumnému srovnání účinnosti herních režimů na stejném obsahu.
@@ -569,17 +585,20 @@ by se změnil princip.
 
 **Jak je inovace doložena.** Git historie zachycuje dvě implementované varianty adaptivního
 mechanismu a důvod přechodu mezi nimi (kap. 12.2); chování finální varianty ověřuje
-11 scénářových testů a reprodukovatelná simulace, která kvantifikuje rozdíl proti prototypu.
-Spojení adaptivity, bonusů a zpětné vazby je čitelné v jedné službě (`SituationSelector`)
-a jednom kontroleru (`AnswerController`), sdílený datový model v tabulce `answers`.
-Co doloženo není, je optimálnost parametrů a účinnost na cílovou skupinu; to jsou otevřené
-body pro nasazení v kurzech AU3V (Analýza funkčních požadavků, kap. 10).
+14 testů v `SituationTest` (6 scénářů obtížnosti a fallbacku, 3 scénáře bonusů)
+a reprodukovatelná simulace, která kvantifikuje rozdíl proti prototypu. Chování v reálném
+provozu dokládá provozní ověření v kurzech U3V (07–08/2026, 1 304 aktivních herních běhů;
+Analýza, kap. 1.7) a statistika přechodů mezi obtížnostmi přepočtená z uložených odpovědí
+(kap. 12.4). Řízení obtížnosti a bonusů je čitelné v jedné službě (`SituationSelector`),
+zpětná vazba v jednom kontroleru (`AnswerController`), sdílený datový model v tabulce
+`respondents_answers`. Doloženo není statistické optimum hodnot parametrů; to není
+podmínkou funkčnosti a je možností dalšího rozvoje (Analýza funkčních požadavků, kap. 10).
 
 ### 12.4 Návaznost evaluace na technický vývoj
 
 Tabulka spojuje zjištění z vývoje a evaluace s konkrétní změnou softwaru a jejím dokladem.
-Pilotní testování s cílovou skupinou nebylo systematicky protokolováno; jeho průběh
-shrnuje Analýza funkčních požadavků, kap. 1.7.
+Pilotní testování (05–06/2026) a provozní ověření v kurzech U3V (07–08/2026) shrnuje
+Analýza funkčních požadavků, kap. 1.7.
 
 | Zjištění | Úprava softwaru | Technická realizace | Ověření | Doklad |
 |---|---|---|---|---|
@@ -596,6 +615,8 @@ shrnuje Analýza funkčních požadavků, kap. 1.7.
 | Pilotáž: chybějící karta u bezpečné situace působila jako chyba; po závěrečném videu chyběly kontakty. | Univerzální karta bezpečí za bonus; telefonní čísla po videu. | `AnswerController::BONUS_SAFETY_CARD`, `ContactsList.vue` | `IslandGame\AnswerTest`; funkční ověření | git historie (06/2026) |
 | Pilotáž: u bonusových úkolů hráči klikali do obrázků. | Zpřesněné instrukce úkolů (rozdíly se neoznačují; cesty se sledují očima nebo prstem) a doplněné řešení. | texty v migracích easter eggů | funkční ověření | migrace bonusových úkolů (06/2026) |
 | Pilotáž a finální scénáře: zpřesnění textů, časový limit u vybraných situací. | Reimport otázek verze 3; limit 59 s u 9 situací. | datové migrace, `settings.time_limit` | `useQuestionFlow.handleTimeUp`; funkční ověření | datové migrace reimportu otázek verze 3 (06/2026) |
+| Provozní ověření (07–08/2026): chování adaptivity je třeba doložit na skutečných hráčích, nejen simulací. | Statistika adaptivity v `stats:island-game`: cílová obtížnost se zpětně přepočítá z prvních pokusů stejným pravidlem jako v `SituationSelector`; vykazuje se počet změn obtížnosti na hráče, přechody 1 → 2, 2 → 3, 3 → 2, 2 → 1, přímé propady 3 → 1, reakce na ojedinělou a opakovanou chybu, podíl hráčů na obtížnosti 2 a 3 a podíl situací podaných v jiné než cílové obtížnosti. | `GameStatistics::adaptivity`, `difficultyTransitions`, `difficultyAfterMistake`; `FirstAttemptAnswer` | `IslandGameStatsCommandTest::testAdaptivityReplaysDifficultyTransitions` | git historie `GameStatistics` (09/2026); výstup nad provozní databází v příloze 5 (ISTA) |
+| Výzkumný tým potřebuje výsledky kvízu po kurzech. | Export XLSX podle názvu události, sdílená služba pro administraci i konzoli. | `Services/Export/QuestionsResultsExporter`, `export:questions-results` | `ExportQuestionsResultsTest`, `ExportQuestionsResultsCommandTest` | git historie (09/2026) |
 
 ### 12.5 Srovnání s existujícími řešeními
 
@@ -615,9 +636,10 @@ tvrzení, že systém funkci nemá.
 Žádný z uvedených systémů podle veřejně dostupných zdrojů necílí primárně na seniory
 a nekombinuje nelineární volbu témat s adaptací obtížnosti za běhu. To nedokazuje, že
 taková kombinace nikde neexistuje; rešerše pokryla zavedené hry proti dezinformacím
-s publikovanou evaluací, ne celý trh vzdělávacích aplikací. Srovnání v této kapitole
-vzniklo při zpracování dokumentace (září 2026) nad veřejně dostupnými zdroji; případná
-rešerše z přípravy projektu je součástí projektové dokumentace mimo tento repozitář.
+s publikovanou evaluací a vybrané adaptivní vzdělávací systémy a hry pro starší uživatele
+(kap. 12.5.1), ne celý trh vzdělávacích aplikací. Srovnání v této kapitole vzniklo při
+zpracování dokumentace (září 2026) nad veřejně dostupnými zdroji; případná rešerše
+z přípravy projektu je součástí projektové dokumentace mimo tento repozitář.
 
 Zdroje ke komparátorům:
 Roozenbeek a van der Linden, *Fake news game confers psychological resistance against
@@ -633,6 +655,37 @@ Butler a kol., *The (Mis)Information Game: A social media simulator*, Behavior R
 Methods 2023 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10991066/,
 zdrojový kód https://github.com/TheMisinformationGame/MisinformationGame).
 
+#### 12.5.1 Srovnání s dalšími adaptivními vzdělávacími nástroji
+
+Při posouzení technického řešení LAKRIM byly vedle her zaměřených na dezinformace
+zohledněny také vybrané adaptivní vzdělávací systémy a hry určené starším uživatelům.
+Do srovnání byla zařazena řešení, u nichž je v odborných nebo projektových zdrojích popsán
+způsob přizpůsobování obsahu, práce s údaji o uživateli nebo ověřování funkčnosti. Rešerše
+byla aktualizována v září 2026; bibliografické údaje všech zdrojů byly ověřeny podle
+registru DOI. Některé publikace neuvádějí podrobnosti o technické architektuře či ukládání
+dat; v takových případech je tato skutečnost v tabulce výslovně uvedena.
+
+| Řešení | Zaměření | Přizpůsobování obtížnosti | Práce s uživatelskými daty | Uspořádání a ověření | Zdroj |
+|---|---|---|---|---|---|
+| **Maths Garden** | Procvičování matematiky u žáků. | Systém průběžně volí obtížnost úloh podle úrovně žáka; při vyhodnocení zohledňuje správnost i dobu odpovědi. | Model vycházející ze systému Elo po každé odpovědi aktualizuje odhad schopnosti žáka a obtížnosti položky. | Několik matematických oblastí se společným adaptačním principem. Ověření proběhlo na 3 648 žácích, kteří vyřešili více než 3,5 milionu úloh. | Klinkenberg, S., Straatemeier, M., & van der Maas, H. L. J. (2011). Computer adaptive practice of Maths ability using a new item response model for on the fly ability and difficulty estimation. *Computers & Education, 57*(2), 1813–1824. https://doi.org/10.1016/j.compedu.2011.02.003 |
+| **80Days** | Výuka zeměpisu prostřednictvím příběhové hry, zejména u žáků ve věku 12–14 let. | Přizpůsobuje výběr následující scény, nápovědu, tempo, obtížnost i další vývoj příběhu. | Model Narrative Game-based Learning Objects propojuje vzdělávací, herní a příběhové prvky; pracuje se znalostním a hráčským modelem a s aktuálním stavem příběhu. | Větvené příběhové prostředí, nikoli několik samostatně dostupných her. Funkčnost ověřována na vývojových demonstrátorech a v počátečních uživatelských studiích. | Göbel, S., Wendel, V., Ritter, C., & Steinmetz, R. (2010). Personalized, adaptive digital educational games using narrative game-based learning objects. In X. Zhang, S. Zhong, Z. Pan, K. Wong, & R. Yun (Eds.), *Entertainment for education: Digital techniques and systems* (pp. 438–445). Springer. https://doi.org/10.1007/978-3-642-14533-9_45 |
+| **NeuroRacer** | Trénink kognitivní kontroly a souběžného provádění úloh u osob ve věku 60–85 let. | Schodišťový algoritmus upravuje náročnost řízení vozidla a rozpoznávání podnětů podle aktuálního výkonu. | Publikace popisuje sledování výkonnostních parametrů jednotlivých úloh; podrobnější databázový nebo událostní model zveřejněn nebyl. | Jedna hra spojuje dvě úlohy a umožňuje jejich samostatné i souběžné použití. Experimentální ověření zahrnovalo 46 starších dospělých a kontrolní podmínky; sledován byl také účinek po šesti měsících. | Anguera, J. A., Boccanfuso, J., Rintoul, J. L., Al-Hashimi, O., Faraji, F., Janowich, J., Kong, E., Larraburo, Y., Rolle, C., Johnston, E., & Gazzaley, A. (2013). Video game training enhances cognitive control in older adults. *Nature, 501*(7465), 97–101. https://doi.org/10.1038/nature12486 |
+| **Farming** (výzkumný prototyp) | Podpora fyzických a kognitivních schopností starších dospělých. | Obtížnost a relativní hodnocení výkonu se přizpůsobují s využitím metod umělé inteligence. | Systém využívá údaje o výkonu uživatele; technická struktura ukládaných dat není v dostupné publikaci podrobněji popsána. | Fyzické a kognitivní aktivity v jednom herním prostředí. Ověření se zaměřovalo na výkon, motivaci a uživatelskou zkušenost. Veřejně přístupná verze ani zdrojový kód nebyly při rešerši nalezeny. | Eun, S.-J., Kim, E. J., & Kim, J. Y. (2023). Artificial intelligence-based personalized serious game for enhancing the physical and cognitive abilities of the elderly. *Future Generation Computer Systems, 141*, 713–722. https://doi.org/10.1016/j.future.2022.12.017 |
+| **EBO / CORTEX** (výzkumný systém) | Kognitivní stimulace osob ve věku 65–96 let s mírným až středním kognitivním postižením. | Podle výkonu, preferencí a zapojení uživatele se mění obtížnost, rychlost, komplexita, zpětná vazba i způsob komunikace; adaptace může probíhat automaticky nebo s podporou terapeuta. | Architektura CORTEX využívá distribuovanou reprezentaci stavu uživatele; jednotlivé hry mají vlastní hodnoticí agenty nad společnou architekturou. | Hry Simon Says a personalizované vyprávění. Dvouměsíčního ověření ve třech pobytových zařízeních se účastnilo 32 starších osob. | Blanco, A., Condón, A., Rina, R., Rodríguez, T., & Núñez, P. (2025). Personalized adaptive serious games for elderly care through context-aware robotic interaction. In *Intelligent and fuzzy systems* (Lecture Notes in Networks and Systems, pp. 435–443). Springer. https://doi.org/10.1007/978-3-031-98565-2_48 |
+| **Cognitive Training Game for Older People** (výzkumný prototyp) | Procvičování různých kognitivních schopností starších uživatelů v situacích známých z každodenního života. | Automatická změna obtížnosti není v publikaci popsána; obsah a rozhraní byly postupně upravovány podle výsledků testování. | Podrobnější technický datový model nebyl zveřejněn. | Tabletová aplikace se šesti kognitivními úlohami; při vývoji byli zapojeni starší uživatelé i odborníci z medicíny, designu a technických oborů. | Lu, M.-H., Lin, W., & Yueh, H.-P. (2017). Development and evaluation of a cognitive training game for older people: A design-based approach. *Frontiers in Psychology, 8*, Article 1837. https://doi.org/10.3389/fpsyg.2017.01837 |
+
+Odlišnost LAKRIM proto nespočívá v samotném využití adaptivity. Podstatná je konkrétní
+podoba řešení pro krátký herní průchod bez registrace a bez předchozí kalibrace uživatele.
+Finální algoritmus vyhodnocuje první pokusy napříč volitelnými tematickými oblastmi, tlumí
+dopad jednotlivé chyby a odděluje změnu obtížnosti od zařazování bonusových úloh. Tři
+samostatné herní režimy současně využívají společnou banku otázek, model respondenta
+a způsob ukládání odpovědí.
+
+V rámci provedeného srovnání nebylo nalezeno řešení, které by stejným způsobem spojovalo
+uvedené technické prvky ve veřejně dostupné aplikaci zaměřené na informační a digitální
+rizika seniorů. Toto zjištění dokládá odlišitelnost LAKRIM od posuzovaných systémů, nelze
+je však považovat za důkaz absolutní nebo celosvětové jedinečnosti.
+
 ### 12.6 Vymezení novosti vůči stavu poznání
 
 Dynamické přizpůsobování obtížnosti (dynamic difficulty adjustment, DDA) v serious games
@@ -645,7 +698,7 @@ https://doi.org/10.3390/info17010096). LAKRIM proto **netvrdí novost adaptivity
 takové**. V této taxonomii je jeho mechanismus pravidlový model hráče z výkonu.
 
 Novost, kterou dokumentace dokládá, spočívá v konkrétním řešení pro podmínky, pro které
-běžné DDA přístupy nejsou navrženy: krátký anonymní běh (nejvýše 20 rozhodnutí), žádná
+běžné DDA přístupy nejsou navrženy: krátký běh bez registrace (nejvýše 20 rozhodnutí), žádná
 kalibrační data položek, cílová skupina citlivá na neúspěch a volný průchod tematickými
 okruhy. Pro tyto podmínky byl navržen a proti prototypové variantě ověřen mechanismus
 globálního kumulativního skóre s asymetrickým tlumením (dolní mez, preference nižší
@@ -655,7 +708,53 @@ dvoustupňovou zpětnou vazbou a událostním sběrem dat společným pro tři r
 Nejlépe obhajitelným prvkem je způsob propojení nelineárního průchodu, globální adaptace
 obtížnosti, odstupňované zpětné vazby a výzkumného sběru dat, nikoli hodnoty parametrů.
 
-Pro označení výsledku za nový poznatek v oblasti programování bude v dalším kroku nutné:
-(a) doplnit chybějící údaje o pilotním testování a při dalším testování vést protokol,
-(b) kalibrovat parametry na datech z nasazení v kurzech AU3V a
-(c) rozšířit rešerši o adaptivní vzdělávací systémy pro seniory mimo oblast dezinformací.
+### 12.7 Technický přínos a vymezení novosti řešení
+
+Technický přínos LAKRIM spočívá v návrhu a ověření adaptivního řízení krátké nelineární
+hry, kterou lze hrát bez registrace a bez předchozích údajů o schopnostech hráče.
+
+Během vývoje byly realizovány a porovnány dvě varianty algoritmu. Původní varianta určovala
+obtížnost podle série správných odpovědí a po chybě sérii vynulovala, což vedlo k přímému
+propadu z nejvyšší na nejnižší obtížnost. Konečná varianta využívá kumulativní skóre, které
+se postupně zvyšuje nebo snižuje; jednotlivá chyba tak nemá nepřiměřený vliv a při
+opakovaných chybách se obtížnost snižuje postupně. Řízení obtížnosti je odděleno od
+bonusových úloh: obtížnost se určuje podle kumulativního skóre, bonusy se zařazují podle
+série správných odpovědí a zpětná vazba vychází z výsledku konkrétního pokusu.
+
+Obě varianty byly ověřeny scénářovými testy a simulací 20 000 herních běhů pro každý
+sledovaný scénář. Výsledky potvrdily, že konečný algoritmus odstraňuje přímé propady mezi
+krajními úrovněmi a zajišťuje stabilnější průběh hry. Pilotní uživatelské testování se
+seniory ověřilo srozumitelnost a použitelnost řešení a provozní ověření v kurzech U3V
+(1 304 aktivních herních běhů, 65,9 % dokončení) doložilo, že adaptivní mechanismus
+převáděl úspěšné hráče k náročnějším úlohám; statistika přechodů mezi obtížnostmi
+přepočtená z uložených odpovědí umožňuje tato zjištění ověřit na úrovni jednotlivých
+kroků (kap. 12.4, Analýza kap. 1.7).
+
+Srovnávací rešerše (kap. 12.5) ukázala, že jednotlivé principy adaptivního vzdělávání jsou
+známé. V posuzovaných zdrojích však nebylo nalezeno řešení, které by stejným způsobem
+spojovalo krátký nelineární průchod, kumulativní řízení obtížnosti, samostatné řízení
+bonusů, volbu tematické cesty a společné ukládání dat z více herních režimů zaměřených
+na informační a digitální rizika seniorů.
+
+Za hlavní technický poznatek projektu lze považovat zjištění, že nulování série odpovědí
+není pro tento typ hry vhodné, a návrh ověřeného kumulativního mechanismu, který omezuje
+nepřiměřené změny obtížnosti. Další vyhodnocení provozních dat může nastavení algoritmu
+zpřesnit, není však podmínkou dokončení ani funkčnosti softwaru.
+
+## 13. Vlastnictví výsledku a licenční podmínky
+
+Zdrojový kód softwaru LAKRIM je zveřejněn ve veřejném repozitáři
+https://github.com/upol-cmtf/lakrim pod licencí MIT (soubor `LICENSE`). Původní vzdělávací
+obsah vytvořený v rámci projektu TAČR SIGMA TQ01000315 „Labyrinty kritického myšlení“,
+zejména herní scénáře, otázky, vysvětlující zpětná vazba, karty bezpečí, metodické texty
+a původní grafické materiály, je poskytován pod licencí Creative Commons Uveďte původ 4.0
+Mezinárodní (CC BY 4.0), není-li u konkrétního materiálu uvedeno jinak (soubor
+`CONTENT-LICENSE.md`). Licence CC BY 4.0 se nevztahuje na loga institucí, video Policie
+České republiky ani na jiné označené materiály třetích stran.
+
+Licence umožňuje obsah kopírovat, upravovat a dále šířit, včetně komerčního využití, při
+uvedení autora, zdroje, odkazu na licenci a informace o případných změnách. Úplné licenční
+podmínky jsou veřejně dostupné na adrese https://www.lakrim.cz/licencni-podminky/ a odkaz
+na ně je v patičce všech tří herních režimů. Řešitelem projektu a nositelem výsledku je
+Cyrilometodějská teologická fakulta Univerzity Palackého v Olomouci ve spolupráci
+s Asociací univerzit třetího věku ČR; software vyvinul Tomáš Pavlík.

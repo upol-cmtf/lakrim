@@ -22,9 +22,9 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class SituationSelector
 {
-    /** Skóre znalostí potřebné pro obtížnost 2, resp. 3. */
-    private const SCORE_FOR_MEDIUM = 2;
-    private const SCORE_FOR_HARD = 4;
+    /** Skóre znalostí potřebné pro obtížnost 2, resp. 3 (čte i GameStatistics). */
+    public const SCORE_FOR_MEDIUM = 2;
+    public const SCORE_FOR_HARD = 4;
 
     /** Série správných odpovědí v řadě, která odemkne 1., resp. 2. bonus. */
     private const STREAK_FOR_FIRST_BONUS = 3;
