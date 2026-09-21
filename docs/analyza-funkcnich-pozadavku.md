@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (LAKRIM) |
 | Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
-| Verze dokumentu | 1.3, září 2026 (1.2: zapracováno posouzení dokumentace; 1.3: doplněny výsledky statistiky adaptivity z provozních dat) |
+| Verze dokumentu | 1.4, září 2026 (1.2: zapracováno posouzení dokumentace; 1.3: doplněny výsledky statistiky adaptivity z provozních dat; 1.4: upřesněna úspěšnost odpovědí podle obtížnosti) |
 | Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; kód pod licencí MIT, vzdělávací obsah pod CC BY 4.0) |
 | Související dokumenty | Technická dokumentace (`docs/technicka-dokumentace.md`), Programátorská dokumentace (`docs/programatorska-dokumentace.md`), uživatelská příručka, popis ověření funkčnosti |
 
@@ -229,15 +229,17 @@ a že většina uživatelů, kteří začali aktivně odpovídat, dokončila cel
 tedy 65,9 %). Medián délky hry 12,1 minuty ukazuje, že celý průchod byl pro účastníky
 časově zvládnutelný.
 
-V hlavních herních situacích (lehké, střední a těžké, bez bonusových otázek) bylo
-zaznamenáno 19 265 odpovědí, celková úspěšnost na první pokus dosáhla 90 %. Tento výsledek
-je třeba posuzovat s ohledem na charakter skupiny: účastníci U3V se aktivně vzdělávají
-a mají zkušenosti s kurzy zaměřenými na mediální a digitální gramotnost. Vysoká úspěšnost
-proto nemusí znamenat, že je hra obecně příliš snadná; ukazuje však, že i situace označené
-jako těžké byly pro tuto skupinu většinou zvládnutelné.
+V hlavních herních situacích, tedy bez bonusových otázek, bylo zaznamenáno 19 265
+odpovědí; z toho připadalo 2 957 odpovědí na lehkou, 3 554 na střední a 12 754 na těžkou
+obtížnost. Celková úspěšnost na první pokus ve všech zaznamenaných odpovědích včetně
+bonusových činila 90,0 %; v hlavních situacích se podle obtížnosti pohybovala mezi 90,7 %
+(střední) a 96,3 % (lehká), u těžkých situací činila 93,2 %. Tento výsledek je třeba
+posuzovat s ohledem na charakter skupiny: účastníci U3V se aktivně vzdělávají a mají
+zkušenosti s kurzy zaměřenými na mediální a digitální gramotnost. Vysoká úspěšnost proto
+nemusí znamenat, že je hra obecně příliš snadná; ukazuje však, že i situace označené jako
+těžké byly pro tuto skupinu většinou zvládnutelné.
 
-Z hlavních herních situací připadalo 2 957 odpovědí na lehkou, 3 554 na střední a 12 754
-na těžkou obtížnost. Přibližně dvě třetiny situací tak byly předloženy v nejtěžší úrovni,
+Přibližně dvě třetiny hlavních situací byly předloženy v nejtěžší úrovni,
 což odpovídá vysoké úspěšnosti sledované skupiny a dokládá, že adaptivní mechanismus
 převáděl úspěšné hráče k náročnějším úlohám.
 

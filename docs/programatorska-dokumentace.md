@@ -4,7 +4,7 @@
 |---|---|
 | Software | Labyrinty kritického myšlení (LAKRIM) |
 | Verze softwaru | LAKRIM 3.9 (git tag `3.9`, větev `master`, září 2026) |
-| Verze dokumentu | 1.1, září 2026 (doplněna verze výsledku, rozsah licence, statistika adaptivity a exporty) |
+| Verze dokumentu | 1.2, září 2026 (1.1: doplněna verze výsledku, rozsah licence, statistika adaptivity a exporty; 1.2: doplněna řada vydání `3.x`) |
 | Repozitář | https://github.com/upol-cmtf/lakrim (veřejný; zdrojový kód pod licencí MIT) |
 | Související dokumenty | Analýza funkčních požadavků (`docs/analyza-funkcnich-pozadavku.md`), Technická dokumentace (`docs/technicka-dokumentace.md`) |
 
@@ -106,7 +106,7 @@ LICENSE, CONTENT-LICENSE.md    licence zdrojového kódu (MIT) a vzdělávacího
 - **Testy jsou scénářové.** Feature testy volají skutečné HTTP endpointy nad MySQL databází
   a ověřují chování (např. „po pěti správných a jedné špatné odpovědi přijde stále těžká
   situace“), nikoli vnitřní strukturu tříd.
-- **Verzování.** Vydání jsou označena tagy `1.x` (kvíz) a `2.x` (pexeso); změny jdou přes
+- **Verzování.** Vydání jsou označena tagy `1.x` (kvíz), `2.x` (pexeso) a `3.x` (výprava); změny jdou přes
   pull requesty do `master`, CI po úspěchu slučuje feature větve do `staging`.
 
 ## 4. Průvodce kódem: jeden tah v Dobrodružné výpravě
