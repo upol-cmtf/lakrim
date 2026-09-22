@@ -3,6 +3,14 @@
 @section('content')
     <section class="bg-white">
         <div class="max-w-screen-xl px-4 pt-10 pb-8 mx-auto lg:py-16 lg:pt-16 text-gray-800">
+            <p class="mb-6">
+                <a href="{{ url('/') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-800">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+                    </svg>
+                    Zpět na úvodní stránku
+                </a>
+            </p>
             <h1 class="mb-8 text-4xl font-extrabold leading-none tracking-tight md:text-5xl">
                 Licenční podmínky
             </h1>
@@ -54,6 +62,10 @@
                 K uloženým údajům má přístup pouze řešitelský tým projektu. Údaje se uchovávají po dobu řešení
                 a vyhodnocení projektu a slouží výhradně k ověření funkčnosti hry a k výzkumu v rámci projektu.
             </p>
+
+            <div class="mt-10">
+                @include('web.partials.back-to-homepage')
+            </div>
         </div>
     </section>
 @endsection
