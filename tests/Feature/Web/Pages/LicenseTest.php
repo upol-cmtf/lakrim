@@ -9,6 +9,7 @@ class LicenseTest extends TestCase
     {
         $this->get(route('web.license'))
             ->assertOk()
+            ->assertSee('Zpět na úvodní stránku')
             ->assertSee('Licenční podmínky')
             ->assertSee('CC BY 4.0')
             ->assertSee('licencí MIT');

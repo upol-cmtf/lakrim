@@ -9,6 +9,7 @@ class FunctionalityTest extends TestCase
     {
         $this->get(route('web.functionality'))
             ->assertOk()
+            ->assertSee('Zpět na úvodní stránku')
             ->assertSee('Popis funkčnosti')
             ->assertSee('TQ01000315')
             ->assertSee('adaptivní výběr obtížnosti')
