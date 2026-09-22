@@ -13,6 +13,9 @@ Route::get('/saved-game', [Web\SavedGameController::class, 'index'])
 Route::get('/licencni-podminky', fn() => view('web.license'))
     ->name('web.license');
 
+Route::get('/popis-funkcnosti', fn() => view('web.functionality'))
+    ->name('web.functionality');
+
 Route::prefix('kviz')->group(function () {
     Route::get('/dokonceni', fn() => view('web.quiz.finish'))
         ->name('web.quiz.finish');
