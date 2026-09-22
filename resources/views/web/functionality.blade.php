@@ -30,17 +30,49 @@
                 úroveň obtížnosti, zatímco opakované chyby vedou k jejímu postupnému snižování. Pokud situace v cílové
                 obtížnosti není dostupná, systém vybírá nejbližší dostupnou variantu s preferencí nižší obtížnosti.
             </p>
-            <p class="mb-8">
+            <p class="mb-4">
                 Dobrodružná výprava dále využívá dvoupokusové řešení úloh s odlišnou zpětnou vazbou po prvním a druhém
                 neúspěšném pokusu, bonusové úlohy za sérii správných odpovědí, karty bezpečí, vybrané časově omezené
                 situace a možnost přerušit a následně obnovit rozehranou hru.
             </p>
-
-            <h2 class="mb-3 text-2xl font-extrabold leading-none tracking-tight">Znalostní kvíz a Pexeso</h2>
             <p class="mb-8">
+                <a href="{{ route('web.island-game.homepage') }}"
+                   class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition-colors">
+                    Vyrazit na výpravu
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </p>
+
+            <h2 class="mb-3 text-2xl font-extrabold leading-none tracking-tight">Znalostní kvíz</h2>
+            <p class="mb-4">
                 Znalostní kvíz umožňuje procvičovat znalosti prostřednictvím sady otázek s okamžitým vyhodnocením
-                a závěrečným shrnutím výsledků. Pexeso propojuje řešení modelových situací s postupným odkrýváním
-                výsledného obrazu a poskytuje hráči zpětnou vazbu k jeho odpovědím.
+                a závěrečným shrnutím výsledků.
+            </p>
+            <p class="mb-8">
+                <a href="{{ route('web.quiz.homepage') }}"
+                   class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                    Spustit kvíz
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </p>
+
+            <h2 class="mb-3 text-2xl font-extrabold leading-none tracking-tight">Pexeso</h2>
+            <p class="mb-4">
+                Pexeso propojuje řešení modelových situací s postupným odkrýváním výsledného obrazu a poskytuje hráči
+                zpětnou vazbu k jeho odpovědím.
+            </p>
+            <p class="mb-8">
+                <a href="{{ route('web.quiz-grid.homepage') }}"
+                   class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
+                    Hrát pexeso
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
             </p>
 
             <h2 class="mb-3 text-2xl font-extrabold leading-none tracking-tight">Záznam průběhu hry</h2>
