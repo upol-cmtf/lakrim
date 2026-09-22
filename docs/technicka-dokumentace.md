@@ -759,7 +759,7 @@ zpřesnit, není však podmínkou dokončení ani funkčnosti softwaru.
 
 Zdrojový kód softwaru LAKRIM je zveřejněn ve veřejném repozitáři
 https://github.com/upol-cmtf/lakrim pod licencí MIT (soubor `LICENSE`). Původní vzdělávací
-obsah vytvořený v rámci projektu TAČR SIGMA TQ01000315 „Labyrinty kritického myšlení“,
+obsah vytvořený v rámci projektu TA ČR SIGMA TQ01000315 „Labyrinty kritického myšlení“,
 zejména herní scénáře, otázky, vysvětlující zpětná vazba, karty bezpečí, metodické texty
 a původní grafické materiály, je poskytován pod licencí Creative Commons Uveďte původ 4.0
 Mezinárodní (CC BY 4.0), není-li u konkrétního materiálu uvedeno jinak (soubor
