@@ -11,7 +11,10 @@ class FunctionalityTest extends TestCase
             ->assertOk()
             ->assertSee('Popis funkčnosti')
             ->assertSee('TQ01000315')
-            ->assertSee('adaptivní výběr obtížnosti');
+            ->assertSee('adaptivní výběr obtížnosti')
+            ->assertSee(route('web.island-game.homepage'), false)
+            ->assertSee(route('web.quiz.homepage'), false)
+            ->assertSee(route('web.quiz-grid.homepage'), false);
     }
 
     public function testFooterLinksToFunctionalityPage(): void
