@@ -13,6 +13,10 @@
                 </a>
             </div>
 
+            <p class="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-gray-600">
+                Tento software „TQ01000315-V1 – Labyrinty kritického myšlení: Zvyšování datové gramotnosti a kritického myšlení seniorů“ byl vytvořen se státní podporou Technologické agentury ČR v rámci programu SIGMA.
+            </p>
+
             <div class="mt-8 space-y-2 rounded-lg bg-gray-100 px-4 py-5 text-xs leading-relaxed text-gray-600 sm:px-6">
                 <p>Tato hra je vzdělávacím dílem vytvořeným za účelem rozvoje kritického myšlení, digitální bezpečnosti a mediální gramotnosti.</p>
                 <p>Situace, osoby, organizace, společnosti, úřady, webové stránky, aplikace, značky, loga a další prvky zobrazené ve hře jsou fiktivní nebo byly vytvořeny a upraveny pro vzdělávací účely. Nejedná se o skutečné subjekty a jejich zobrazení nepředstavuje žádnou formu hodnocení, kritiky, podpory ani spolupráce s existujícími organizacemi.</p>
